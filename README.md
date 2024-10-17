@@ -207,4 +207,4 @@
    - I medici devono avere un accesso differenziato rispetto ai pazienti per visualizzare, modificare e gestire i dati clinici.
    - I pazienti possono accedere solo ai propri dati e comunicare con il proprio medico.
 
-
+https://yuml.me/pfarmacy/4e4098dd.svg
