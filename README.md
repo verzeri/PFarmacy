@@ -3,19 +3,24 @@
 ### Descrizione
 Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
 
+
 ### Tag Line
 "Gestisci la tua salute, un promemoria alla volta."
+
 
 ### Soggetti Interessati
 Persone di ogni età con esigenze farmacologiche e necessità di gestirne l’assunzione in modo regolare.
 
+
 ### Problema
 PFarmacy risolve il problema di creare e mantenere una routine regolare per l’assunzione dei medicinali, riducendo così il rischio di dimenticanze o dosaggi irregolari.
+
 
 ### Competitor
 - **MyTherapy**
 - **TOM Medication**
 - **Mediteo**
+
 
 ### Tecnologie
 - **Frontend**: HTML, CSS, JS 
@@ -90,5 +95,8 @@ PFarmacy risolve il problema di creare e mantenere una routine regolare per l’
 3. **Ruoli e autorizzazioni**:
    - I medici devono avere un accesso differenziato rispetto ai pazienti per visualizzare, modificare e gestire i dati clinici.
    - I pazienti possono accedere solo ai propri dati e comunicare con il proprio medico.
+
+
+### Diagramma dei casi d'uso
 
 ![4e4098dd](https://github.com/user-attachments/assets/903232ab-799c-4e68-8ed4-80e08733c782)
