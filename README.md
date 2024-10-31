@@ -91,4 +91,4 @@ PFarmacy risolve il problema di creare e mantenere una routine regolare per l’
    - I medici devono avere un accesso differenziato rispetto ai pazienti per visualizzare, modificare e gestire i dati clinici.
    - I pazienti possono accedere solo ai propri dati e comunicare con il proprio medico.
 
-https://yuml.me/pfarmacy/4e4098dd.svg
+![4e4098dd](https://github.com/user-attachments/assets/903232ab-799c-4e68-8ed4-80e08733c782)
