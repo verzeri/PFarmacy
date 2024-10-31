@@ -1,23 +1,29 @@
 # PFarmacy
 
--Accesso per contattare il medico di base: possibilità di inviare messaggi o richieste direttamente al medico di riferimento.
+### Descrizione
+Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
 
--Sistema di notifiche: invio di avvisi e promemoria per aggiornamenti, appuntamenti o eventi rilevanti.
+### Tag Line
+"Gestisci la tua salute, un promemoria alla volta."
 
--Sincronizzazione dei dati: aggiornamento continuo e automatico dei dati tra diversi dispositivi e piattaforme.
+### Soggetti Interessati
+Persone di ogni età con esigenze farmacologiche e necessità di gestirne l’assunzione in modo regolare.
 
--Gestione dei profili utente: creazione e amministrazione di profili personali per pazienti e medici, con livelli di accesso personalizzati.
+### Problema
+PFarmacy risolve il problema di creare e mantenere una routine regolare per l’assunzione dei medicinali, riducendo così il rischio di dimenticanze o dosaggi irregolari.
 
--Funzionalità di registrazione: sistema di registrazione per nuovi utenti (pazienti o medico).
+### Competitor
+- **MyTherapy**
+- **TOM Medication**
+- **Mediteo**
 
--Database centralizzato dei pazienti: archiviazione sicura e strutturata dei dati di accesso dei pazienti, con accesso riservato al personale medico autorizzato.
+### Tecnologie
+- **Frontend**: HTML, CSS, JS 
+- **Backend**: Node.js, Express.js 
+- **Database**: SQLite 
 
--Motore di ricerca per pazienti: funzionalità avanzata per cercare e filtrare i profili dei pazienti in base a nome e cognome.
 
-
-
-
-### Requisiti Funzionali:
+### Requisiti Funzionali
 
 1. **Accesso per contattare il medico di base**:
    - Possibilità di inviare messaggi o richieste direttamente al medico di riferimento attraverso l'applicazione.
@@ -46,9 +52,8 @@
 7. **Motore di ricerca per pazienti**:
    - Funzione di ricerca avanzata per filtrare e trovare rapidamente i profili dei pazienti in base a nome, cognome o altri parametri.
 
----
 
-### Requisiti Non Funzionali:
+### Requisiti Non Funzionali
 
 1. **Sicurezza**:
    - Crittografia dei dati scambiati tra pazienti e medici.
@@ -72,9 +77,9 @@
 6. **Compatibilità**:
    - L'applicazione deve essere compatibile con i principali sistemi operativi (iOS, Android, Windows, macOS) e dispositivi (smartphone, tablet, PC).
 
----
 
-### Requisiti di Dominio:
+
+### Requisiti di Dominio
 
 1. **Interazione medico-paziente**:
    - Il sistema deve facilitare la comunicazione tra medici e pazienti, rispettando le regole di riservatezza e deontologia medica.
