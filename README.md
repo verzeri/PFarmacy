@@ -35,16 +35,16 @@ PFarmacy risolve il problema di creare e mantenere una routine regolare per l’
    - Notifiche di risposta o aggiornamenti dal medico.
 
 2. **Sistema di notifiche**:
-   - Invio automatico di avvisi e promemoria per appuntamenti, eventi medici rilevanti o aggiornamenti importanti.
+   - Invio automatico di avvisi e promemoria.
    - Notifiche personalizzate per pazienti e medici.
 
 3. **Sincronizzazione dei dati**:
    - Sincronizzazione automatica e continua dei dati su più dispositivi.
-   - Aggiornamento istantaneo delle informazioni in tempo reale su tutte le piattaforme coinvolte (app mobile, web, etc.).
+   - Aggiornamento istantaneo delle informazioni in tempo reale su tutte le piattaforme coinvolte.
 
 4. **Gestione dei profili utente**:
    - Creazione e gestione di profili utente per pazienti e medici.
-   - Differenziazione dei livelli di accesso in base al ruolo (paziente, medico, amministratore).
+   - Differenziazione dei livelli di accesso in base al ruolo (paziente, medico).
 
 5. **Funzionalità di registrazione**:
    - Sistema di registrazione per nuovi utenti, con la possibilità di registrarsi come pazienti o medici.
