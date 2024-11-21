@@ -13,7 +13,7 @@ const swaggerOptions = {
         info: {
             title: 'API di PFarmacy',
             version: '1.0.0',
-            description: 'Documentazione API per l\'app di gestione utenti',
+            description: 'Documentazione API per l\'app di gestione utentii',
         },
         servers: [
             {
@@ -41,8 +41,8 @@ app.use(express.json());
 // Servire il file HTML per il frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Creare la tabella utenti se non esiste
-db.run(`CREATE TABLE IF NOT EXISTS utenti (
+// Creare la tabella utentii se non esiste
+db.run(`CREATE TABLE IF NOT EXISTS utentii (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT,
     cognome TEXT,
@@ -52,9 +52,10 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
     eta INTEGER
 )`);
 
+
 /**
  * @swagger
- * /utenti:
+ * /utentii:
  *   post:
  *     summary: Registra un nuovo utente
  *     requestBody:
@@ -87,7 +88,7 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
  */
 
 //registrazione
-app.post('/utenti', (req, res) => {
+app.post('/utentii', (req, res) => {
     console.log('Dati ricevuti per registrazione:', req.body);
     const { nome, cognome, email, password, sesso, eta } = req.body;
 
@@ -96,7 +97,7 @@ app.post('/utenti', (req, res) => {
         return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
 
-    const sql = `INSERT INTO utenti (nome, cognome, email, password, sesso, eta) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO utentii (nome, cognome, email, password, sesso, eta) VALUES (?, ?, ?, ?, ?, ?)`;
 
     db.run(sql, [nome, cognome, email, password, sesso, eta], function (err) {
         if (err) {
@@ -149,7 +150,7 @@ app.post('/utenti', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    db.get('SELECT * FROM utenti WHERE email = ? AND password = ?', [email, password], (err, row) => {
+    db.get('SELECT * FROM utentii WHERE email = ? AND password = ?', [email, password], (err, row) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Errore interno del server' });
         }

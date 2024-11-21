@@ -74,7 +74,7 @@
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
 
-            fetch('/utenti', {
+            fetch('/utentii', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, cognome, sesso, eta, email, password })
@@ -122,9 +122,9 @@
 
 
 
-        // Funzione per recuperare e visualizzare la lista degli utenti
+        // Funzione per recuperare e visualizzare la lista degli utentii
         function fetchUsers(order = 'asc', sesso = '') {
-            const query = `/utenti?order=${order}${sesso ? `&sesso=${sesso}` : ''}`;
+            const query = `/utentii?order=${order}${sesso ? `&sesso=${sesso}` : ''}`;
 
             fetch(query)
                 .then(response => response.json())
@@ -138,8 +138,8 @@
                     });
                 })
                 .catch(error => {
-                    console.error('Errore durante il recupero degli utenti:', error);
-                    alert('Si è verificato un errore nel caricamento della lista utenti.');
+                    console.error('Errore durante il recupero degli utentii:', error);
+                    alert('Si è verificato un errore nel caricamento della lista utentii.');
                 });
         }
 
