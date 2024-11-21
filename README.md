@@ -1,160 +1,50 @@
 # PFarmacy
-{
-  "registrations": [
-    {
-      "request": {
-        "name": "Mario",
-        "surname": "Rossi",
-        "email": "mario.rossi@example.com",
-        "password": "password123"
-      },
-      "response": {
-        "status": "success",
-        "message": "Registration successful",
-        "user": {
-          "id": 1,
-          "name": "Mario",
-          "surname": "Rossi",
-          "email": "mario.rossi@example.com"
-        }
-      }
-    },
-    {
-      "request": {
-        "name": "Luisa",
-        "surname": "Bianchi",
-        "email": "luisa.bianchi@example.com",
-        "password": "pass456"
-      },
-      "response": {
-        "status": "success",
-        "message": "Registration successful",
-        "user": {
-          "id": 2,
-          "name": "Luisa",
-          "surname": "Bianchi",
-          "email": "luisa.bianchi@example.com"
-        }
-      }
-    },
-    {
-      "request": {
-        "name": "Giovanni",
-        "surname": "Verdi",
-        "email": "giovanni.verdi@example.com",
-        "password": "verdi789"
-      },
-      "response": {
-        "status": "success",
-        "message": "Registration successful",
-        "user": {
-          "id": 3,
-          "name": "Giovanni",
-          "surname": "Verdi",
-          "email": "giovanni.verdi@example.com"
-        }
-      }
-    },
-    {
-      "request": {
-        "name": "Elena",
-        "surname": "Neri",
-        "email": "elena.neri@example.com",
-        "password": "elena999"
-      },
-      "response": {
-        "status": "success",
-        "message": "Registration successful",
-        "user": {
-          "id": 4,
-          "name": "Elena",
-          "surname": "Neri",
-          "email": "elena.neri@example.com"
-        }
-      }
-    }
-  ]
-}
+
+### Descrizione
+Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
 
 
-
-{
-  "notifications_sent": [
-    {
-      "id": 1,
-      "title": "Promemoria",
-      "message": "Ricordati i farmaci",
-      "timestamp": "2024-09-27T08:30:00Z",
-      "status": "delivered",
-      "user_id": 101,
-      "app_id": "com.example.app"
-    },
-    {
-      "id": 2,
-      "title": "Messaggio",
-      "message": "Hai un nuovo messaggio",
-      "timestamp": "2024-09-26T12:00:00Z",
-      "status": "delivered",
-      "user_id": 102,
-      "app_id": "com.example.app"
-    },
-    {
-      "id": 3,
-      "title": "Avviso",
-      "message": "Hai dimenticato di prendere i farmaci",
-      "timestamp": "2024-09-25T15:45:00Z",
-      "status": "delivered",
-      "user_id": 103,
-      "app_id": "com.example.app"
-    },
-    {
-      "id": 4,
-      "title": "Appuntamento",
-      "message": "Hai un nuovo appuntamento fissato",
-      "timestamp": "2024-09-24T10:20:00Z",
-      "status": "delivered",
-      "user_id": 104,
-      "app_id": "com.example.app"
-    }
-  ]
-}
+### Tag Line
+"Gestisci la tua salute, un promemoria alla volta."
 
 
-
--Accesso per contattare il medico di base: possibilità di inviare messaggi o richieste direttamente al medico di riferimento.
-
--Sistema di notifiche: invio di avvisi e promemoria per aggiornamenti, appuntamenti o eventi rilevanti.
-
--Sincronizzazione dei dati: aggiornamento continuo e automatico dei dati tra diversi dispositivi e piattaforme.
-
--Gestione dei profili utente: creazione e amministrazione di profili personali per pazienti e medici, con livelli di accesso personalizzati.
-
--Funzionalità di registrazione: sistema di registrazione per nuovi utenti (pazienti o medico).
-
--Database centralizzato dei pazienti: archiviazione sicura e strutturata dei dati di accesso dei pazienti, con accesso riservato al personale medico autorizzato.
-
--Motore di ricerca per pazienti: funzionalità avanzata per cercare e filtrare i profili dei pazienti in base a nome e cognome.
+### Soggetti Interessati
+Persone di ogni età con esigenze farmacologiche e necessità di gestirne l’assunzione in modo regolare.
 
 
+### Problema
+PFarmacy risolve il problema di creare e mantenere una routine regolare per l’assunzione dei medicinali, riducendo così il rischio di dimenticanze o dosaggi irregolari.
 
 
-### Requisiti Funzionali:
+### Competitor
+- **MyTherapy**
+- **TOM Medication**
+- **Mediteo**
+
+
+### Tecnologie
+- **Frontend**: HTML, CSS, JS 
+- **Backend**: Node.js, Express.js 
+- **Database**: SQLite 
+
+
+### Requisiti Funzionali
 
 1. **Accesso per contattare il medico di base**:
    - Possibilità di inviare messaggi o richieste direttamente al medico di riferimento attraverso l'applicazione.
    - Notifiche di risposta o aggiornamenti dal medico.
 
 2. **Sistema di notifiche**:
-   - Invio automatico di avvisi e promemoria per appuntamenti, eventi medici rilevanti o aggiornamenti importanti.
+   - Invio automatico di avvisi e promemoria.
    - Notifiche personalizzate per pazienti e medici.
 
 3. **Sincronizzazione dei dati**:
    - Sincronizzazione automatica e continua dei dati su più dispositivi.
-   - Aggiornamento istantaneo delle informazioni in tempo reale su tutte le piattaforme coinvolte (app mobile, web, etc.).
+   - Aggiornamento istantaneo delle informazioni in tempo reale su tutte le piattaforme coinvolte.
 
 4. **Gestione dei profili utente**:
    - Creazione e gestione di profili utente per pazienti e medici.
-   - Differenziazione dei livelli di accesso in base al ruolo (paziente, medico, amministratore).
+   - Differenziazione dei livelli di accesso in base al ruolo (paziente, medico).
 
 5. **Funzionalità di registrazione**:
    - Sistema di registrazione per nuovi utenti, con la possibilità di registrarsi come pazienti o medici.
@@ -167,9 +57,8 @@
 7. **Motore di ricerca per pazienti**:
    - Funzione di ricerca avanzata per filtrare e trovare rapidamente i profili dei pazienti in base a nome, cognome o altri parametri.
 
----
 
-### Requisiti Non Funzionali:
+### Requisiti Non Funzionali
 
 1. **Sicurezza**:
    - Crittografia dei dati scambiati tra pazienti e medici.
@@ -193,9 +82,9 @@
 6. **Compatibilità**:
    - L'applicazione deve essere compatibile con i principali sistemi operativi (iOS, Android, Windows, macOS) e dispositivi (smartphone, tablet, PC).
 
----
 
-### Requisiti di Dominio:
+
+### Requisiti di Dominio
 
 1. **Interazione medico-paziente**:
    - Il sistema deve facilitare la comunicazione tra medici e pazienti, rispettando le regole di riservatezza e deontologia medica.
@@ -207,4 +96,7 @@
    - I medici devono avere un accesso differenziato rispetto ai pazienti per visualizzare, modificare e gestire i dati clinici.
    - I pazienti possono accedere solo ai propri dati e comunicare con il proprio medico.
 
-https://yuml.me/pfarmacy/4e4098dd.svg
+
+### Diagramma dei casi d'uso
+
+![4e4098dd](https://github.com/user-attachments/assets/903232ab-799c-4e68-8ed4-80e08733c782)

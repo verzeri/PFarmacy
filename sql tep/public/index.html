@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login e Registrazione - PFarmacy</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login e Registrazione</title>
+    <link rel="stylesheet" href="style.css"> <!-- Collegamento al file CSS -->
 </head>
 <body>
+
     <div class="container">
         <h1 style="text-align: center; color: #007BFF; margin-bottom: 30px;">Benvenuti da <span style="color: blue;">PFarmacy</span></h1>
 
-        <!-- Login Form -->
         <div id="login" class="tab-content active">
             <h2>Login</h2>
             <form id="loginForm">
@@ -18,29 +18,26 @@
                 <input type="password" id="loginPassword" placeholder="Password" required />
                 <button type="submit">Login</button>
             </form>
+
+            <!-- Link per passare a Registrazione -->
             <p>Non hai ancora un account? <a href="#" onclick="openTab('register')">Registrati</a></p>
         </div>
 
-        <!-- Registration Form -->
         <div id="register" class="tab-content">
             <h2>Registrazione</h2>
             <form id="registerForm">
                 <input type="text" id="registerNome" placeholder="Nome" required />
                 <input type="text" id="registerCognome" placeholder="Cognome" required />
-                <select id="registerSesso" required>
-                    <option value="">Seleziona sesso</option>
-                    <option value="M">Maschio</option>
-                    <option value="F">Femmina</option>
-                </select>
-                <input type="number" id="registerEta" placeholder="Età" required min="1" />
                 <input type="email" id="registerEmail" placeholder="Email" required />
                 <input type="password" id="registerPassword" placeholder="Password" required />
                 <button type="submit">Registrati</button>
             </form>
+
+            <!-- Link per tornare al Login -->
             <p>Hai già un account? <a href="#" onclick="openTab('login')">Accedi</a></p>
         </div>
 
-        <!-- User Data Display -->
+        <!-- Sezione per visualizzare i dati dell'utente dopo il login -->
         <div id="userData" style="display: none;">
             <h2>Login Effettuato</h2>
             <p><strong>Nome:</strong> <span id="userNome"></span></p>
@@ -48,43 +45,81 @@
             <p><strong>Email:</strong> <span id="userEmail"></span></p>
         </div>
 
-        <!-- User Controls for Sorting and Filtering -->
-        <div class="user-controls">
-            <button onclick="fetchUsers('asc')">Ordina A-Z</button>
-            <button onclick="fetchUsers('desc')">Ordina Z-A</button>
-            <button onclick="fetchUsers('asc', 'M')">Solo Maschi</button>
-            <button onclick="fetchUsers('asc', 'F')">Solo Femmine</button>
-        </div>
-        <div id="userList"></div>
     </div>
 
     <script>
-        // Funzione per cambiare tab tra Login e Registrazione
+        // Funzione per gestire il passaggio tra Login e Registrazione
         function openTab(tabName) {
-            document.getElementById('login').classList.toggle('active', tabName === 'login');
-            document.getElementById('register').classList.toggle('active', tabName === 'register');
+            var loginContent = document.getElementById('login');
+            var registerContent = document.getElementById('register');
+            var userDataContent = document.getElementById('userData');
+            
+            if (tabName === 'login') {
+                loginContent.classList.add('active');
+                registerContent.classList.remove('active');
+                userDataContent.style.display = 'none'; // Nascondi i dati utente
+            } else if (tabName === 'register') {
+                registerContent.classList.add('active');
+                loginContent.classList.remove('active');
+                userDataContent.style.display = 'none'; // Nascondi i dati utente
+            }
         }
 
-        // Funzione per registrare un nuovo utente
-        function registerUser() {
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostra i dati dell'utente
+                    document.getElementById('userNome').textContent = data.nome;
+                    document.getElementById('userCognome').textContent = data.cognome;
+                    document.getElementById('userEmail').textContent = data.email;
+
+                    // Nascondi le sezioni di login e registrazione, mostra i dati
+                    document.getElementById('login').classList.remove('active');
+                    document.getElementById('register').classList.remove('active');
+                    document.getElementById('userData').style.display = 'block';
+                } else {
+                    alert('Errore: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Errore durante il login:', error);
+                alert('Si è verificato un errore.');
+            });
+        });
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
             const nome = document.getElementById('registerNome').value;
             const cognome = document.getElementById('registerCognome').value;
-            const sesso = document.getElementById('registerSesso').value;
-            const eta = parseInt(document.getElementById('registerEta').value, 10);
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
 
             fetch('/utenti', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, cognome, sesso, eta, email, password })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, cognome, email, password })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.message) {
                     alert('Registrazione avvenuta con successo!');
                     document.getElementById('registerForm').reset();
-                    openTab('login');
                 } else {
                     alert('Errore: ' + data.error);
                 }
@@ -93,65 +128,22 @@
                 console.error('Errore:', error);
                 alert('Si è verificato un errore.');
             });
-        }
-
-        // Funzione per effettuare il login dell'utente
-        function loginUser() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-
-    fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Reindirizza alla pagina paziente.html
-            window.location.href = 'paziente.html';
-        } else {
-            alert('Errore di login: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Errore:', error);
-        alert('Si è verificato un errore durante il login.');
-    });
-}
-
-
-        // Funzione per recuperare e visualizzare la lista degli utenti
-        function fetchUsers(order = 'asc', sesso = '') {
-            const query = `/utenti?order=${order}${sesso ? `&sesso=${sesso}` : ''}`;
-
-            fetch(query)
-                .then(response => response.json())
-                .then(data => {
-                    const userList = document.getElementById('userList');
-                    userList.innerHTML = '';
-                    data.users.forEach(user => {
-                        const userItem = document.createElement('p');
-                        userItem.textContent = `${user.nome} ${user.cognome} - ${user.sesso} - ${user.eta} anni - ${user.email}`;
-                        userList.appendChild(userItem);
-                    });
-                })
-                .catch(error => {
-                    console.error('Errore durante il recupero degli utenti:', error);
-                    alert('Si è verificato un errore nel caricamento della lista utenti.');
-                });
-        }
-
-        // Event Listeners per invio form di registrazione e login
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            registerUser();
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            loginUser();
         });
     </script>
+
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
