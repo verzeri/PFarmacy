@@ -148,22 +148,20 @@ app.post('/utenti', (req, res) => {
 // Endpoint per il login
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    
+
     db.get('SELECT * FROM utenti WHERE email = ? AND password = ?', [email, password], (err, row) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Errore interno del server' });
         }
         if (row) {
-            // Restituisce i dati dell'utente se la login ha successo
-            res.json({ success: true, nome: row.nome, cognome: row.cognome, email: row.email });
+            // Restituisce solo il flag di successo
+            res.json({ success: true });
         } else {
             // Restituisce un messaggio di errore se le credenziali non sono corrette
             res.json({ success: false, message: 'Email o password errati' });
         }
     });
 });
-
-
 
 // Avvio del server
 app.listen(port, () => {

@@ -97,31 +97,29 @@
 
          // Funzione per effettuare il login dell'utente
          function loginUser() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
 
-            fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('userNome').innerText = data.nome;
-                    document.getElementById('userCognome').innerText = data.cognome;
-                    document.getElementById('userEmail').innerText = data.email;
-                    document.getElementById('login').style.display = 'none';
-                    document.getElementById('userData').style.display = 'block';
-                } else {
-                    alert('Errore di login: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Errore:', error);
-                alert('Si è verificato un errore durante il login.');
-            });
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reindirizza alla pagina paziente.html
+            window.location.href = 'paziente.html';
+        } else {
+            alert('Errore di login: ' + data.message);
         }
+    })
+    .catch(error => {
+        console.error('Errore:', error);
+        alert('Si è verificato un errore durante il login.');
+    });
+}
+
 
 
         // Funzione per recuperare e visualizzare la lista degli utenti
