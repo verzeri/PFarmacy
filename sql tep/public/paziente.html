@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFarmacy - Area Paziente</title>
+    <!-- Link a Font Awesome per le icone -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Titolo principale della pagina -->
+    <div class="main-title">
+        <h1>PFarmacy</h1>
+    </div>
+    
+    <!-- Header specifico dell'area paziente -->
+    <div class="paziente-header">
+        <!-- Icona dell'account -->
+        <i class="fas fa-user-circle icon"></i>
+        <!-- Titolo personalizzato con il nome del paziente -->
+        <h1 id="patientName">Area Paziente</h1> <!-- Titolo dinamico -->
+    </div>
+
+    <script>
+        // Simulazione del recupero del nome del paziente dal back-end
+        const queryString = window.location.search; // Ottiene la query string dalla URL
+        const urlParams = new URLSearchParams(queryString);
+        const nomePaziente = urlParams.get('nome'); // Recupera il parametro "nome"
+        
+        // Cambia il titolo con il nome del paziente
+        if (nomePaziente) {
+            document.getElementById('patientName').textContent = nomePaziente;
+        } else {
+            document.getElementById('patientName').textContent = 'Area Paziente'; // Default
+        }
+    </script>
+</body>
+</html>

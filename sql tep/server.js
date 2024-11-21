@@ -47,14 +47,16 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
     nome TEXT,
     cognome TEXT,
     email TEXT,
-    password TEXT
+    password TEXT,
+    sesso TEXT CHECK(sesso IN ('M', 'F')),
+    eta INTEGER
 )`);
 
 /**
  * @swagger
  * /utenti:
  *   post:
- *     summary: Aggiunge un nuovo utente
+ *     summary: Registra un nuovo utente
  *     requestBody:
  *       required: true
  *       content:
@@ -70,70 +72,42 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
  *                 type: string
  *               password:
  *                 type: string
+ *               sesso:
+ *                 type: string
+ *                 enum: [M, F]
+ *               eta:
+ *                 type: integer
  *     responses:
- *       200:
- *         description: Utente creato con successo
+ *       201:
+ *         description: Utente registrato con successo
+ *       400:
+ *         description: Richiesta non valida
+ *       500:
+ *         description: Errore del server
  */
 
-// Route per aggiungere un utente
+//registrazione
 app.post('/utenti', (req, res) => {
-    const { nome, cognome, email, password } = req.body;
-    console.log('Dati ricevuti per la registrazione:', { nome, cognome, email, password }); // Log dei dati
-    db.run(`INSERT INTO utenti (nome, cognome, email, password) 
-            VALUES (?, ?, ?, ?)`, 
-        [nome, cognome, email, password], function (err) {
+    console.log('Dati ricevuti per registrazione:', req.body);
+    const { nome, cognome, email, password, sesso, eta } = req.body;
+
+    if (!nome || !cognome || !email || !password || !sesso || !eta) {
+        console.error('Errore: campi mancanti');
+        return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+    }
+
+    const sql = `INSERT INTO utenti (nome, cognome, email, password, sesso, eta) VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [nome, cognome, email, password, sesso, eta], function (err) {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            console.error('Errore nel database:', err.message);
+            return res.status(500).json({ error: 'Errore durante la registrazione' });
         }
-        res.json({ message: 'Nuovo utente creato', id: this.lastID });
+        res.status(201).json({ message: 'Registrazione avvenuta con successo' });
     });
 });
 
-/**
- * @swagger
- * /utenti:
- *   get:
- *     summary: Recupera l'elenco degli utenti
- *     parameters:
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *         description: Ordine alfabetico (ascendente o discendente)
- *     responses:
- *       200:
- *         description: Elenco degli utenti
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 users:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       nome:
- *                         type: string
- *                       cognome:
- *                         type: string
- *                       email:
- *                         type: string
- */
 
-// Route per ottenere tutti gli utenti
-app.get('/utenti', (req, res) => {
-    const order = req.query.order === 'desc' ? 'DESC' : 'ASC';
-    db.all(`SELECT * FROM utenti ORDER BY nome ${order}`, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ users: rows });
-    });
-});
 
 /**
  * @swagger
@@ -174,20 +148,21 @@ app.get('/utenti', (req, res) => {
 // Endpoint per il login
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    
+
     db.get('SELECT * FROM utenti WHERE email = ? AND password = ?', [email, password], (err, row) => {
         if (err) {
             return res.status(500).json({ success: false, message: 'Errore interno del server' });
         }
         if (row) {
-            // Restituisce i dati dell'utente se la login ha successo
-            res.json({ success: true, nome: row.nome, cognome: row.cognome, email: row.email });
+            // Reindirizza l'utente alla pagina del paziente con il nome nella query string
+            res.redirect(`/paziente.html?nome=${encodeURIComponent(row.nome + ' ' + row.cognome)}`);
         } else {
-            // Restituisce un messaggio di errore se le credenziali non sono corrette
-            res.json({ success: false, message: 'Email o password errati' });
+            res.status(401).json({ success: false, message: 'Email o password errati' });
         }
     });
 });
+
+
 
 // Avvio del server
 app.listen(port, () => {

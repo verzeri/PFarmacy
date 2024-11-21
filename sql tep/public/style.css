@@ -1,11 +1,13 @@
 /* style.css */
 
+/* Reset generale */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Stile generale per il corpo */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f0f4f8;
@@ -13,56 +15,67 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin: 0;
 }
 
+/* Contenitore principale */
 .container {
+    max-width: 500px;
     background-color: #fff;
-    padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-}
-
-h2 {
-    color: #333;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin: auto;
     text-align: center;
 }
 
-input {
+/* Titoli */
+h1, h2 {
+    color: #007BFF;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 24px;
+    color: #333;
+}
+
+/* Input e pulsanti */
+input, select, button {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 1px solid #007BFF; /* Bordo blu per le caselle di testo */
+    border: 1px solid #007BFF;
     border-radius: 4px;
     font-size: 16px;
 }
 
 input:focus {
     outline: none;
-    border: 1px solid #0056b3; /* Bordo più scuro quando è in focus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Effetto glow */
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 button {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #007BFF, #0056b3); /* Sfumatura sui bottoni */
-    color: #fff;
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
     cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s ease; /* Transizione fluida */
+    font-size: 16px;
+    transition: background 0.3s ease;
 }
 
 button:hover {
-    background: linear-gradient(135deg, #0056b3, #004080); /* Sfumatura più scura al passaggio del mouse */
+    background: linear-gradient(135deg, #0056b3, #004080);
 }
 
-/* Tabs styles */
+/* Tabs */
 .tabs {
     display: flex;
     justify-content: space-around;
@@ -96,21 +109,7 @@ button:hover {
     display: block;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    .container {
-        padding: 20px;
-    }
-}
-
-.container {
-    width: 100%;
-    max-width: 500px;
-    margin: auto;
-    padding: 20px;
-    text-align: center;
-}
-
+/* Controlli utente */
 .user-controls {
     margin-top: 20px;
 }
@@ -126,4 +125,35 @@ button:hover {
     text-align: left;
 }
 
+/* Stile per la pagina paziente.html */
+.paziente-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+}
 
+.paziente-header .icon {
+    position: absolute;
+    left: 0;
+    font-size: 36px;
+    color: #007BFF;
+}
+
+.paziente-header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    color: #007BFF;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+}
