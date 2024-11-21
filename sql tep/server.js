@@ -168,4 +168,3 @@ app.post('/login', (req, res) => {
 app.listen(port, () => {
     console.log(`Server API in esecuzione su http://localhost:${port}`);
 });
-
