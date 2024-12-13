@@ -36,16 +36,19 @@
 
     <script>
         // Simulazione del recupero del nome del paziente dal back-end
-        const queryString = window.location.search; // Ottiene la query string dalla URL
-        const urlParams = new URLSearchParams(queryString);
-        const nomePaziente = urlParams.get('nome'); // Recupera il parametro "nome"
-        
-        // Cambia il titolo con il nome del paziente
-        if (nomePaziente) {
-            document.getElementById('patientName').textContent = nomePaziente;
-        } else {
-            document.getElementById('patientName').textContent = 'Area Paziente'; // Default
-        }
+       // Recupera i parametri dalla query string
+       const queryString = window.location.search;
+       const urlParams = new URLSearchParams(queryString);
+       const nome = urlParams.get('nome');
+       const cognome = urlParams.get('cognome');
+
+// Cambia il titolo con nome e cognome
+       if (nome && cognome) {
+          document.getElementById('patientName').textContent = `${nome} ${cognome}`;
+          } else {
+          document.getElementById('patientName').textContent = 'Area Paziente'; // Default
+          }
+
 
         // Inizializzazione di FullCalendar
         document.addEventListener('DOMContentLoaded', function() {
