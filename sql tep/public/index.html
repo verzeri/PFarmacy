@@ -108,8 +108,10 @@
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Reindirizza alla pagina paziente.html
-            window.location.href = 'paziente.html';
+            // Reindirizza alla pagina paziente.html con nome e cognome
+            const nome = encodeURIComponent(data.user.nome);
+            const cognome = encodeURIComponent(data.user.cognome);
+            window.location.href = `paziente.html?nome=${nome}&cognome=${cognome}`;
         } else {
             alert('Errore di login: ' + data.message);
         }
@@ -119,6 +121,7 @@
         alert('Si è verificato un errore durante il login.');
     });
 }
+
 
 
 
