@@ -150,30 +150,111 @@ button:hover {
 
 /* Calendario */
 #calendar {
-    width: 90%;
-    max-width: 900px;
+    width: 100%; /* Imposta la larghezza al 100% del suo contenitore */
+    max-width: 1200px; /* Limita la larghezza massima */
     height: 600px;
     margin: 40px auto;
-    border: 1px solid #ddd;
-    padding: 10px;
-    background-color: #fff;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background-color: #f9f9f9; /* Colore di sfondo leggero */
+    border-radius: 10px; /* Aggiungi angoli arrotondati */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Aggiungi un'ombra delicata */
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-    .container {
-        padding: 20px;
-    }
+/* Pulsanti per il calendario */
+.fc-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
 
+/* Gruppo pulsanti "Today", avanti e indietro */
+.fc-button-group {
+    display: flex;
+    justify-content: space-between; /* Separazione tra il gruppo di pulsanti */
+    align-items: center;
+    width: 100%; /* Allarga il gruppo per prendere tutta la larghezza disponibile */
+}
+
+/* Pulsante "Today" */
+.fc-button.today {
+    margin-right: 20px; /* Spazio tra "Today" e gli altri pulsanti */
+}
+
+/* Pulsante generico del calendario */
+.fc-button {
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+/* Hover sui pulsanti */
+.fc-button:hover {
+    background: linear-gradient(135deg, #0056b3, #004080);
+}
+
+/* Aggiungi margini e padding al contenitore del calendario */
+#calendar {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Stile per il titolo principale PFarmacy */
+.main-title {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 30px;
+}
+
+.main-title h1 {
+    font-size: 3em;
+    color: #007BFF;
+}
+
+/* Stili per l'header dell'area paziente */
+.paziente-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.paziente-header .icon {
+    font-size: 36px;
+    color: #007BFF;
+    margin-bottom: 10px;
+}
+
+.paziente-header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Stili per la visualizzazione mobile */
+@media screen and (max-width: 768px) {
     .paziente-header {
         flex-direction: column;
         text-align: center;
     }
 
-    .paziente-header .icon {
-        position: static;
-        margin-bottom: 10px;
+    #calendar {
+        padding: 10px;
+    }
+
+    .main-title h1 {
+        font-size: 2.2em;
     }
 
     .paziente-header h1 {
