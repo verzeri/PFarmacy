@@ -231,6 +231,30 @@ app.post('/login', (req, res) => {
     });
 });
 
+
+// Endpoint per restituire gli eventi
+app.get('/events', (req, res) => {
+    // Esempio di eventi statici (modifica con il tuo database)
+    const events = [
+      {
+        title: 'Visita Medica',
+        start: '2024-12-14T10:00:00',
+        end: '2024-12-14T11:00:00',
+        description: 'Visita di controllo generale'
+      },
+      {
+        title: 'Check-up Fisico',
+        start: '2024-12-15T09:00:00',
+        end: '2024-12-15T10:00:00',
+        description: 'Visita di controllo cardiaco'
+      }
+    ];
+  
+    res.json(events);  // Restituisci gli eventi in formato JSON
+  });
+  
+
+
 // Avvio del server
 app.listen(port, () => {
     console.log(`Server API in esecuzione su http://localhost:${port}`);
