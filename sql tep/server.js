@@ -56,6 +56,73 @@ db.run(`CREATE TABLE IF NOT EXISTS utentii (
 /**
  * @swagger
  * /utentii:
+ *   get:
+ *     summary: Ottieni la lista degli utenti con filtri opzionali
+ *     parameters:
+ *       - in: query
+ *         name: eta
+ *         schema:
+ *           type: string
+ *           enum: [max20, min21]
+ *         description: Filtra gli utenti in base all'età (max20 = meno di 20 anni, min21 = 21 anni o più)
+ *     responses:
+ *       200:
+ *         description: Lista degli utenti
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nome:
+ *                         type: string
+ *                       cognome:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       sesso:
+ *                         type: string
+ *                         enum: [M, F]
+ *                       eta:
+ *                         type: integer
+ *       500:
+ *         description: Errore del server
+ */
+
+// Endpoint per ottenere la lista degli utenti
+app.get('/utentii', (req, res) => {
+    const { eta } = req.query;
+
+    let sql = 'SELECT * FROM utentii';
+    const params = [];
+
+    // Aggiungi i filtri in base ai parametri della query
+    if (eta === 'max20') {
+        sql += ' WHERE eta <= 20';
+    } else if (eta === 'min21') {
+        sql += ' WHERE eta > 20';
+    }
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Errore nel database:', err.message);
+            return res.status(500).json({ error: 'Errore durante il recupero degli utenti' });
+        }
+        res.json({ users: rows });
+    });
+});
+
+
+
+/**
+ * @swagger
+ * /utentii:
  *   post:
  *     summary: Registra un nuovo utente
  *     requestBody:
