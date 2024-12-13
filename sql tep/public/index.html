@@ -48,14 +48,14 @@
             <p><strong>Email:</strong> <span id="userEmail"></span></p>
         </div>
 
-        <!-- User Controls for Sorting and Filtering -->
-        <div class="user-controls">
-            <button onclick="fetchUsers('asc')">Ordina A-Z</button>
-            <button onclick="fetchUsers('desc')">Ordina Z-A</button>
-            <button onclick="fetchUsers('asc', 'M')">Solo Maschi</button>
-            <button onclick="fetchUsers('asc', 'F')">Solo Femmine</button>
-        </div>
-        <div id="userList"></div>
+       <!-- User Controls for Sorting and Filtering -->
+<div class="user-controls">
+    <button onclick="fetchUsers()">Visualizza Tutti</button>
+    <button onclick="fetchUsers('under20')">Utenti con meno di 20 anni</button>
+    <button onclick="fetchUsers('over20')">Utenti con più di 20 anni</button>
+</div>
+<div id="userList"></div>
+
     </div>
 
     <script>
@@ -119,26 +119,33 @@
         alert('Si è verificato un errore durante il login.');
     });
 }
-        // Funzione per recuperare e visualizzare la lista degli utentii
-        function fetchUsers(order = 'asc', sesso = '') {
-            const query = `/utentii?order=${order}${sesso ? `&sesso=${sesso}` : ''}`;
+        // Funzione per recuperare e visualizzare la lista degli utenti
+function fetchUsers(filter = '') {
+    // Determina la query string in base al filtro
+    let query = '/utentii';
+    if (filter === 'under20') {
+        query += '?eta=max20';
+    } else if (filter === 'over20') {
+        query += '?eta=min21';
+    }
 
-            fetch(query)
-                .then(response => response.json())
-                .then(data => {
-                    const userList = document.getElementById('userList');
-                    userList.innerHTML = '';
-                    data.users.forEach(user => {
-                        const userItem = document.createElement('p');
-                        userItem.textContent = `${user.nome} ${user.cognome} - ${user.sesso} - ${user.eta} anni - ${user.email}`;
-                        userList.appendChild(userItem);
-                    });
-                })
-                .catch(error => {
-                    console.error('Errore durante il recupero degli utentii:', error);
-                    alert('Si è verificato un errore nel caricamento della lista utentii.');
-                });
-        }
+    fetch(query)
+        .then(response => response.json())
+        .then(data => {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            data.users.forEach(user => {
+                const userItem = document.createElement('p');
+                userItem.textContent = `${user.nome} ${user.cognome} - ${user.sesso} - ${user.eta} anni - ${user.email}`;
+                userList.appendChild(userItem);
+            });
+        })
+        .catch(error => {
+            console.error('Errore durante il recupero degli utenti:', error);
+            alert('Si è verificato un errore nel caricamento della lista utenti.');
+        });
+}
+
 
         // Event Listeners per invio form di registrazione e login
         document.getElementById('registerForm').addEventListener('submit', function (e) {
