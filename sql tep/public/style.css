@@ -178,12 +178,12 @@ button:hover {
 
 /* Pulsante "Today" */
 .fc-button.today {
-    margin-right: 20px; /* Spazio tra "Today" e gli altri pulsanti */
+    margin-right: -20px; /* Spazio tra "Today" e gli altri pulsanti */
 }
 
 /* Pulsante generico del calendario */
 .fc-button {
-    background: linear-gradient(135deg, #007BFF, #0056b3);
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
     border: none;
     cursor: pointer;
