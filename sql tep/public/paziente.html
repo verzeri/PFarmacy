@@ -23,13 +23,15 @@
     
     <!-- Header specifico dell'area paziente -->
     <div class="paziente-header">
-        <!-- Icona dell'account -->
-        <i class="fas fa-user-circle icon"></i>
+        <!-- Icona dell'account con link -->
+        <a href="dati.html">
+            <i class="fas fa-user-circle icon"></i>
+        </a>
         <!-- Titolo personalizzato con il nome del paziente -->
         <h1 id="patientName">Area Paziente</h1> <!-- Titolo dinamico -->
     </div>
 
-    <!--Contenitore per Calendario-->
+    <!-- Contenitore per Calendario -->
     <div id="calendar"></div>
 
     <script>
@@ -46,18 +48,19 @@
         }
 
         // Inizializzazione di FullCalendar
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth', // Vista iniziale
-            locale: 'it', // Localizzazione in italiano
-            events: [ // Eventi fittizi per test
-                { title: 'Visita Medica', start: '2024-12-10' },
-                { title: 'Controllo Periodico', start: '2024-12-15', end: '2024-12-16' }
-            ]
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth', // Vista iniziale
+                locale: 'it', // Localizzazione in italiano
+                events: [ // Eventi fittizi per test
+                    { title: 'Visita Medica', start: '2024-12-10' },
+                    { title: 'Controllo Periodico', start: '2024-12-15', end: '2024-12-16' }
+                ]
+            });
+            calendar.render();
         });
-        calendar.render();
-    });
     </script>
 </body>
 </html>
+
