@@ -108,10 +108,8 @@
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Passa nome e cognome nella query string
-            const nome = encodeURIComponent(data.user.nome);
-            const cognome = encodeURIComponent(data.user.cognome);
-            window.location.href = `paziente.html?nome=${nome}&cognome=${cognome}`;
+            // Reindirizza alla pagina paziente.html
+            window.location.href = 'paziente.html';
         } else {
             alert('Errore di login: ' + data.message);
         }
@@ -121,7 +119,6 @@
         alert('Si è verificato un errore durante il login.');
     });
 }
-
         // Funzione per recuperare e visualizzare la lista degli utentii
         function fetchUsers(order = 'asc', sesso = '') {
             const query = `/utentii?order=${order}${sesso ? `&sesso=${sesso}` : ''}`;
