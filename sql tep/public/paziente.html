@@ -13,7 +13,6 @@
 
     <!-- Aggiungi FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-    
 </head>
 <body>
     <!-- Titolo principale della pagina -->
@@ -28,47 +27,72 @@
             <i class="fas fa-user-circle icon"></i>
         </a>
         <!-- Titolo personalizzato con il nome del paziente -->
-        <h1 id="patientName">Area Paziente</h1> <!-- Titolo dinamico -->
+        <h1 id="patientName">Area Paziente</h1>
+        <!-- Icona Chat accanto al titolo -->
+        <span id="chatIcon" title="Apri chat">
+            <i class="fas fa-comment"></i>
+        </span>
     </div>
 
     <!-- Calendario FullCalendar -->
     <div id="calendar"></div>
 
+    <!-- Finestra di Chat -->
+    <div id="chatWindow">
+        <div id="chatHeader">
+            <h3>Chat</h3>
+            <button id="closeChat">&times;</button>
+        </div>
+        <div id="chatBody">
+            <p>Benvenuto! Come posso aiutarti?</p>
+        </div>
+        <div id="chatFooter">
+            <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
+        </div>
+    </div>
 
     <script>
         // Simulazione del recupero del nome del paziente dal back-end
-       // Recupera i parametri dalla query string
-       const queryString = window.location.search;
-       const urlParams = new URLSearchParams(queryString);
-       const nome = urlParams.get('nome');
-       const cognome = urlParams.get('cognome');
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const nome = urlParams.get('nome');
+        const cognome = urlParams.get('cognome');
 
-// Cambia il titolo con nome e cognome
-       if (nome && cognome) {
-          document.getElementById('patientName').textContent = `${nome} ${cognome}`;
-          } else {
-          document.getElementById('patientName').textContent = 'Area Paziente'; // Default
-          }
-
+        // Cambia il titolo con nome e cognome
+        if (nome && cognome) {
+            document.getElementById('patientName').textContent = `${nome} ${cognome}`;
+        } else {
+            document.getElementById('patientName').textContent = 'Area Paziente'; // Default
+        }
 
         // Inizializzazione di FullCalendar
         document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
+            var calendarEl = document.getElementById('calendar');
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      // Configurazione base del calendario
-      initialView: 'dayGridMonth',  // Visualizza il mese per default
-      locale: 'it',  // Imposta la lingua in italiano
-      events: '/events',  // Indica l'endpoint che fornisce gli eventi
-      eventClick: function(info) {
-        // Gestisci il click su un evento (ad esempio, mostra i dettagli dell'evento)
-        alert('Evento: ' + info.event.title);
-      }
-    });
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'it',
+                events: '/events',
+                eventClick: function(info) {
+                    alert('Evento: ' + info.event.title);
+                }
+            });
 
-    // Renderizza il calendario
-    calendar.render();
-  });
+            calendar.render();
+        });
+
+        // Gestione apertura e chiusura della finestra di chat
+        const chatIcon = document.getElementById('chatIcon');
+        const chatWindow = document.getElementById('chatWindow');
+        const closeChat = document.getElementById('closeChat');
+
+        chatIcon.addEventListener('click', () => {
+            chatWindow.style.display = 'block';
+        });
+
+        closeChat.addEventListener('click', () => {
+            chatWindow.style.display = 'none';
+        });
     </script>
 </body>
 </html>
