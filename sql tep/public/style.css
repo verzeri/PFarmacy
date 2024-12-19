@@ -124,28 +124,44 @@ button:hover {
 
 /* Stile per la pagina paziente.html */
 .paziente-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; /* Disposizione orizzontale degli elementi */
+    align-items: center; /* Allinea verticalmente al centro */
+    justify-content: center; /* Allinea orizzontalmente */
+    margin-bottom: 20px;
+    text-align: center;
     position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: 20px auto;
 }
 
 .paziente-header .icon {
-    position: absolute;
-    left: 20px;
     font-size: 36px;
     color: #007BFF;
+    margin-right: 10px; /* Spazio tra l'icona utente e il titolo */
 }
 
 .paziente-header h1 {
-    margin: 0;
     font-size: 28px;
     font-weight: bold;
-    text-align: center;
     color: #007BFF;
+    margin: 0;
+    display: inline-block;
+}
+
+/* Stile per l'icona della chat */
+#chatIcon {
+    margin-left: 15px; /* Spazio tra il titolo e l'icona della chat */
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #007bff;
+    display: inline-block;
+}
+
+/* Stile per l'icona dell'utente */
+#userIcon {
+    margin-left: 10px; /* Spazio tra il titolo e l'icona utente */
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #007bff;
+    display: inline-block;
 }
 
 /* Calendario */
@@ -220,106 +236,19 @@ button:hover {
     color: #007BFF;
 }
 
-/* Stili per l'header dell'area paziente */
-.paziente-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.paziente-header .icon {
-    font-size: 36px;
-    color: #007BFF;
-    margin-bottom: 10px;
-}
-
-.paziente-header h1 {
-    font-size: 28px;
-    font-weight: bold;
-    color: #333;
-}
-
 /* Stili per la visualizzazione mobile */
 @media screen and (max-width: 768px) {
     .paziente-header {
-        flex-direction: column;
+        flex-direction: column; /* Disposizione in colonna su dispositivi piccoli */
         text-align: center;
     }
 
-    #calendar {
-        padding: 10px;
-    }
-
-    .main-title h1 {
-        font-size: 2.2em;
+    #chatIcon, #userIcon {
+        margin-left: 0; /* Rimuove il margine per evitare spazi eccessivi */
+        margin-top: 10px; /* Aggiunge un po' di spazio sopra le icone */
     }
 
     .paziente-header h1 {
         font-size: 24px;
     }
 }
-
-/* Icona della chat accanto al titolo */
-#chatIcon {
-    display: inline-block;
-    margin-left: 10px;
-    cursor: pointer;
-    color: #007bff;
-    font-size: 1.5rem;
-}
-
-/* Stile finestra di chat */
-#chatWindow {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    height: 400px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-}
-
-#chatHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 10px 10px 0 0;
-}
-
-#chatBody {
-    padding: 10px;
-    height: calc(100% - 80px);
-    overflow-y: auto;
-}
-
-#chatFooter {
-    display: flex;
-    padding: 10px;
-    border-top: 1px solid #ccc;
-}
-
-#chatInput {
-    flex-grow: 1;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-#closeChat {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-
