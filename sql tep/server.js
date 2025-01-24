@@ -1,11 +1,18 @@
 const express = require('express');
 const sqlite = require('sqlite3').verbose();
 const path = require('path');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const session = require('express-session');
+require('dotenv').config();
 const app = express();
 const port = 3000;
 
+
+//dipendenze swagger
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
+const { doesNotMatch } = require('assert');
 
 const swaggerOptions = {
     swaggerDefinition: {
@@ -41,6 +48,37 @@ app.use(express.json());
 // Servire il file HTML per il frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
+//sessione google
+app.use(session({
+    secret: 'yourSecretKey',
+    resave: false,
+    saveUninitialized: true
+}));
+
+//inizializzazione passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+//configurazione passport
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/callback",
+}, (accessToken, refreshToken, profile, done) => {
+    //funzione callback
+    return done(null, profile);
+}
+));
+
+//serializza e deserializza utente
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
 // Creare la tabella utentii se non esiste
 db.run(`CREATE TABLE IF NOT EXISTS utentii (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +90,37 @@ db.run(`CREATE TABLE IF NOT EXISTS utentii (
     eta INTEGER
 )`);
 
+//rotta login google
+app.get('/auth/google',
+    passport.authenticate('google', {
+        scope: ['profile', 'email']
+    })
+);
+
+//rotta callback
+app.get('/auth/google/alback',
+    passport.authenticate('google', {failureRedirect: '/'}),
+    (req, res) => {
+        //reinderizza homepage
+        res.redirect('/');
+    }
+);
+
+//rotta utente autenticato
+app.get('/', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.send(`<h1>Benvenuto, ${req.user.displayname}<h1><a href='/logout'>Logout</a>`);
+    } else {
+        res.send('<h1>Benvenuto! <a href="/auth/google">Accedi con Google</a></h1>');
+    }
+});
+
+//rotta logout
+app.get('/logout', (req, res) => {
+    req.logout((err) => {
+        res.redirect('/');
+    });
+});
 
 /**
  * @swagger
