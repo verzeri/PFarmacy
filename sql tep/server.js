@@ -59,16 +59,41 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-//configurazione passport
+
+
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/callback",
-}, (accessToken, refreshToken, profile, done) => {
-    //funzione callback
+     // Sostituisci con il tuo Client Secret
+    callbackURL: "http://localhost:3000/auth/google/callback"
+},
+function(accessToken, refreshToken, profile, done) {
+    // Logica di autenticazione
     return done(null, profile);
-}
-));
+}));
+
+// Rotta callback Google corretta
+app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/' }),
+    (req, res) => {
+        // Reindirizza alla homepage dopo il login
+        res.redirect('/');
+    }
+);
+
+// Rotta per mostrare l'utente autenticato
+app.get('/', (req, res) => {
+    if (req.isAuthenticated()) {
+        const user = req.user;
+        res.send(`
+            <h1>Benvenuto, ${user.displayName}</h1>
+            <p>Email: ${user.emails[0].value}</p>
+            <a href='/logout'>Logout</a>
+        `);
+    } else {
+        res.send(`
+            <h1>Benvenuto! <a href="/auth/google">Accedi con Google</a></h1>
+        `);
+    }
+});
 
 //serializza e deserializza utente
 passport.serializeUser((user, done) => {
