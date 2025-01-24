@@ -45,6 +45,7 @@ let db = new sqlite.Database('./database.db', (err) => {
 
 app.use(express.json());
 
+
 // Servire il file HTML per il frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -62,40 +63,13 @@ app.use(passport.session());
 
 
 passport.use(new GoogleStrategy({
-     // Sostituisci con il tuo Client Secret
-    callbackURL: "http://localhost:3000/auth/google/callback"
+
+    callbackURL: "http://localhost:3000/auth/google/callback",
 },
 function(accessToken, refreshToken, profile, done) {
-    // Logica di autenticazione
     return done(null, profile);
 }));
 
-// Rotta callback Google corretta
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-        // Reindirizza alla homepage dopo il login
-        res.redirect('/');
-    }
-);
-
-// Rotta per mostrare l'utente autenticato
-app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-        const user = req.user;
-        res.send(`
-            <h1>Benvenuto, ${user.displayName}</h1>
-            <p>Email: ${user.emails[0].value}</p>
-            <a href='/logout'>Logout</a>
-        `);
-    } else {
-        res.send(`
-            <h1>Benvenuto! <a href="/auth/google">Accedi con Google</a></h1>
-        `);
-    }
-});
-
-//serializza e deserializza utente
 passport.serializeUser((user, done) => {
     done(null, user);
 });
@@ -104,6 +78,43 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+// Rotta di login Google
+app.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+// Callback di Google dopo il login
+app.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/' }),
+    (req, res) => {
+        res.redirect('/dashboard'); // Redirigi alla dashboard
+    }
+);
+
+// Pagina di dashboard
+app.get('/dashboard', (req, res) => {
+    if (req.isAuthenticated()) {
+        const user = req.user;
+        res.send(`
+            <html>
+                <body>
+                    <h1>Ciao, ${user.displayName}!</h1>
+                    <p>Email: ${user.emails[0].value}</p>
+                    <a href="/logout">Logout</a>
+                </body>
+            </html>
+        `);
+    } else {
+        res.redirect('/');
+    }
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+    req.logout((err) => {
+        res.redirect('/');
+    });
+});
 // Creare la tabella utentii se non esiste
 db.run(`CREATE TABLE IF NOT EXISTS utentii (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,38 +125,6 @@ db.run(`CREATE TABLE IF NOT EXISTS utentii (
     sesso TEXT CHECK(sesso IN ('M', 'F')),
     eta INTEGER
 )`);
-
-//rotta login google
-app.get('/auth/google',
-    passport.authenticate('google', {
-        scope: ['profile', 'email']
-    })
-);
-
-//rotta callback
-app.get('/auth/google/alback',
-    passport.authenticate('google', {failureRedirect: '/'}),
-    (req, res) => {
-        //reinderizza homepage
-        res.redirect('/');
-    }
-);
-
-//rotta utente autenticato
-app.get('/', (req, res) => {
-    if (req.isAuthenticated()) {
-        res.send(`<h1>Benvenuto, ${req.user.displayname}<h1><a href='/logout'>Logout</a>`);
-    } else {
-        res.send('<h1>Benvenuto! <a href="/auth/google">Accedi con Google</a></h1>');
-    }
-});
-
-//rotta logout
-app.get('/logout', (req, res) => {
-    req.logout((err) => {
-        res.redirect('/');
-    });
-});
 
 /**
  * @swagger
