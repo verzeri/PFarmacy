@@ -1,12 +1,13 @@
 const express = require('express');
 const sqlite = require('sqlite3').verbose();
 const path = require('path');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 require('dotenv').config();
 const app = express();
 const port = 3000;
+
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 
 //dipendenze swagger
@@ -49,6 +50,13 @@ app.use(express.json());
 // Servire il file HTML per il frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
+//app.use(express.static(path.join(__dirname, 'sql tep', 'public')));
+
+app.get('/paziente', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sql tep', 'paziente.html'));
+});
+
+
 //sessione google
 app.use(session({
     secret: 'yourSecretKey',
@@ -56,20 +64,22 @@ app.use(session({
     saveUninitialized: true
 }));
 
-//inizializzazione passport
+// Inizializza Passport e sessioni
 app.use(passport.initialize());
 app.use(passport.session());
 
 
-
+// Configurazione per il login tramite Google
 passport.use(new GoogleStrategy({
-
-    callbackURL: "http://localhost:3000/auth/google/callback",
-},
-function(accessToken, refreshToken, profile, done) {
+    clientID: 'clientid',
+    clientSecret: 'clientsecret',
+    callbackURL: '/auth/google/callback'
+}, (accessToken, refreshToken, profile, done) => {
+    // Puoi salvare o gestire il profilo utente qui
     return done(null, profile);
 }));
 
+// Serializzazione e deserializzazione utente
 passport.serializeUser((user, done) => {
     done(null, user);
 });
@@ -78,43 +88,31 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-// Rotta di login Google
-app.get('/auth/google', passport.authenticate('google', {
-    scope: ['profile', 'email']
-}));
 
-// Callback di Google dopo il login
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-        res.redirect('/dashboard'); // Redirigi alla dashboard
-    }
-);
+// Rotte per il login tramite Google
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// Pagina di dashboard
-app.get('/dashboard', (req, res) => {
-    if (req.isAuthenticated()) {
-        const user = req.user;
-        res.send(`
-            <html>
-                <body>
-                    <h1>Ciao, ${user.displayName}!</h1>
-                    <p>Email: ${user.emails[0].value}</p>
-                    <a href="/logout">Logout</a>
-                </body>
-            </html>
-        `);
-    } else {
-        res.redirect('/');
-    }
+app.get('/auth/google/callback', passport.authenticate('google', {
+    failureRedirect: '/login'
+}), (req, res) => {
+    // Reindirizza dopo il successo del login tramite Google
+    res.redirect('/paziente.html'); 
 });
 
-// Logout
-app.get('/logout', (req, res) => {
-    req.logout((err) => {
-        res.redirect('/');
-    });
+// Middleware per verificare se l'utente è autenticato
+function ensureAuthenticated(req, res, next) {
+    if (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+}
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'sql tep', 'public', 'paziente.html'));
 });
+
+
+
 // Creare la tabella utentii se non esiste
 db.run(`CREATE TABLE IF NOT EXISTS utentii (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
