@@ -355,9 +355,12 @@ app.post('/login', (req, res) => {
         // Memorizza l'utente nella sessione
         req.session.user = result.user;
         
+        // Controllo per la redirezione in base alla email
+        const redirectPage = email.endsWith('@admin') ? 'index.html' : 'paziente.html';
+        
         res.json({ 
             success: true,
-            redirectPage: result.redirectPage 
+            redirectPage
         });
     } else {
         res.json({ 
