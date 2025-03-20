@@ -1,14 +1,16 @@
 const express = require('express');
-const sqlite = require('sqlite3').verbose();
 const path = require('path');
 const session = require('express-session');
 require('dotenv').config();
 const app = express();
 const port = 3000;
 
+// Importa DBMock anziché SQLite
+const DBMock = require('./DBMock');
+const db = new DBMock();
+
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
 
 //dipendenze swagger
 const swaggerUi = require('swagger-ui-express');
@@ -35,44 +37,27 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-
-// Connessione al database
-let db = new sqlite.Database('./database.db', (err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Connesso al database SQlite');
-});
-
 app.use(express.json());
 
-
-// Servire il file HTML per il frontend
-app.use(express.static(path.join(__dirname, 'public')));
-
-//app.use(express.static(path.join(__dirname, 'sql tep', 'public')));
-
-app.get('/paziente', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'sql tep', 'paziente.html'));
-});
-
-
-//sessione google
+// Configurazione delle sessioni
 app.use(session({
     secret: 'yourSecretKey',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 ore
 }));
+
+// Servire il file HTML per il frontend
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Inizializza Passport e sessioni
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // Configurazione per il login tramite Google
 passport.use(new GoogleStrategy({
-    clientID: 'clientid',
-    clientSecret: 'clientsecret',
+    clientID: '',
+    clientSecret: '',
     callbackURL: '/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
     // Puoi salvare o gestire il profilo utente qui
@@ -88,41 +73,81 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+// Middleware per verificare se l'utente è autenticato
+function ensureAuthenticated(req, res, next) {
+    if (req.session && req.session.user) {
+        return next();
+    }
+    res.redirect('/');
+}
+
+// Middleware per verificare se l'utente è admin
+function ensureAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.ruolo === 'admin') {
+        return next();
+    }
+    res.status(403).json({ error: 'Accesso negato' });
+}
 
 // Rotte per il login tramite Google
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback', passport.authenticate('google', {
-    failureRedirect: '/login'
+    failureRedirect: '/'
 }), (req, res) => {
     // Reindirizza dopo il successo del login tramite Google
-    res.redirect('/paziente.html'); 
+    res.redirect('/paziente.html');
 });
 
-// Middleware per verificare se l'utente è autenticato
-function ensureAuthenticated(req, res, next) {
-    if (typeof req.isAuthenticated === 'function' && req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-}
-
+// Route principale
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'sql tep', 'public', 'paziente.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Route per la pagina paziente (protetta da autenticazione)
+app.get('/paziente.html', ensureAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'paziente.html'));
+});
 
+// Route per la pagina admin (protetta da autenticazione admin)
+app.get('/admin.html', ensureAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
-// Creare la tabella utentii se non esiste
-db.run(`CREATE TABLE IF NOT EXISTS utentii (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT,
-    cognome TEXT,
-    email TEXT,
-    password TEXT,
-    sesso TEXT CHECK(sesso IN ('M', 'F')),
-    eta INTEGER
-)`);
+/**
+ * @swagger
+ * /api/check-auth:
+ *   get:
+ *     summary: Verifica l'autenticazione dell'utente
+ *     responses:
+ *       200:
+ *         description: Stato di autenticazione dell'utente
+ */
+app.get('/api/check-auth', (req, res) => {
+    if (req.session && req.session.user) {
+        res.json({
+            isAuthenticated: true,
+            role: req.session.user.ruolo,
+            nome: req.session.user.nome
+        });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
+});
+
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Effettua il logout dell'utente
+ *     responses:
+ *       200:
+ *         description: Logout effettuato con successo
+ */
+app.post('/logout', (req, res) => {
+    req.session.destroy();
+    res.json({ success: true });
+});
 
 /**
  * @swagger
@@ -139,57 +164,52 @@ db.run(`CREATE TABLE IF NOT EXISTS utentii (
  *     responses:
  *       200:
  *         description: Lista degli utenti
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 users:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                       nome:
- *                         type: string
- *                       cognome:
- *                         type: string
- *                       email:
- *                         type: string
- *                       sesso:
- *                         type: string
- *                         enum: [M, F]
- *                       eta:
- *                         type: integer
  *       500:
  *         description: Errore del server
  */
-
-// Endpoint per ottenere la lista degli utenti
 app.get('/utentii', (req, res) => {
     const { eta } = req.query;
-
-    let sql = 'SELECT * FROM utentii';
-    const params = [];
-
-    // Aggiungi i filtri in base ai parametri della query
+    
+    // Ottieni tutti gli utenti
+    let users = db.getAllUsers();
+    
+    // Filtra in base all'età se necessario
     if (eta === 'max20') {
-        sql += ' WHERE eta <= 20';
+        users = users.filter(user => user.eta <= 20);
     } else if (eta === 'min21') {
-        sql += ' WHERE eta > 20';
+        users = users.filter(user => user.eta > 20);
     }
-
-    db.all(sql, params, (err, rows) => {
-        if (err) {
-            console.error('Errore nel database:', err.message);
-            return res.status(500).json({ error: 'Errore durante il recupero degli utenti' });
-        }
-        res.json({ users: rows });
-    });
+    
+    res.json({ users });
 });
 
-
+/**
+ * @swagger
+ * /utentii/{id}:
+ *   get:
+ *     summary: Ottiene un utente specifico per ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dettagli dell'utente
+ *       404:
+ *         description: Utente non trovato
+ */
+app.get('/utentii/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const user = db.getUserById(userId);
+    
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({ error: 'Utente non trovato' });
+    }
+});
 
 /**
  * @swagger
@@ -224,8 +244,6 @@ app.get('/utentii', (req, res) => {
  *       500:
  *         description: Errore del server
  */
-
-//registrazione
 app.post('/utentii', (req, res) => {
     console.log('Dati ricevuti per registrazione:', req.body);
     const { nome, cognome, email, password, sesso, eta } = req.body;
@@ -235,18 +253,77 @@ app.post('/utentii', (req, res) => {
         return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
 
-    const sql = `INSERT INTO utentii (nome, cognome, email, password, sesso, eta) VALUES (?, ?, ?, ?, ?, ?)`;
-
-    db.run(sql, [nome, cognome, email, password, sesso, eta], function (err) {
-        if (err) {
-            console.error('Errore nel database:', err.message);
-            return res.status(500).json({ error: 'Errore durante la registrazione' });
-        }
+    try {
+        const newUser = db.createUser({ nome, cognome, email, password, sesso, eta });
         res.status(201).json({ message: 'Registrazione avvenuta con successo' });
-    });
+    } catch (error) {
+        console.error('Errore durante la registrazione:', error);
+        res.status(500).json({ error: 'Errore durante la registrazione' });
+    }
 });
 
+/**
+ * @swagger
+ * /utentii/{id}:
+ *   put:
+ *     summary: Aggiorna un utente esistente
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Utente aggiornato con successo
+ *       404:
+ *         description: Utente non trovato
+ */
+app.put('/utentii/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const updates = req.body;
+    
+    const updatedUser = db.updateUser(userId, updates);
+    if (updatedUser) {
+        res.json({ success: true, user: updatedUser });
+    } else {
+        res.status(404).json({ error: 'Utente non trovato' });
+    }
+});
 
+/**
+ * @swagger
+ * /utentii/{id}:
+ *   delete:
+ *     summary: Elimina un utente
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Utente eliminato con successo
+ *       404:
+ *         description: Utente non trovato
+ */
+app.delete('/utentii/:id', (req, res) => {
+    const userId = parseInt(req.params.id);
+    const success = db.deleteUser(userId);
+    
+    if (success) {
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'Utente non trovato' });
+    }
+});
 
 /**
  * @swagger
@@ -267,45 +344,40 @@ app.post('/utentii', (req, res) => {
  *     responses:
  *       200:
  *         description: Login effettuato con successo
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 nome:
- *                   type: string
- *                 cognome:
- *                   type: string
- *                 email:
- *                   type: string
  *       401:
  *         description: Credenziali non valide
  */
-
-// Endpoint per il login
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-
-    db.get('SELECT * FROM utentii WHERE email = ? AND password = ?', [email, password], (err, row) => {
-        if (err) {
-            return res.status(500).json({ success: false, message: 'Errore interno del server' });
-        }
-        if (row) {
-            // Restituisce solo il flag di successo
-            res.json({ success: true });
-        } else {
-            // Restituisce un messaggio di errore se le credenziali non sono corrette
-            res.json({ success: false, message: 'Email o password errati' });
-        }
-    });
+    
+    const result = db.verifyCredentials(email, password);
+    if (result.success) {
+        // Memorizza l'utente nella sessione
+        req.session.user = result.user;
+        
+        res.json({ 
+            success: true,
+            redirectPage: result.redirectPage 
+        });
+    } else {
+        res.json({ 
+            success: false, 
+            message: result.message 
+        });
+    }
 });
 
-
-// Endpoint per restituire gli eventi
+/**
+ * @swagger
+ * /events:
+ *   get:
+ *     summary: Ottiene gli eventi del calendario
+ *     responses:
+ *       200:
+ *         description: Lista degli eventi
+ */
 app.get('/events', (req, res) => {
-    // Esempio di eventi statici (modifica con il tuo database)
+    // Esempio di eventi statici
     const events = [
       {
         title: 'Visita Medica',
@@ -320,13 +392,12 @@ app.get('/events', (req, res) => {
         description: 'Visita di controllo cardiaco'
       }
     ];
-  
-    res.json(events);  // Restituisci gli eventi in formato JSON
-  });
-  
-
+ 
+    res.json(events);
+});
 
 // Avvio del server
 app.listen(port, () => {
     console.log(`Server API in esecuzione su http://localhost:${port}`);
 });
+
