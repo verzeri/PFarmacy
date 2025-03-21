@@ -13,19 +13,21 @@
         <h1 style="text-align: center; color: #007BFF; margin-bottom: 30px;">Benvenuti da <span
                 style="color: blue;">PFarmacy</span></h1>
 
+        <!-- Pulsante di Login con Google -->
         <a href="/auth/google" class="google-login-button">Accedi con Google</a>
 
+        <!-- Login Form -->
         <div id="login" class="tab-content active">
             <h2>Login</h2>
             <form id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email" required />
                 <input type="password" id="loginPassword" placeholder="Password" required />
                 <button type="submit">Login</button>
-
             </form>
             <p>Non hai ancora un account? <a href="#" onclick="openTab('register')">Registrati</a></p>
         </div>
 
+        <!-- Registration Form -->
         <div id="register" class="tab-content">
             <h2>Registrazione</h2>
             <form id="registerForm">
@@ -44,6 +46,7 @@
             <p>Hai già un account? <a href="#" onclick="openTab('login')">Accedi</a></p>
         </div>
 
+        <!-- User Data Display -->
         <div id="userData" style="display: none;">
             <h2>Login Effettuato</h2>
             <p><strong>Nome:</strong> <span id="userNome"></span></p>
@@ -51,6 +54,7 @@
             <p><strong>Email:</strong> <span id="userEmail"></span></p>
         </div>
 
+        <!-- User Controls for Sorting and Filtering -->
         <div class="user-controls">
             <button onclick="fetchUsers()">Visualizza Tutti</button>
             <button onclick="fetchUsers('under20')">Utenti con meno di 20 anni</button>
@@ -107,17 +111,21 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirectPage; // Reindirizza in base al ruolo
-                    } else {
-                        alert(data.message); // Mostra errore se le credenziali non sono valide
-                    }
-                })
-                .catch(error => console.error('Errore durante il login:', error));
-
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Login riuscito, reindirizzamento a:', data.redirectPage);
+                    window.location.href = data.redirectPage; // Reindirizza in base al ruolo
+                } else {
+                    alert(data.message); // Mostra errore se le credenziali non sono valide
+                }
+            })
+            .catch(error => {
+                console.error('Errore durante il login:', error);
+                alert('Si è verificato un errore durante il login.');
+            });
         }
+
         // Funzione per recuperare e visualizzare la lista degli utenti
         function fetchUsers(filter = '') {
             // Determina la query string in base al filtro

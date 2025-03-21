@@ -16,7 +16,7 @@
             <p><strong>Nome:</strong> <span>{{ user.nome }}</span></p>
             <p><strong>Cognome:</strong> <span>{{ user.cognome }}</span></p>
             <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
-            </div>
+        </div>
         <div>
             <h2>Aggiorna Password</h2>
             <form id="updatePasswordForm">
@@ -38,7 +38,9 @@
         </div>
     </div>
     <div class="logout">
-        <a href="/logout" class="logout-link">Logout</a>
+        <form id="logoutForm" action="/logout" method="post">
+            <button type="submit" class="logout-link">Logout</button>
+        </form>
     </div>
 
     <script>
@@ -86,17 +88,6 @@
                     });
                 });
             }
-
-            // Puoi anche aggiungere qui la logica per recuperare e visualizzare i dati dell'utente
-            // fetch('/api/user-data')
-            //   .then(response => response.json())
-            //   .then(data => {
-            //     document.querySelector('.content').innerHTML += `<p><strong>Nome:</strong> <span>${data.nome}</span></p>`;
-            //     document.querySelector('.content').innerHTML += `<p><strong>Cognome:</strong> <span>${data.cognome}</span></p>`;
-            //     document.querySelector('.content').innerHTML += `<p><strong>Email:</strong> <span>${data.email}</span></p>`;
-            //     // ... altri dati
-            //   })
-            //   .catch(error => console.error('Errore nel recupero dei dati utente:', error));
         });
     </script>
 </body>

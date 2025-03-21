@@ -16,7 +16,7 @@
         <h1>PFarmacy</h1>
     </div>
     <div class="paziente-header">
-        <a href="dati.html">
+        <a href="/dati">
             <i class="fas fa-user-circle icon"></i>
         </a>
         <div class="header-title">
@@ -71,19 +71,6 @@
         closeChat.addEventListener('click', () => {
             chatWindow.style.display = 'none';
         });
-
-        // Rimuovo la parte di JavaScript che gestiva il nome, ora gestito da HBS
-        // const queryString = window.location.search;
-        // const urlParams = new URLSearchParams(queryString);
-        // const nome = urlParams.get('nome');
-        // const cognome = urlParams.get('cognome');
-
-        // // Cambia il titolo con nome e cognome
-        // if (nome && cognome) {
-        //     document.getElementById('patientName').textContent = `${nome} ${cognome}`;
-        // } else {
-        //     document.getElementById('patientName').textContent = 'Area Paziente'; // Default
-        // }
     </script>
 </body>
 </html>

@@ -38,6 +38,7 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Configurazione delle sessioni
 app.use(session({
@@ -50,7 +51,12 @@ app.use(session({
 // **Configurazione Handlebars come view engine**
 const hbs = require('hbs');
 app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'public')); // Assicurati che le tue pagine .hbs siano nella cartella 'public' o adatta il percorso
+app.set('views', path.join(__dirname, 'public')); // Assicurati che le tue pagine .hbs siano nella cartella 'public'
+
+// Registra l'helper eq per le comparazioni in Handlebars
+hbs.registerHelper('eq', function(a, b) {
+    return a === b;
+});
 
 // Servire i file statici dalla cartella 'public'
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,8 +71,15 @@ passport.use(new GoogleStrategy({
     clientSecret: '',
     callbackURL: '/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
-    // Puoi salvare o gestire il profilo utente qui
-    return done(null, profile);
+    // Crea un utente di base dal profilo Google
+    const user = {
+        id: profile.id,
+        nome: profile.name.givenName || profile.displayName,
+        cognome: profile.name.familyName || '',
+        email: profile.emails[0].value,
+        ruolo: profile.emails[0].value.endsWith('@admin') ? 'admin' : 'user'
+    };
+    return done(null, user);
 }));
 
 // Serializzazione e deserializzazione utente
@@ -81,16 +94,20 @@ passport.deserializeUser((user, done) => {
 // Middleware per verificare se l'utente è autenticato
 function ensureAuthenticated(req, res, next) {
     if (req.session && req.session.user) {
+        console.log('Utente autenticato:', req.session.user.nome);
         return next();
     }
+    console.log('Utente non autenticato, reindirizzamento a /');
     res.redirect('/');
 }
 
 // Middleware per verificare se l'utente è admin
 function ensureAdmin(req, res, next) {
     if (req.session && req.session.user && req.session.user.ruolo === 'admin') {
+        console.log('Utente admin autenticato:', req.session.user.nome);
         return next();
     }
+    console.log('Accesso admin negato');
     res.status(403).json({ error: 'Accesso negato' });
 }
 
@@ -100,43 +117,49 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/'
 }), (req, res) => {
-    // Reindirizza dopo il successo del login tramite Google
-    // **Ora reindirizza alla route per la pagina paziente**
-    res.redirect('/paziente');
+    // Memorizza i dati dell'utente nella sessione
+    req.session.user = req.user;
+    console.log('Login Google completato per:', req.user.email);
+    // Reindirizza in base al ruolo
+    const redirectPage = req.user.ruolo === 'admin' ? '/admin' : '/paziente';
+    res.redirect(redirectPage);
 });
 
 // Route principale (login page)
 app.get('/', (req, res) => {
-    // **Ora renderizza index.hbs**
-    res.render('index');
+    // Serve la pagina index.html senza usare Handlebars
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Route per la pagina paziente (protetta da autenticazione)
 app.get('/paziente', ensureAuthenticated, (req, res) => {
-    // **Ora renderizza paziente.hbs e passa i dati dell'utente**
+    console.log('Renderizzazione pagina paziente per:', req.session.user.nome);
+    // Renderizza paziente.hbs e passa i dati dell'utente
     res.render('paziente', { patient: { nome: req.session.user.nome, cognome: req.session.user.cognome } });
 });
 
 // Route per la pagina admin (protetta da autenticazione admin)
 app.get('/admin', ensureAdmin, (req, res) => {
-    // **Ora renderizza admin.hbs e passa i dati dell'admin e degli utenti**
+    console.log('Renderizzazione pagina admin per:', req.session.user.nome);
+    // Renderizza admin.hbs e passa i dati dell'admin e degli utenti
     res.render('admin', { admin: { nome: req.session.user.nome }, users: db.getAllUsers() });
 });
 
 // Route per la pagina dati utente (protetta da autenticazione)
 app.get('/dati', ensureAuthenticated, (req, res) => {
-    // **Ora renderizza dati.hbs e passa i dati dell'utente**
+    console.log('Renderizzazione pagina dati per:', req.session.user.nome);
+    // Renderizza dati.hbs e passa i dati dell'utente
     res.render('dati', { user: req.session.user });
 });
 
 /**
  * @swagger
  * /api/check-auth:
- * get:
- * summary: Verifica l'autenticazione dell'utente
- * responses:
- * 200:
- * description: Stato di autenticazione dell'utente
+ *   get:
+ *     summary: Verifica l'autenticazione dell'utente
+ *     responses:
+ *       200:
+ *         description: Stato di autenticazione dell'utente
  */
 app.get('/api/check-auth', (req, res) => {
     if (req.session && req.session.user) {
@@ -153,15 +176,16 @@ app.get('/api/check-auth', (req, res) => {
 /**
  * @swagger
  * /logout:
- * post:
- * summary: Effettua il logout dell'utente
- * responses:
- * 200:
- * description: Logout effettuato con successo
+ *   post:
+ *     summary: Effettua il logout dell'utente
+ *     responses:
+ *       200:
+ *         description: Logout effettuato con successo
  */
 app.post('/logout', (req, res) => {
+    console.log('Logout per utente:', req.session.user ? req.session.user.nome : 'Sessione non trovata');
     req.session.destroy(() => {
-        // **Ora reindirizza alla route principale**
+        // Reindirizza alla route principale
         res.redirect('/');
     });
 });
@@ -169,20 +193,20 @@ app.post('/logout', (req, res) => {
 /**
  * @swagger
  * /utentii:
- * get:
- * summary: Ottieni la lista degli utenti con filtri opzionali
- * parameters:
- * - in: query
- * name: eta
- * schema:
- * type: string
- * enum: [max20, min21]
- * description: Filtra gli utenti in base all'età (max20 = meno di 20 anni, min21 = 21 anni o più)
- * responses:
- * 200:
- * description: Lista degli utenti
- * 500:
- * description: Errore del server
+ *   get:
+ *     summary: Ottieni la lista degli utenti con filtri opzionali
+ *     parameters:
+ *       - in: query
+ *         name: eta
+ *         schema:
+ *           type: string
+ *           enum: [max20, min21]
+ *         description: Filtra gli utenti in base all'età (max20 = meno di 20 anni, min21 = 21 anni o più)
+ *     responses:
+ *       200:
+ *         description: Lista degli utenti
+ *       500:
+ *         description: Errore del server
  */
 app.get('/utentii', (req, res) => {
     const { eta } = req.query;
@@ -203,19 +227,19 @@ app.get('/utentii', (req, res) => {
 /**
  * @swagger
  * /utentii/{id}:
- * get:
- * summary: Ottiene un utente specifico per ID
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * responses:
- * 200:
- * description: Dettagli dell'utente
- * 404:
- * description: Utente non trovato
+ *   get:
+ *     summary: Ottiene un utente specifico per ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dettagli dell'utente
+ *       404:
+ *         description: Utente non trovato
  */
 app.get('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
@@ -231,35 +255,35 @@ app.get('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /utentii:
- * post:
- * summary: Registra un nuovo utente
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * nome:
- * type: string
- * cognome:
- * type: string
- * email:
- * type: string
- * password:
- * type: string
- * sesso:
- * type: string
- * enum: [M, F]
- * eta:
- * type: integer
- * responses:
- * 201:
- * description: Utente registrato con successo
- * 400:
- * description: Richiesta non valida
- * 500:
- * description: Errore del server
+ *   post:
+ *     summary: Registra un nuovo utente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               cognome:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               sesso:
+ *                 type: string
+ *                 enum: [M, F]
+ *               eta:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Utente registrato con successo
+ *       400:
+ *         description: Richiesta non valida
+ *       500:
+ *         description: Errore del server
  */
 app.post('/utentii', (req, res) => {
     console.log('Dati ricevuti per registrazione:', req.body);
@@ -282,25 +306,25 @@ app.post('/utentii', (req, res) => {
 /**
  * @swagger
  * /utentii/{id}:
- * put:
- * summary: Aggiorna un utente esistente
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * responses:
- * 200:
- * description: Utente aggiornato con successo
- * 404:
- * description: Utente non trovato
+ *   put:
+ *     summary: Aggiorna un utente esistente
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Utente aggiornato con successo
+ *       404:
+ *         description: Utente non trovato
  */
 app.put('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
@@ -317,19 +341,19 @@ app.put('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /utentii/{id}:
- * delete:
- * summary: Elimina un utente
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: integer
- * responses:
- * 200:
- * description: Utente eliminato con successo
- * 404:
- * description: Utente non trovato
+ *   delete:
+ *     summary: Elimina un utente
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Utente eliminato con successo
+ *       404:
+ *         description: Utente non trovato
  */
 app.delete('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
@@ -345,41 +369,46 @@ app.delete('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /login:
- * post:
- * summary: Effettua il login di un utente
- * requestBody:
- * required: true
- * content:
- * application/json:
- * schema:
- * type: object
- * properties:
- * email:
- * type: string
- * password:
- * type: string
- * responses:
- * 200:
- * description: Login effettuato con successo
- * 401:
- * description: Credenziali non valide
+ *   post:
+ *     summary: Effettua il login di un utente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login effettuato con successo
+ *       401:
+ *         description: Credenziali non valide
  */
 app.post('/login', (req, res) => {
+    console.log('Tentativo di login con email:', req.body.email);
     const { email, password } = req.body;
 
     const result = db.verifyCredentials(email, password);
+    console.log('Risultato verifica credenziali:', result);
+    
     if (result.success) {
         // Memorizza l'utente nella sessione
         req.session.user = result.user;
 
         // Controllo per la redirezione in base al ruolo
         const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
+        console.log('Login riuscito, reindirizzamento a:', redirectPage);
 
         res.json({
             success: true,
             redirectPage
         });
     } else {
+        console.log('Login fallito:', result.message);
         res.json({
             success: false,
             message: result.message
@@ -390,11 +419,11 @@ app.post('/login', (req, res) => {
 /**
  * @swagger
  * /events:
- * get:
- * summary: Ottiene gli eventi del calendario
- * responses:
- * 200:
- * description: Lista degli eventi
+ *   get:
+ *     summary: Ottiene gli eventi del calendario
+ *     responses:
+ *       200:
+ *         description: Lista degli eventi
  */
 app.get('/events', (req, res) => {
     // Esempio di eventi statici
@@ -416,28 +445,73 @@ app.get('/events', (req, res) => {
     res.json(events);
 });
 
+/**
+ * @swagger
+ * /update-password:
+ *   post:
+ *     summary: Aggiorna la password dell'utente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password aggiornata con successo
+ *       401:
+ *         description: Password attuale non corretta
+ *       404:
+ *         description: Utente non trovato
+ *       500:
+ *         description: Errore durante l'aggiornamento
+ */
 app.post('/update-password', ensureAuthenticated, (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const userId = req.session.user.id; // Assumendo che l'ID utente sia nella sessione
+    console.log('Tentativo di aggiornamento password per utente ID:', userId);
 
     const user = db.getUserById(userId);
     if (!user) {
+        console.log('Utente non trovato per ID:', userId);
         return res.status(404).json({ success: false, message: 'Utente non trovato.' });
     }
 
     if (user.password === currentPassword) { // In un sistema reale, usa l'hashing
         const updatedUser = db.updateUser(userId, { password: newPassword }); // Anche qui, in realtà dovresti hasharla
         if (updatedUser) {
+            console.log('Password aggiornata con successo per:', user.email);
             return res.json({ success: true, message: 'Password aggiornata con successo.' });
         } else {
+            console.log('Errore durante l\'aggiornamento della password');
             return res.status(500).json({ success: false, message: 'Errore durante l\'aggiornamento della password.' });
         }
     } else {
+        console.log('Password attuale non corretta');
         return res.status(401).json({ success: false, message: 'La password attuale non è corretta.' });
     }
+});
+
+// Route di test per debugging
+app.get('/test-paziente', (req, res) => {
+    console.log('Accesso alla route di test paziente');
+    req.session.user = {
+        id: 999,
+        nome: 'Test',
+        cognome: 'Utente',
+        email: 'test@example.com',
+        ruolo: 'user'
+    };
+    res.redirect('/paziente');
 });
 
 // Avvio del server
 app.listen(port, () => {
     console.log(`Server API in esecuzione su http://localhost:${port}`);
+    console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
 });

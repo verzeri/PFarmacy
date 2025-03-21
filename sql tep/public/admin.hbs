@@ -5,231 +5,543 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PFarmacy - Pannello Amministratore</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <style>
+        :root {
+            --primary: #3f6ad8;
+            --primary-light: #e0e8ff;
+            --secondary: #6c757d;
+            --success: #3ac47d;
+            --danger: #d92550;
+            --warning: #f7b924;
+            --info: #16aaff;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --white: #ffffff;
+            --shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 
+                       0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 
+                       0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 
+                       0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
+            --border-radius: 0.25rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            color: #495057;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Header styles */
         .admin-header {
-            background-color: #3a5795;
-            color: white;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #5a8dee 100%);
+            color: var(--white);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
 
+        .admin-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .admin-header i {
+            font-size: 1.5rem;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #adminName {
+            font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Filter controls */
+        .panel-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-controls h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--light);
+            color: var(--dark);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .add-btn {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .add-btn:hover {
+            background-color: #2ea96a;
+            color: var(--white);
+        }
+
+        /* Table styles */
         .users-table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .users-table th, .users-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #ddd;
+            padding: 1rem;
             text-align: left;
         }
 
         .users-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid rgba(63, 106, 216, 0.2);
+        }
+
+        .users-table th:first-child {
+            border-top-left-radius: var(--border-radius);
+        }
+
+        .users-table th:last-child {
+            border-top-right-radius: var(--border-radius);
+        }
+
+        .users-table tr:nth-child(even) {
+            background-color: rgba(245, 247, 250, 0.5);
         }
 
         .users-table tr:hover {
-            background-color: #f1f1f1;
+            background-color: var(--primary-light);
         }
 
-        .action-buttons button {
-            margin-right: 5px;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+        .users-table td {
+            border-bottom: 1px solid #e9ecef;
         }
 
-        .edit-btn {
-            background-color: #ffc107;
-            color: black;
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
         }
 
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .admin-badge {
-            background-color: #28a745;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.8em;
+            background-color: var(--primary-light);
+            color: var(--primary);
         }
 
         .user-badge {
-            background-color: #6c757d;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.8em;
+            background-color: var(--light);
+            color: var(--secondary);
         }
 
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.375rem 0.75rem;
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s ease;
         }
 
-        .filter-controls {
-            margin-bottom: 20px;
+        .edit-btn {
+            background-color: var(--warning);
+            color: #212529;
         }
 
+        .edit-btn:hover {
+            background-color: #e5a91f;
+        }
+
+        .delete-btn {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .delete-btn:hover {
+            background-color: #c32148;
+        }
+
+        /* Modal styles */
         .user-modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 100;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
             max-width: 500px;
-            border-radius: 5px;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin: 0;
         }
 
         .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1.75rem;
+            font-weight: 700;
             cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 1.25rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
         }
 
-        .form-group input, .form-group select {
+        .form-control {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .submit-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #345bc3;
+        }
+
+        .cancel-btn {
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cancel-btn:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .users-table th, .users-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.875rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation utilities */
+        .fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="admin-header">
-            <h1><i class="fas fa-user-shield"></i> Pannello Amministratore</h1>
-            <div>
+            <h1><i class="fas fa-clinic-medical"></i> PFarmacy - Pannello Amministratore</h1>
+            <div class="admin-info">
                 <span id="adminName">{{ admin.nome }}</span>
-                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button id="logoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </div>
 
-        <div class="filter-controls">
-            <h2>Gestione Utenti</h2>
-            <div>
-                <button onclick="fetchAllUsers()">Tutti gli Utenti</button>
-                <button onclick="filterUsers('user')">Solo Utenti</button>
-                <button onclick="addNewUser()">Aggiungi Nuovo Utente</button>
+        <div class="panel-card">
+            <div class="filter-controls">
+                <h2><i class="fas fa-users-cog"></i> Gestione Utenti</h2>
+                <div class="filter-buttons">
+                    <button id="allUsersBtn" class="filter-btn active" onclick="fetchAllUsers()">
+                        <i class="fas fa-users"></i> Tutti gli Utenti
+                    </button>
+                    <button id="onlyUsersBtn" class="filter-btn" onclick="filterUsers('user')">
+                        <i class="fas fa-user"></i> Solo Utenti
+                    </button>
+                    <button id="addUserBtn" class="filter-btn add-btn" onclick="addNewUser()">
+                        <i class="fas fa-user-plus"></i> Aggiungi Utente
+                    </button>
+                </div>
             </div>
         </div>
 
-        <table class="users-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Cognome</th>
-                    <th>Email</th>
-                    <th>Sesso</th>
-                    <th>Età</th>
-                    <th>Ruolo</th>
-                    <th>Azioni</th>
-                </tr>
-            </thead>
-            <tbody id="usersTableBody">
-                {{#each users}}
-                <tr>
-                    <td>{{ id }}</td>
-                    <td>{{ nome }}</td>
-                    <td>{{ cognome }}</td>
-                    <td>{{ email }}</td>
-                    <td>{{ sesso }}</td>
-                    <td>{{ eta }}</td>
-                    <td><span class="{{#if (eq ruolo 'admin')}}admin-badge{{else}}user-badge{{/if}}">{{ ruolo }}</span></td>
-                    <td class="action-buttons">
-                        <button class="edit-btn" onclick="editUser({{ id }})">
-                            <i class="fas fa-edit"></i> Modifica
-                        </button>
-                        <button class="delete-btn" onclick="deleteUser({{ id }})">
-                            <i class="fas fa-trash"></i> Elimina
-                        </button>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
+        <div class="table-container fadeIn">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-id-card"></i> ID</th>
+                        <th><i class="fas fa-user"></i> Nome</th>
+                        <th><i class="fas fa-user"></i> Cognome</th>
+                        <th><i class="fas fa-envelope"></i> Email</th>
+                        <th><i class="fas fa-venus-mars"></i> Sesso</th>
+                        <th><i class="fas fa-birthday-cake"></i> Età</th>
+                        <th><i class="fas fa-user-tag"></i> Ruolo</th>
+                        <th><i class="fas fa-cogs"></i> Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {{#each users}}
+                    <tr>
+                        <td>{{ id }}</td>
+                        <td>{{ nome }}</td>
+                        <td>{{ cognome }}</td>
+                        <td>{{ email }}</td>
+                        <td>{{ sesso }}</td>
+                        <td>{{ eta }}</td>
+                        <td><span class="badge {{#if (eq ruolo 'admin')}}admin-badge{{else}}user-badge{{/if}}">{{ ruolo }}</span></td>
+                        <td class="action-buttons">
+                            <button class="btn edit-btn" onclick="editUser({{ id }})">
+                                <i class="fas fa-edit"></i> Modifica
+                            </button>
+                            <button class="btn delete-btn" onclick="deleteUser({{ id }})">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
 
         <div id="userModal" class="user-modal">
             <div class="modal-content">
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-                <h2 id="modalTitle">Modifica Utente</h2>
+                <div class="modal-header">
+                    <h2 id="modalTitle">Modifica Utente</h2>
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                </div>
                 <form id="userForm">
                     <input type="hidden" id="userId">
                     <div class="form-group">
                         <label for="userNome">Nome:</label>
-                        <input type="text" id="userNome" required>
+                        <input type="text" id="userNome" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="userCognome">Cognome:</label>
-                        <input type="text" id="userCognome" required>
+                        <input type="text" id="userCognome" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="userEmail">Email:</label>
-                        <input type="email" id="userEmail" required>
+                        <input type="email" id="userEmail" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="userSesso">Sesso:</label>
-                        <select id="userSesso" required>
+                        <select id="userSesso" class="form-control" required>
                             <option value="M">Maschio</option>
                             <option value="F">Femmina</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="userEta">Età:</label>
-                        <input type="number" id="userEta" required min="1">
+                        <input type="number" id="userEta" class="form-control" required min="1">
                     </div>
                     <div class="form-group">
                         <label for="userRuolo">Ruolo:</label>
-                        <select id="userRuolo" required>
+                        <select id="userRuolo" class="form-control" required>
                             <option value="user">Utente</option>
                             <option value="admin">Amministratore</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="userPassword">Password:</label>
-                        <input type="password" id="userPassword" placeholder="Lascia vuoto per mantenere la password attuale">
+                        <input type="password" id="userPassword" class="form-control" placeholder="Lascia vuoto per mantenere la password attuale">
                     </div>
-                    <button type="submit">Salva Modifiche</button>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeModal()">Annulla</button>
+                        <button type="submit" class="submit-btn">Salva Modifiche</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -246,8 +558,8 @@
             .then(response => response.json())
             .then(data => {
                 if (!data.isAuthenticated || data.role !== 'admin') {
-                    // Reindirizza a index.html se non è un admin
-                    window.location.href = 'index.html';
+                    // Reindirizza alla pagina principale se non è un admin
+                    window.location.href = '/';
                 } else {
                     // Mostra il nome dell'admin
                     document.getElementById('adminName').textContent = data.nome || 'Admin';
@@ -257,12 +569,16 @@
             })
             .catch(error => {
                 console.error('Errore di autenticazione:', error);
-                window.location.href = 'index.html';
+                window.location.href = '/';
             });
         });
 
         // Recupera tutti gli utenti
         function fetchAllUsers() {
+            // Aggiorna classe attiva dei pulsanti
+            document.getElementById('allUsersBtn').classList.add('active');
+            document.getElementById('onlyUsersBtn').classList.remove('active');
+
             fetch('/utentii')
             .then(response => response.json())
             .then(data => {
@@ -270,12 +586,16 @@
             })
             .catch(error => {
                 console.error('Errore durante il recupero degli utenti:', error);
-                alert('Si è verificato un errore nel caricamento degli utenti.');
+                showNotification('Si è verificato un errore nel caricamento degli utenti.', 'error');
             });
         }
 
         // Filtra gli utenti per ruolo
         function filterUsers(role) {
+            // Aggiorna classe attiva dei pulsanti
+            document.getElementById('allUsersBtn').classList.remove('active');
+            document.getElementById('onlyUsersBtn').classList.add('active');
+
             fetch('/utentii')
             .then(response => response.json())
             .then(data => {
@@ -284,7 +604,7 @@
             })
             .catch(error => {
                 console.error('Errore durante il filtraggio degli utenti:', error);
-                alert('Si è verificato un errore nel filtraggio degli utenti.');
+                showNotification('Si è verificato un errore nel filtraggio degli utenti.', 'error');
             });
         }
 
@@ -302,18 +622,26 @@
                     <td>${user.email}</td>
                     <td>${user.sesso}</td>
                     <td>${user.eta}</td>
-                    <td><span class="${user.ruolo === 'admin' ? 'admin-badge' : 'user-badge'}">${user.ruolo}</span></td>
+                    <td><span class="badge ${user.ruolo === 'admin' ? 'admin-badge' : 'user-badge'}">${user.ruolo}</span></td>
                     <td class="action-buttons">
-                        <button class="edit-btn" onclick="editUser(${user.id})">
+                        <button class="btn edit-btn" onclick="editUser(${user.id})">
                             <i class="fas fa-edit"></i> Modifica
                         </button>
-                        <button class="delete-btn" onclick="deleteUser(${user.id})">
+                        <button class="btn delete-btn" onclick="deleteUser(${user.id})">
                             <i class="fas fa-trash"></i> Elimina
                         </button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
+
+            // Aggiungi animazione di fade in
+            document.querySelector('.table-container').classList.add('fadeIn');
+        }
+
+        // Mostra notifiche
+        function showNotification(message, type = 'success') {
+            alert(message); // Per ora utilizziamo alert, ma potrebbe essere sostituito con un sistema di notifiche più elegante
         }
 
         // Apre il modale per aggiungere un nuovo utente
@@ -347,7 +675,7 @@
             })
             .catch(error => {
                 console.error('Errore durante il recupero dei dati utente:', error);
-                alert('Si è verificato un errore nel recupero dei dati utente.');
+                showNotification('Si è verificato un errore nel recupero dei dati utente.', 'error');
             });
         }
 
@@ -365,15 +693,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Utente eliminato con successo.');
+                        showNotification('Utente eliminato con successo.');
                         fetchAllUsers();
                     } else {
-                        alert('Errore durante l\'eliminazione dell\'utente.');
+                        showNotification('Errore durante l\'eliminazione dell\'utente.', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Errore durante l\'eliminazione dell\'utente:', error);
-                    alert('Si è verificato un errore durante l\'eliminazione dell\'utente.');
+                    showNotification('Si è verificato un errore durante l\'eliminazione dell\'utente.', 'error');
                 });
             }
         }
@@ -409,16 +737,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success || data.message) {
-                    alert(userId ? 'Utente aggiornato con successo.' : 'Utente aggiunto con successo.');
+                    showNotification(userId ? 'Utente aggiornato con successo.' : 'Utente aggiunto con successo.');
                     closeModal();
                     fetchAllUsers();
                 } else {
-                    alert('Errore: ' + (data.error || 'Si è verificato un errore durante l\'operazione.'));
+                    showNotification('Errore: ' + (data.error || 'Si è verificato un errore durante l\'operazione.'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Errore durante l\'operazione:', error);
-                alert('Si è verificato un errore durante l\'operazione.');
+                showNotification('Si è verificato un errore durante l\'operazione.', 'error');
             });
         });
 
@@ -429,11 +757,11 @@
                 credentials: 'include'
             })
             .then(() => {
-                window.location.href = 'index.html';
+                window.location.href = '/';
             })
             .catch(error => {
                 console.error('Errore durante il logout:', error);
-                window.location.href = 'index.html';
+                window.location.href = '/';
             });
         });
 
@@ -447,3 +775,4 @@
     </script>
 </body>
 </html>
+
