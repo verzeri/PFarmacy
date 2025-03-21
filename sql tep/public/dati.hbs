@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFarmacy - Dati Utente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-title">
+        <h1>Dati Utente</h1>
+    </div>
+    <div class="content">
+        <p>Qui puoi visualizzare e aggiornare i tuoi dati personali.</p>
+        <div>
+            <p><strong>Nome:</strong> <span>{{ user.nome }}</span></p>
+            <p><strong>Cognome:</strong> <span>{{ user.cognome }}</span></p>
+            <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
+            </div>
+        <div>
+            <h2>Aggiorna Password</h2>
+            <form id="updatePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">Password attuale:</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Nuova password:</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Conferma nuova password:</label>
+                    <input type="password" id="confirmNewPassword" required>
+                </div>
+                <button type="submit">Aggiorna Password</button>
+                <div id="passwordUpdateMessage"></div>
+            </form>
+        </div>
+    </div>
+    <div class="logout">
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funzione per aggiornare la password
+            const updatePasswordForm = document.getElementById('updatePasswordForm');
+            const passwordUpdateMessage = document.getElementById('passwordUpdateMessage');
+
+            if (updatePasswordForm) {
+                updatePasswordForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const currentPassword = document.getElementById('currentPassword').value;
+                    const newPassword = document.getElementById('newPassword').value;
+                    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                    if (newPassword !== confirmNewPassword) {
+                        passwordUpdateMessage.textContent = 'Le nuove password non corrispondono.';
+                        passwordUpdateMessage.style.color = 'red';
+                        return;
+                    }
+
+                    fetch('/update-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            passwordUpdateMessage.textContent = 'Password aggiornata con successo!';
+                            passwordUpdateMessage.style.color = 'green';
+                            updatePasswordForm.reset();
+                        } else {
+                            passwordUpdateMessage.textContent = data.message || 'Errore durante l\'aggiornamento della password.';
+                            passwordUpdateMessage.style.color = 'red';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore durante l\'aggiornamento della password:', error);
+                        passwordUpdateMessage.textContent = 'Si è verificato un errore durante l\'aggiornamento della password.';
+                        passwordUpdateMessage.style.color = 'red';
+                    });
+                });
+            }
+
+            // Puoi anche aggiungere qui la logica per recuperare e visualizzare i dati dell'utente
+            // fetch('/api/user-data')
+            //   .then(response => response.json())
+            //   .then(data => {
+            //     document.querySelector('.content').innerHTML += `<p><strong>Nome:</strong> <span>${data.nome}</span></p>`;
+            //     document.querySelector('.content').innerHTML += `<p><strong>Cognome:</strong> <span>${data.cognome}</span></p>`;
+            //     document.querySelector('.content').innerHTML += `<p><strong>Email:</strong> <span>${data.email}</span></p>`;
+            //     // ... altri dati
+            //   })
+            //   .catch(error => console.error('Errore nel recupero dei dati utente:', error));
+        });
+    </script>
+</body>
+</html>

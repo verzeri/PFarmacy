@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFarmacy - Area Paziente</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+</head>
+<body>
+    <div class="main-title">
+        <h1>PFarmacy</h1>
+    </div>
+    <div class="paziente-header">
+        <a href="dati.html">
+            <i class="fas fa-user-circle icon"></i>
+        </a>
+        <div class="header-title">
+            <h1 id="patientName">{{ patient.nome }} {{ patient.cognome }}</h1>
+            <span id="chatIcon" title="Apri chat">
+                <i class="fas fa-comment"></i>
+            </span>
+        </div>
+    </div>
+
+    <div id="calendar"></div>
+
+    <div id="chatWindow">
+        <div id="chatHeader">
+            <h3>Chat</h3>
+            <button id="closeChat">&times;</button>
+        </div>
+        <div id="chatBody">
+            <p>Benvenuto! Come posso aiutarti?</p>
+        </div>
+        <div id="chatFooter">
+            <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
+        </div>
+    </div>
+
+    <script>
+        // Inizializzazione di FullCalendar
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'it',
+                events: '/events',
+                eventClick: function(info) {
+                    alert('Evento: ' + info.event.title);
+                }
+            });
+
+            calendar.render();
+        });
+
+        // Gestione apertura e chiusura della finestra di chat
+        const chatIcon = document.getElementById('chatIcon');
+        const chatWindow = document.getElementById('chatWindow');
+        const closeChat = document.getElementById('closeChat');
+
+        chatIcon.addEventListener('click', () => {
+            chatWindow.style.display = 'block';
+        });
+
+        closeChat.addEventListener('click', () => {
+            chatWindow.style.display = 'none';
+        });
+
+        // Rimuovo la parte di JavaScript che gestiva il nome, ora gestito da HBS
+        // const queryString = window.location.search;
+        // const urlParams = new URLSearchParams(queryString);
+        // const nome = urlParams.get('nome');
+        // const cognome = urlParams.get('cognome');
+
+        // // Cambia il titolo con nome e cognome
+        // if (nome && cognome) {
+        //     document.getElementById('patientName').textContent = `${nome} ${cognome}`;
+        // } else {
+        //     document.getElementById('patientName').textContent = 'Area Paziente'; // Default
+        // }
+    </script>
+</body>
+</html>
