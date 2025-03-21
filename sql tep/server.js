@@ -67,8 +67,8 @@ app.use(passport.session());
 
 // Configurazione per il login tramite Google
 passport.use(new GoogleStrategy({
-    clientID: '',
-    clientSecret: '',
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
     // Crea un utente di base dal profilo Google
