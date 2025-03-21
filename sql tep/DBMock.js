@@ -26,7 +26,7 @@ class DBMock {
 
         this.userCounter = this.users.length ? this.users[this.users.length - 1].id + 1 : 1;
     }
-   
+
     // Ottieni tutti gli utenti
     getAllUsers() {
         return this.users.map(user => ({ ...user, password: undefined })); // Escludi la password
@@ -69,17 +69,17 @@ class DBMock {
         if (!user) {
             return { success: false, message: 'Email o password errati' };
         }
-       
+
         if (user.password === password) {
-            // Determina la pagina di reindirizzamento in base al ruolo
-            const redirectPage = user.ruolo === 'admin' ? 'admin.html' : 'paziente.html';
+            // Determina la pagina di reindirizzamento in base al ruolo (ora usando le route)
+            const redirectPage = user.ruolo === 'admin' ? '/admin' : '/paziente';
             return {
                 success: true,
                 user: { ...user, password: undefined },
                 redirectPage
             };
         }
-       
+
         return { success: false, message: 'Email o password errati' };
     }
 
@@ -89,15 +89,15 @@ class DBMock {
         if (userIndex === -1) {
             return null;
         }
-       
+
         // Aggiorna i campi forniti
         this.users[userIndex] = { ...this.users[userIndex], ...updates };
-       
+
         // Controlla se l'email è stata aggiornata per aggiornare il ruolo
         if (updates.email) {
             this.users[userIndex].ruolo = updates.email.endsWith('@admin') ? 'admin' : 'user';
         }
-       
+
         return { ...this.users[userIndex], password: undefined };
     }
 

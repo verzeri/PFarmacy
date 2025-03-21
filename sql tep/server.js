@@ -23,7 +23,7 @@ const swaggerOptions = {
         info: {
             title: 'API di PFarmacy',
             version: '1.0.0',
-            description: 'Documentazione API per l\'app di gestione utentii',
+            description: 'Documentazione API per l\'app di gestione utenti',
         },
         servers: [
             {
@@ -47,7 +47,12 @@ app.use(session({
     cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 ore
 }));
 
-// Servire il file HTML per il frontend
+// **Configurazione Handlebars come view engine**
+const hbs = require('hbs');
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'public')); // Assicurati che le tue pagine .hbs siano nella cartella 'public' o adatta il percorso
+
+// Servire i file statici dalla cartella 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Inizializza Passport e sessioni
@@ -96,32 +101,42 @@ app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/'
 }), (req, res) => {
     // Reindirizza dopo il successo del login tramite Google
-    res.redirect('/paziente.html');
+    // **Ora reindirizza alla route per la pagina paziente**
+    res.redirect('/paziente');
 });
 
-// Route principale
+// Route principale (login page)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    // **Ora renderizza index.hbs**
+    res.render('index');
 });
 
 // Route per la pagina paziente (protetta da autenticazione)
-app.get('/paziente.html', ensureAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'paziente.html'));
+app.get('/paziente', ensureAuthenticated, (req, res) => {
+    // **Ora renderizza paziente.hbs e passa i dati dell'utente**
+    res.render('paziente', { patient: { nome: req.session.user.nome, cognome: req.session.user.cognome } });
 });
 
 // Route per la pagina admin (protetta da autenticazione admin)
-app.get('/admin.html', ensureAdmin, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+app.get('/admin', ensureAdmin, (req, res) => {
+    // **Ora renderizza admin.hbs e passa i dati dell'admin e degli utenti**
+    res.render('admin', { admin: { nome: req.session.user.nome }, users: db.getAllUsers() });
+});
+
+// Route per la pagina dati utente (protetta da autenticazione)
+app.get('/dati', ensureAuthenticated, (req, res) => {
+    // **Ora renderizza dati.hbs e passa i dati dell'utente**
+    res.render('dati', { user: req.session.user });
 });
 
 /**
  * @swagger
  * /api/check-auth:
- *   get:
- *     summary: Verifica l'autenticazione dell'utente
- *     responses:
- *       200:
- *         description: Stato di autenticazione dell'utente
+ * get:
+ * summary: Verifica l'autenticazione dell'utente
+ * responses:
+ * 200:
+ * description: Stato di autenticazione dell'utente
  */
 app.get('/api/check-auth', (req, res) => {
     if (req.session && req.session.user) {
@@ -138,72 +153,74 @@ app.get('/api/check-auth', (req, res) => {
 /**
  * @swagger
  * /logout:
- *   post:
- *     summary: Effettua il logout dell'utente
- *     responses:
- *       200:
- *         description: Logout effettuato con successo
+ * post:
+ * summary: Effettua il logout dell'utente
+ * responses:
+ * 200:
+ * description: Logout effettuato con successo
  */
 app.post('/logout', (req, res) => {
-    req.session.destroy();
-    res.json({ success: true });
+    req.session.destroy(() => {
+        // **Ora reindirizza alla route principale**
+        res.redirect('/');
+    });
 });
 
 /**
  * @swagger
  * /utentii:
- *   get:
- *     summary: Ottieni la lista degli utenti con filtri opzionali
- *     parameters:
- *       - in: query
- *         name: eta
- *         schema:
- *           type: string
- *           enum: [max20, min21]
- *         description: Filtra gli utenti in base all'età (max20 = meno di 20 anni, min21 = 21 anni o più)
- *     responses:
- *       200:
- *         description: Lista degli utenti
- *       500:
- *         description: Errore del server
+ * get:
+ * summary: Ottieni la lista degli utenti con filtri opzionali
+ * parameters:
+ * - in: query
+ * name: eta
+ * schema:
+ * type: string
+ * enum: [max20, min21]
+ * description: Filtra gli utenti in base all'età (max20 = meno di 20 anni, min21 = 21 anni o più)
+ * responses:
+ * 200:
+ * description: Lista degli utenti
+ * 500:
+ * description: Errore del server
  */
 app.get('/utentii', (req, res) => {
     const { eta } = req.query;
-    
+
     // Ottieni tutti gli utenti
     let users = db.getAllUsers();
-    
+
     // Filtra in base all'età se necessario
     if (eta === 'max20') {
         users = users.filter(user => user.eta <= 20);
     } else if (eta === 'min21') {
         users = users.filter(user => user.eta > 20);
     }
-    
+
     res.json({ users });
 });
 
 /**
  * @swagger
  * /utentii/{id}:
- *   get:
- *     summary: Ottiene un utente specifico per ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Dettagli dell'utente
- *       404:
- *         description: Utente non trovato
+ * get:
+ * summary: Ottiene un utente specifico per ID
+ * parameters:
+ * - in: path
+ * name: id
+ * required: true
+ * schema:
+ * type: integer
+ * responses:
+ * 200:
+ * description: Dettagli dell'utente
+ * 404:
+ * description: Utente non trovato
  */
 app.get('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
     const user = db.getUserById(userId);
-    
+
     if (user) {
         res.json(user);
     } else {
@@ -214,35 +231,35 @@ app.get('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /utentii:
- *   post:
- *     summary: Registra un nuovo utente
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *               cognome:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               sesso:
- *                 type: string
- *                 enum: [M, F]
- *               eta:
- *                 type: integer
- *     responses:
- *       201:
- *         description: Utente registrato con successo
- *       400:
- *         description: Richiesta non valida
- *       500:
- *         description: Errore del server
+ * post:
+ * summary: Registra un nuovo utente
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * nome:
+ * type: string
+ * cognome:
+ * type: string
+ * email:
+ * type: string
+ * password:
+ * type: string
+ * sesso:
+ * type: string
+ * enum: [M, F]
+ * eta:
+ * type: integer
+ * responses:
+ * 201:
+ * description: Utente registrato con successo
+ * 400:
+ * description: Richiesta non valida
+ * 500:
+ * description: Errore del server
  */
 app.post('/utentii', (req, res) => {
     console.log('Dati ricevuti per registrazione:', req.body);
@@ -265,30 +282,30 @@ app.post('/utentii', (req, res) => {
 /**
  * @swagger
  * /utentii/{id}:
- *   put:
- *     summary: Aggiorna un utente esistente
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Utente aggiornato con successo
- *       404:
- *         description: Utente non trovato
+ * put:
+ * summary: Aggiorna un utente esistente
+ * parameters:
+ * - in: path
+ * name: id
+ * required: true
+ * schema:
+ * type: integer
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * responses:
+ * 200:
+ * description: Utente aggiornato con successo
+ * 404:
+ * description: Utente non trovato
  */
 app.put('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
     const updates = req.body;
-    
+
     const updatedUser = db.updateUser(userId, updates);
     if (updatedUser) {
         res.json({ success: true, user: updatedUser });
@@ -300,24 +317,24 @@ app.put('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /utentii/{id}:
- *   delete:
- *     summary: Elimina un utente
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Utente eliminato con successo
- *       404:
- *         description: Utente non trovato
+ * delete:
+ * summary: Elimina un utente
+ * parameters:
+ * - in: path
+ * name: id
+ * required: true
+ * schema:
+ * type: integer
+ * responses:
+ * 200:
+ * description: Utente eliminato con successo
+ * 404:
+ * description: Utente non trovato
  */
 app.delete('/utentii/:id', (req, res) => {
     const userId = parseInt(req.params.id);
     const success = db.deleteUser(userId);
-    
+
     if (success) {
         res.json({ success: true });
     } else {
@@ -328,44 +345,44 @@ app.delete('/utentii/:id', (req, res) => {
 /**
  * @swagger
  * /login:
- *   post:
- *     summary: Effettua il login di un utente
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login effettuato con successo
- *       401:
- *         description: Credenziali non valide
+ * post:
+ * summary: Effettua il login di un utente
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * email:
+ * type: string
+ * password:
+ * type: string
+ * responses:
+ * 200:
+ * description: Login effettuato con successo
+ * 401:
+ * description: Credenziali non valide
  */
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    
+
     const result = db.verifyCredentials(email, password);
     if (result.success) {
         // Memorizza l'utente nella sessione
         req.session.user = result.user;
-        
-        // Controllo per la redirezione in base alla email
-        const redirectPage = email.endsWith('@admin') ? 'index.html' : 'paziente.html';
-        
-        res.json({ 
+
+        // Controllo per la redirezione in base al ruolo
+        const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
+
+        res.json({
             success: true,
             redirectPage
         });
     } else {
-        res.json({ 
-            success: false, 
-            message: result.message 
+        res.json({
+            success: false,
+            message: result.message
         });
     }
 });
@@ -373,34 +390,54 @@ app.post('/login', (req, res) => {
 /**
  * @swagger
  * /events:
- *   get:
- *     summary: Ottiene gli eventi del calendario
- *     responses:
- *       200:
- *         description: Lista degli eventi
+ * get:
+ * summary: Ottiene gli eventi del calendario
+ * responses:
+ * 200:
+ * description: Lista degli eventi
  */
 app.get('/events', (req, res) => {
     // Esempio di eventi statici
     const events = [
-      {
-        title: 'Visita Medica',
-        start: '2024-12-14T10:00:00',
-        end: '2024-12-14T11:00:00',
-        description: 'Visita di controllo generale'
-      },
-      {
-        title: 'Check-up Fisico',
-        start: '2024-12-15T09:00:00',
-        end: '2024-12-15T10:00:00',
-        description: 'Visita di controllo cardiaco'
-      }
+        {
+            title: 'Visita Medica',
+            start: '2024-12-14T10:00:00',
+            end: '2024-12-14T11:00:00',
+            description: 'Visita di controllo generale'
+        },
+        {
+            title: 'Check-up Fisico',
+            start: '2024-12-15T09:00:00',
+            end: '2024-12-15T10:00:00',
+            description: 'Visita di controllo cardiaco'
+        }
     ];
- 
+
     res.json(events);
+});
+
+app.post('/update-password', ensureAuthenticated, (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.session.user.id; // Assumendo che l'ID utente sia nella sessione
+
+    const user = db.getUserById(userId);
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'Utente non trovato.' });
+    }
+
+    if (user.password === currentPassword) { // In un sistema reale, usa l'hashing
+        const updatedUser = db.updateUser(userId, { password: newPassword }); // Anche qui, in realtà dovresti hasharla
+        if (updatedUser) {
+            return res.json({ success: true, message: 'Password aggiornata con successo.' });
+        } else {
+            return res.status(500).json({ success: false, message: 'Errore durante l\'aggiornamento della password.' });
+        }
+    } else {
+        return res.status(401).json({ success: false, message: 'La password attuale non è corretta.' });
+    }
 });
 
 // Avvio del server
 app.listen(port, () => {
     console.log(`Server API in esecuzione su http://localhost:${port}`);
 });
-
