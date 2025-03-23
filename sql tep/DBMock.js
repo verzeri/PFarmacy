@@ -16,7 +16,7 @@ class DBMock {
                 id: 2,
                 nome: 'Fabrizio',
                 cognome: 'Quarti',
-                email: 'fabrizio@example.com',
+                email: 'fabrizio@gmail.com',
                 password: 'abcdef',
                 sesso: 'M',
                 eta: 22,
