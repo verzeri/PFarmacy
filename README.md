@@ -38,7 +38,7 @@ services:
     stdin_open: true
     tty: true
 
-6.Inserire, sempre nella cartella "sql tep", il file ".env"(da passare tramite mail o chiavetta)
+6.Inserire, sempre nella cartella "sql tep", il file ".env"(da passare con chiavetta o email)
 7.Aprire la cartella "sql tep" nel terminal(es. promt dei comandi), eseguire il comando "docker-compose up --build -d" ed attendere la fine delle operazioni.
 8.Digitare "http://localhost:3000/" nel browser.
 
