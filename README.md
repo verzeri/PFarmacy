@@ -40,6 +40,7 @@ services:
 
 6.Inserire, sempre nella cartella "sql tep", il file ".env"(da passare tramite mail o chiavetta)
 7.Aprire la cartella "sql tep" nel terminal(es. promt dei comandi), eseguire il comando "docker-compose up --build -d" ed attendere la fine delle operazioni.
+8.Digitare "http://localhost:3000/" nel browser.
 
 ### Descrizione
 Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
