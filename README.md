@@ -1,12 +1,17 @@
 # PFarmacy
 
-1.Effettuare download di Docker(https://www.docker.com/).
-2.Scaricare la repository di github in formato zip.
-3.Estrarre il contenuto dalla cartella.
-4.Entrare nella cartella "sql tep".
-5.All'interno di "sql tep" creare due file di testo con i loro relativi contenuti e da rinominare come segue:
+-1. Installazione di Docker
+Scaricare e installare Docker dal sito ufficiale: https://www.docker.com/
 
--"Dockerfile"
+-2. Download del progetto
+Scaricare la repository GitHub in formato ZIP ed estrarne il contenuto.
+
+-3. Configurazione dell'ambiente
+Aprire la cartella estratta e accedere alla directory "sql tep".
+
+Creare due file di testo con il seguente contenuto e rinominarli rispettivamente in:
+
+-Dockerfile
 FROM node:14
 WORKDIR /app
 COPY package*.json ./
@@ -15,7 +20,7 @@ COPY . .
 EXPOSE 3000
 CMD ["node", "server.js"]
 
--"docker-compose.yml"
+-docker-compose.yml
 services:
   app:
     build: .
@@ -28,9 +33,16 @@ services:
     stdin_open: true
     tty: true
 
-6.Inserire, sempre nella cartella "sql tep", il file ".env"(da passare con chiavetta o email)
-7.Aprire la cartella "sql tep" nel terminal(es. promt dei comandi), eseguire il comando "docker-compose up --build -d" ed attendere la fine delle operazioni.
-8.Digitare "http://localhost:3000/" nel browser.
+Inserire nella cartella "sql tep" il file .env (da ottenere tramite chiavetta USB o email).
+
+-4. Avvio del progetto
+Aprire un terminale nella cartella "sql tep" (ad esempio, Prompt dei comandi su Windows).
+
+Eseguire il seguente comando per avviare il container Docker: docker-compose up --build -d
+Attendere il completamento delle operazioni.
+
+-5. Accesso all'applicazione
+Aprire un browser e digitare: http://localhost:3000/
 
 ### Descrizione
 Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
