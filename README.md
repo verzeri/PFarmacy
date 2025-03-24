@@ -1,5 +1,46 @@
 # PFarmacy
 
+1.Effettuare download di Docker(https://www.docker.com/).
+2.Scaricare la repository di github in formato zip.
+3.Estrarre il contenuto dalla cartella.
+4.Entrare nella cartella "sql tep".
+5.All'interno di "sql tep" creare due file di testo con i loro relativi contenuti e da rinominare come segue:
+
+-"Dockerfile"
+FROM node:14
+
+# Imposta la directory di lavoro
+WORKDIR /app
+
+# Copia i file di configurazione e installa le dipendenze
+COPY package*.json ./
+RUN npm install
+
+# Copia il resto dei file dell'applicazione
+COPY . .
+
+# Espone la porta su cui gira l'applicazione (esempio: 3000)
+EXPOSE 3000
+
+# Comando per avviare l'applicazione
+CMD ["node", "server.js"]
+
+-"docker-compose.yml"
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+
+6.Inserire, sempre nella cartella "sql tep", il file ".env"(da passare tramite mail o chiavetta)
+7.Aprire la cartella "sql tep" nel terminal(es. promt dei comandi), eseguire il comando "docker-compose up --build -d" ed attendere la fine delle operazioni.
+
 ### Descrizione
 Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
 
