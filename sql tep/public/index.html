@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login e Registrazione - PFarmacy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <style>
         * {
             margin: 0;
@@ -147,6 +148,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -166,7 +168,8 @@
             color: #94a3b8;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 15px 15px 15px 45px;
             border: 1px solid #e2e8f0;
@@ -176,7 +179,8 @@
             background-color: #f8fafc;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #3b82f6;
             background-color: #fff;
@@ -262,7 +266,8 @@
             flex: 1;
         }
 
-        .error-message, .success-message {
+        .error-message,
+        .success-message {
             padding: 10px;
             border-radius: 8px;
             font-size: 14px;
@@ -294,8 +299,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         #userData {
@@ -343,10 +353,12 @@
             .main-content {
                 flex-direction: column;
             }
+
             .sidebar {
                 width: 100%;
                 padding: 20px;
             }
+
             .row-form {
                 flex-direction: column;
                 gap: 0;
@@ -368,8 +380,10 @@
         <div class="main-content">
             <div class="sidebar">
                 <h2>Benvenuto nel sistema PFarmacy</h2>
-                <p>Accedi al tuo account per gestire le tue prescrizioni e consultare i tuoi dati sanitari in modo sicuro e conveniente.</p>
-                <p>Non hai ancora un account? Registrati in pochi semplici passaggi per accedere a tutti i nostri servizi.</p>
+                <p>Accedi al tuo account per gestire le tue prescrizioni e consultare i tuoi dati sanitari in modo
+                    sicuro e conveniente.</p>
+                <p>Non hai ancora un account? Registrati in pochi semplici passaggi per accedere a tutti i nostri
+                    servizi.</p>
             </div>
 
             <div class="forms-container">
@@ -470,11 +484,10 @@
                         <i class="fas fa-users"></i> Visualizza Tutti
                     </button>
                     <button onclick="fetchUsers('under20')">
-                        <i class="fas fa-user-graduate"></i> Utenti < 20 anni
-                    </button>
-                    <button onclick="fetchUsers('over20')">
-                        <i class="fas fa-user-tie"></i> Utenti > 20 anni
-                    </button>
+                        <i class="fas fa-user-graduate"></i> Utenti < 20 anni </button>
+                            <button onclick="fetchUsers('over20')">
+                                <i class="fas fa-user-tie"></i> Utenti > 20 anni
+                            </button>
                 </div>
                 <div id="userList"></div>
             </div>
@@ -483,24 +496,52 @@
 
     <script>
         // Al caricamento della pagina, controlla se l'utente è già autenticato
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             checkAuthStatus();
         });
 
         // Funzione per verificare lo stato di autenticazione
         function checkAuthStatus() {
-            fetch('/api/check-auth')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.isAuthenticated) {
-                        // Se l'utente è già autenticato, reindirizza alla pagina appropriata
-                        const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
-                        window.location.href = redirectPage;
+            // Verifica se c'è un token nel localStorage
+            const token = localStorage.getItem('jwtToken');
+
+            if (token) {
+                // Se c'è un token, aggiungiamolo all'header della richiesta
+                fetch('/api/check-auth', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
                 })
-                .catch(error => {
-                    console.error('Errore durante la verifica dell\'autenticazione:', error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isAuthenticated) {
+                            // Se l'utente è autenticato, reindirizza alla pagina appropriata
+                            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
+                            window.location.href = redirectPage;
+                        } else {
+                            // Se il token non è più valido, lo rimuoviamo
+                            localStorage.removeItem('jwtToken');
+                            localStorage.removeItem('user');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore durante la verifica dell\'autenticazione:', error);
+                    });
+            } else {
+                // Facciamo comunque una verifica con il server (per il caso dei cookie)
+                fetch('/api/check-auth')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isAuthenticated) {
+                            // L'utente è autenticato tramite cookie ma non localStorage
+                            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
+                            window.location.href = redirectPage;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore durante la verifica dell\'autenticazione:', error);
+                    });
+            }
         }
 
         // Funzione per cambiare tab tra Login e Registrazione
@@ -508,11 +549,11 @@
             // Aggiorna classi dei pulsanti
             document.getElementById('login-tab').classList.toggle('active', tabName === 'login');
             document.getElementById('register-tab').classList.toggle('active', tabName === 'register');
-            
+
             // Aggiorna classi dei contenuti
             document.getElementById('login').classList.toggle('active', tabName === 'login');
             document.getElementById('register').classList.toggle('active', tabName === 'register');
-            
+
             // Pulisci eventuali messaggi di errore quando cambi tab
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('registerError').style.display = 'none';
@@ -538,39 +579,39 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, cognome, sesso, eta, email, password })
             })
-            .then(response => response.json())
-            .then(data => {
-                // Nascondi l'indicatore di caricamento
-                document.getElementById('registerLoader').style.display = 'none';
-                
-                if (data.message) {
-                    // Mostra il messaggio di successo
-                    document.getElementById('registerSuccess').textContent = 'Registrazione avvenuta con successo!';
-                    document.getElementById('registerSuccess').style.display = 'block';
-                    
-                    // Resetta il form
-                    document.getElementById('registerForm').reset();
-                    
-                    // Passa al tab di login dopo un breve ritardo
-                    setTimeout(() => {
-                        openTab('login');
-                    }, 2000);
-                } else {
-                    // Mostra il messaggio di errore
-                    document.getElementById('registerError').textContent = 'Errore: ' + (data.error || 'Si è verificato un errore durante la registrazione.');
+                .then(response => response.json())
+                .then(data => {
+                    // Nascondi l'indicatore di caricamento
+                    document.getElementById('registerLoader').style.display = 'none';
+
+                    if (data.message) {
+                        // Mostra il messaggio di successo
+                        document.getElementById('registerSuccess').textContent = 'Registrazione avvenuta con successo!';
+                        document.getElementById('registerSuccess').style.display = 'block';
+
+                        // Resetta il form
+                        document.getElementById('registerForm').reset();
+
+                        // Passa al tab di login dopo un breve ritardo
+                        setTimeout(() => {
+                            openTab('login');
+                        }, 2000);
+                    } else {
+                        // Mostra il messaggio di errore
+                        document.getElementById('registerError').textContent = 'Errore: ' + (data.error || 'Si è verificato un errore durante la registrazione.');
+                        document.getElementById('registerError').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    // Nascondi l'indicatore di caricamento e mostra l'errore
+                    document.getElementById('registerLoader').style.display = 'none';
+                    document.getElementById('registerError').textContent = 'Si è verificato un errore durante la connessione al server.';
                     document.getElementById('registerError').style.display = 'block';
-                }
-            })
-            .catch(error => {
-                // Nascondi l'indicatore di caricamento e mostra l'errore
-                document.getElementById('registerLoader').style.display = 'none';
-                document.getElementById('registerError').textContent = 'Si è verificato un errore durante la connessione al server.';
-                document.getElementById('registerError').style.display = 'block';
-                console.error('Errore:', error);
-            });
+                    console.error('Errore:', error);
+                });
         }
 
-        // Funzione per effettuare il login dell'utente
+        // Funzione per effettuare il login dell'utente - AGGIORNATA per utilizzare JWT
         function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -584,31 +625,44 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => response.json())
-            .then(data => {
-                // Nascondi l'indicatore di caricamento
-                document.getElementById('loginLoader').style.display = 'none';
-                
-                if (data.success) {
-                    console.log('Login riuscito, reindirizzamento a:', data.redirectPage);
-                    // Per una migliore esperienza utente, mostriamo un feedback prima del redirect
-                    document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
-                    setTimeout(() => {
-                        window.location.href = data.redirectPage; // Reindirizza in base al ruolo
-                    }, 1000);
-                } else {
-                    // Mostra l'errore nel div dedicato
-                    document.getElementById('loginError').textContent = data.message || 'Si è verificato un errore durante il login.';
+                .then(response => response.json())
+                .then(data => {
+                    // Nascondi l'indicatore di caricamento
+                    document.getElementById('loginLoader').style.display = 'none';
+
+                    if (data.success) {
+                        // Salva il token JWT nel localStorage
+                        if (data.token) {
+                            localStorage.setItem('jwtToken', data.token);
+
+                            // Salva anche le informazioni dell'utente estratte dal token
+                            const userData = {
+                                email: email,
+                                // Aggiungiamo qui altri dati che possiamo ottenere dal token o dalla risposta
+                                ruolo: data.role || 'user'
+                            };
+                            localStorage.setItem('user', JSON.stringify(userData));
+                        }
+
+                        console.log('Login riuscito, reindirizzamento a:', data.redirectPage);
+                        // Per una migliore esperienza utente, mostriamo un feedback prima del redirect
+                        document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
+                        setTimeout(() => {
+                            window.location.href = data.redirectPage; // Reindirizza in base al ruolo
+                        }, 1000);
+                    } else {
+                        // Mostra l'errore nel div dedicato
+                        document.getElementById('loginError').textContent = data.message || 'Si è verificato un errore durante il login.';
+                        document.getElementById('loginError').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    // Nascondi l'indicatore di caricamento e mostra l'errore
+                    document.getElementById('loginLoader').style.display = 'none';
+                    document.getElementById('loginError').textContent = 'Si è verificato un errore durante la connessione al server.';
                     document.getElementById('loginError').style.display = 'block';
-                }
-            })
-            .catch(error => {
-                // Nascondi l'indicatore di caricamento e mostra l'errore
-                document.getElementById('loginLoader').style.display = 'none';
-                document.getElementById('loginError').textContent = 'Si è verificato un errore durante la connessione al server.';
-                document.getElementById('loginError').style.display = 'block';
-                console.error('Errore durante il login:', error);
-            });
+                    console.error('Errore durante il login:', error);
+                });
         }
 
         // Funzione per recuperare e visualizzare la lista degli utenti
@@ -625,7 +679,11 @@
             const userList = document.getElementById('userList');
             userList.innerHTML = '<div class="loader" style="display:block;"></div>';
 
-            fetch(query)
+            // Ottieni il token JWT dal localStorage
+            const token = localStorage.getItem('jwtToken');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+            fetch(query, { headers })
                 .then(response => response.json())
                 .then(data => {
                     userList.innerHTML = '';
@@ -655,6 +713,25 @@
             e.preventDefault();
             loginUser();
         });
+
+        // Questa funzione può essere chiamata quando l'utente fa clic sul pulsante logout
+        function logout() {
+            // Rimuovi i dati dal localStorage
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('user');
+
+            // Chiama l'endpoint di logout del server
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    // Reindirizza alla homepage
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    console.error('Errore durante il logout:', error);
+                    // Reindirizza comunque alla homepage
+                    window.location.href = '/';
+                });
+        }
     </script>
 </body>
 

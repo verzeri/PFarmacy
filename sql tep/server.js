@@ -1,9 +1,14 @@
 const express = require('express');
 const path = require('path');
-const session = require('express-session');
+// Rimuove express-session e aggiunge JWT
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const app = express();
 const port = 3000;
+
+// Chiave segreta per JWT - dovrebbe essere in variabili d'ambiente
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 // Importa DBMock anziché SQLite
 const DBMock = require('./DBMock');
@@ -127,6 +132,10 @@ const swaggerDocument = {
                     "success": {
                       "type": "boolean"
                     },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token per l'autenticazione"
+                    },
                     "redirectPage": {
                       "type": "string",
                       "description": "URL di reindirizzamento in caso di successo"
@@ -181,7 +190,7 @@ const swaggerDocument = {
         "tags": ["Utenti"],
         "security": [
           {
-            "sessionAuth": []
+            "bearerAuth": []
           }
         ],
         "requestBody": {
@@ -689,11 +698,11 @@ const swaggerDocument = {
       }
     },
     "securitySchemes": {
-      "sessionAuth": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "connect.sid",
-        "description": "Autenticazione basata su sessione"
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Autenticazione basata su JWT"
       }
     }
   }
@@ -704,18 +713,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Configurazione avanzata delle sessioni
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'yourSecretKey', // Usa env variable se disponibile
-    resave: false,
-    saveUninitialized: false, // Cambiato a false per rispettare GDPR
-    cookie: { 
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 giorni
-        secure: process.env.NODE_ENV === 'production', // true in produzione
-        httpOnly: true // Protezione contro XSS
-    }
-}));
+app.use(cookieParser()); // Aggiungiamo il middleware cookie-parser
 
 // **Configurazione Handlebars come view engine**
 const hbs = require('hbs');
@@ -730,11 +728,25 @@ hbs.registerHelper('eq', function(a, b) {
 // Servire i file statici dalla cartella 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Inizializza Passport e sessioni
+// Inizializza Passport (solo la parte necessaria, non utilizziamo più le sessioni)
 app.use(passport.initialize());
-app.use(passport.session());
 
-// Configurazione per il login tramite Google
+// Funzione di utilità per generare il token JWT
+function generateToken(user) {
+    return jwt.sign(
+        { 
+            id: user.id,
+            email: user.email,
+            ruolo: user.ruolo,
+            nome: user.nome,
+            cognome: user.cognome 
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '7d' } // Il token scade dopo 7 giorni
+    );
+}
+
+// Configurazione per il login tramite Google (rimane simile)
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -755,62 +767,56 @@ passport.use(new GoogleStrategy({
     }
 }));
 
-// Serializzazione migliorata - salva solo l'id
+// Manteniamo queste funzioni per compatibilità con Passport Google
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
 
-// Deserializzazione migliorata - cerca l'utente nel database
 passport.deserializeUser((id, done) => {
-    // Cerca l'utente completo nel database usando l'id
-    // In questo esempio stiamo passando l'intero oggetto utente, 
-    // ma in una implementazione reale cercheresti l'utente nel DB
     const user = db.getUserById(id);
     if (!user) {
         return done(new Error('User not found'), null);
     }
-    
     done(null, user);
 });
 
-// Middleware migliorato per verificare se l'utente è autenticato
-function ensureAuthenticated(req, res, next) {
-    // Prima verifica l'autenticazione tramite Passport
-    if (req.isAuthenticated()) {
-        return next();
+// Nuovo middleware per verificare il token JWT
+function verifyToken(req, res, next) {
+    // Ottieni il token dall'header Authorization
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Formato Bearer TOKEN
+    
+    // Controlla anche se il token è nei cookie
+    const cookieToken = req.cookies?.jwt;
+    
+    // Usa il token dall'header o dal cookie
+    const finalToken = token || cookieToken;
+    
+    if (!finalToken) {
+        console.log('Nessun token fornito');
+        return res.redirect('/');
     }
     
-    // Verifica secondaria tramite sessione come backup
-    if (req.session && req.session.user) {
-        console.log('Utente autenticato via sessione:', req.session.user.nome);
+    jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            console.error('Verifica del token fallita:', err.message);
+            return res.redirect('/');
+        }
         
-        // Se abbiamo dati di sessione ma Passport non li riconosce,
-        // ripristiniamo la sessione Passport
-        req.login(req.session.user, err => {
-            if (err) {
-                console.error('Errore nel ripristino della sessione:', err);
-                return res.redirect('/');
-            }
-            return next();
-        });
-    } else {
-        console.log('Utente non autenticato, reindirizzamento a /');
-        res.redirect('/');
-    }
+        // Imposta l'utente nella richiesta
+        req.user = decoded;
+        next();
+    });
 }
 
-// Middleware migliorato per verificare se l'utente è admin
+// Middleware per verificare se l'utente è admin
 function ensureAdmin(req, res, next) {
-    // Prima verifica l'autenticazione base
-    if (!req.isAuthenticated() && !(req.session && req.session.user)) {
+    if (!req.user) {
         console.log('Utente non autenticato');
         return res.redirect('/');
     }
     
-    // Poi verifica se l'utente è admin
-    const userRole = req.user?.ruolo || req.session.user?.ruolo;
-    
-    if (userRole === 'admin') {
+    if (req.user.ruolo === 'admin') {
         console.log('Utente admin autenticato');
         return next();
     }
@@ -825,100 +831,95 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/'
 }), (req, res) => {
-    // Migliore gestione della sessione - standardizza tra tutti i metodi di login
-    req.session.loggedin = true;
-    req.session.user = req.user;
-    req.session.role = req.user.ruolo;
+    // Genera un token JWT per l'utente autenticato
+    const token = generateToken(req.user);
+    
+    // Imposta il token in un cookie HTTP-only per sicurezza
+    res.cookie('jwt', token, { 
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+    });
     
     console.log('Login Google completato per:', req.user.email);
     
-    // Forza il salvataggio della sessione per garantire la persistenza
-    req.session.save(err => {
-        if (err) {
-            console.error('Errore nel salvataggio della sessione:', err);
-        }
-        
-        // Reindirizza in base al ruolo
-        const redirectPage = req.user.ruolo === 'admin' ? '/admin' : '/paziente';
-        res.redirect(redirectPage);
-    });
+    // Reindirizza in base al ruolo
+    const redirectPage = req.user.ruolo === 'admin' ? '/admin' : '/paziente';
+    res.redirect(redirectPage);
 });
 
 // Route principale (login page)
 app.get('/', (req, res) => {
-    // Verifica se l'utente è già autenticato
-    if (req.isAuthenticated() || (req.session && req.session.loggedin)) {
-        // Reindirizza l'utente già autenticato alla pagina appropriata
-        const redirectPage = (req.user?.ruolo || req.session.user?.ruolo) === 'admin' ? '/admin' : '/paziente';
-        return res.redirect(redirectPage);
+    // Verifica se l'utente ha un token JWT valido
+    const token = req.cookies?.jwt;
+    
+    if (token) {
+        // Verifica il token
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+            if (!err) {
+                // Token valido, reindirizza in base al ruolo
+                const redirectPage = decoded.ruolo === 'admin' ? '/admin' : '/paziente';
+                return res.redirect(redirectPage);
+            }
+            // Se la verifica del token fallisce, serve la pagina di login
+        });
     }
     
-    // Serve la pagina index.html per gli utenti non autenticati
+    // Serve la pagina di login per gli utenti non autenticati
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Route per la pagina paziente (protetta da autenticazione)
-app.get('/paziente', ensureAuthenticated, (req, res) => {
-    // Ottieni i dati dell'utente da req.user (Passport) o req.session.user (sessione)
-    const user = req.user || req.session.user;
-    
-    // Renderizza paziente.hbs e passa i dati dell'utente
-    res.render('paziente', { patient: { nome: user.nome, cognome: user.cognome } });
+// Route per la pagina paziente (protetta)
+app.get('/paziente', verifyToken, (req, res) => {
+    // Renderizza paziente.hbs con i dati dell'utente
+    res.render('paziente', { patient: { nome: req.user.nome, cognome: req.user.cognome || '' } });
 });
 
-// Route per la pagina admin (protetta da autenticazione admin)
-app.get('/admin', ensureAdmin, (req, res) => {
-    // Ottieni i dati dell'utente da req.user (Passport) o req.session.user (sessione)
-    const user = req.user || req.session.user;
-    
-    // Renderizza admin.hbs e passa i dati dell'admin e degli utenti
-    res.render('admin', { admin: { nome: user.nome }, users: db.getAllUsers() });
+// Route per la pagina admin (protetta)
+app.get('/admin', verifyToken, ensureAdmin, (req, res) => {
+    // Renderizza admin.hbs con i dati dell'admin e tutti gli utenti
+    res.render('admin', { admin: { nome: req.user.nome }, users: db.getAllUsers() });
 });
 
-// Route per la pagina dati utente (protetta da autenticazione)
-app.get('/dati', ensureAuthenticated, (req, res) => {
-    // Ottieni i dati dell'utente da req.user (Passport) o req.session.user (sessione)
-    const user = req.user || req.session.user;
+// Route per la pagina dati utente (protetta)
+app.get('/dati', verifyToken, (req, res) => {
+    // Ottieni i dati completi dell'utente dal database usando l'ID nel token
+    const user = db.getUserById(req.user.id);
     console.log('Renderizzazione pagina dati per:', user.nome);
     
-    // Renderizza dati.hbs e passa i dati dell'utente
+    // Renderizza dati.hbs con i dati dell'utente
     res.render('dati', { user: user });
 });
 
 // API per verificare lo stato di autenticazione dell'utente
 app.get('/api/check-auth', (req, res) => {
-    // Controllo migliorato che verifica sia Passport che la sessione
-    const isAuthenticated = req.isAuthenticated() || (req.session && req.session.loggedin);
-    const user = req.user || req.session.user || {};
+    const token = req.cookies?.jwt || (req.headers['authorization']?.split(' ')[1]);
     
-    if (isAuthenticated) {
+    if (!token) {
+        return res.json({ isAuthenticated: false });
+    }
+    
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.json({ isAuthenticated: false });
+        }
+        
         res.json({
             isAuthenticated: true,
-            role: user.ruolo,
-            nome: user.nome
+            role: decoded.ruolo,
+            nome: decoded.nome
         });
-    } else {
-        res.json({ isAuthenticated: false });
-    }
+    });
 });
 
 // API per il logout
 app.post('/logout', (req, res) => {
-    const user = req.user || req.session.user;
-    console.log('Logout per utente:', user ? user.nome : 'Sessione non trovata');
+    // Cancella il cookie JWT
+    res.clearCookie('jwt');
+    console.log('Utente disconnesso');
     
-    // Logout di Passport
-    req.logout(function(err) {
-        if (err) { 
-            console.error('Errore durante il logout Passport:', err);
-        }
-        
-        // Distruggi completamente la sessione
-        req.session.destroy(() => {
-            // Reindirizza alla route principale
-            res.redirect('/');
-        });
-    });
+    // Reindirizza alla homepage
+    res.redirect('/');
 });
 
 // API per ottenere la lista degli utenti con filtri opzionali
@@ -994,42 +995,29 @@ app.delete('/utentii/:id', (req, res) => {
     }
 });
 
-// API per il login di un utente
+// API per il login di un utente - restituisce JWT
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
     const result = db.verifyCredentials(email, password);
     
     if (result.success) {
-        // Memorizza l'utente nella sessione e in Passport
-        req.session.loggedin = true;
-        req.session.user = result.user;
-        req.session.role = result.user.ruolo;
+        // Genera il token JWT
+        const token = generateToken(result.user);
         
-        // Imposta l'utente in Passport
-        req.login(result.user, err => {
-            if (err) {
-                console.error('Errore durante il login Passport:', err);
-                return res.json({
-                    success: false,
-                    message: 'Errore di sistema durante il login'
-                });
-            }
-            
-            // Forza il salvataggio della sessione
-            req.session.save(err => {
-                if (err) {
-                    console.error('Errore nel salvataggio della sessione:', err);
-                }
-                
-                // Controlla per la redirezione in base al ruolo
-                const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
-
-                res.json({
-                    success: true,
-                    redirectPage
-                });
-            });
+        // Imposta il token in un cookie HTTP-only
+        res.cookie('jwt', token, { 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+        });
+        
+        // Restituisce anche il token nella risposta per i client API
+        const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
+        res.json({
+            success: true,
+            token: token,
+            redirectPage
         });
     } else {
         console.log('Login fallito:', result.message);
@@ -1062,10 +1050,9 @@ app.get('/events', (req, res) => {
 });
 
 // API per aggiornare la password dell'utente
-app.post('/update-password', ensureAuthenticated, (req, res) => {
+app.post('/update-password', verifyToken, (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    // Otteniamo l'id utente da Passport o dalla sessione
-    const userId = req.user?.id || req.session.user?.id;
+    const userId = req.user.id;
     
     console.log('Tentativo di aggiornamento password per utente ID:', userId);
 
@@ -1093,23 +1080,27 @@ app.post('/update-password', ensureAuthenticated, (req, res) => {
 // Route di test per debugging
 app.get('/test-paziente', (req, res) => {
     console.log('Accesso alla route di test paziente');
-    req.session.loggedin = true;
-    req.session.user = {
+    
+    // Crea un utente di test
+    const testUser = {
         id: 999,
         nome: 'Test',
         cognome: 'Utente',
         email: 'test@example.com',
         ruolo: 'user'
     };
-    req.session.role = 'user';
     
-    // Simula il login di Passport
-    req.login(req.session.user, err => {
-        if (err) {
-            console.error('Errore durante il login di test:', err);
-        }
-        res.redirect('/paziente');
+    // Genera JWT per l'utente di test
+    const token = generateToken(testUser);
+    
+    // Imposta il token nel cookie
+    res.cookie('jwt', token, { 
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
     });
+    
+    res.redirect('/paziente');
 });
 
 // Avvio del server
