@@ -1100,6 +1100,8 @@ app.post('/update-password', verifyToken, (req, res) => {
     }
 });
 
+
+
 // Route di test per debugging
 app.get('/test-paziente', (req, res) => {
     console.log('Accesso alla route di test paziente');
