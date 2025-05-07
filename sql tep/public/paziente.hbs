@@ -1784,9 +1784,111 @@
 
         <div class="section-title">
             <h2>I tuoi appuntamenti</h2>
-            <button class="chat-action-btn">
-                <i class="fas fa-plus"></i> Nuovo appuntamento
+            <button class="chat-action-btn" id="newReminderBtn">
+                <i class="fas fa-plus"></i> Nuovo Promemoria
             </button>
+        </div>
+        <!-- Modal per nuovo promemoria -->
+        <div id="reminderModal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+            <div
+                style="background-color: white; margin: 15% auto; padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow-lg); width: 50%; max-width: 500px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: var(--primary-color);">Nuovo Promemoria</h2>
+                    <span id="closeReminderModal" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+                </div>
+                <form id="reminderForm">
+                    <div style="margin-bottom: 15px;">
+                        <label for="reminderDate" style="display: block; margin-bottom: 5px; font-weight: 500;">Data e
+                            ora:</label>
+                        <input type="datetime-local" id="reminderDate" required
+                            style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label for="reminderDescription"
+                            style="display: block; margin-bottom: 5px; font-weight: 500;">Descrizione:</label>
+                        <textarea id="reminderDescription" rows="3" required
+                            style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" id="cancelReminder"
+                            style="padding: 10px 15px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer;">Annulla</button>
+                        <button type="submit"
+                            style="padding: 10px 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;">Salva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Modal per visualizzare/modificare/eliminare un evento -->
+        <div id="eventModal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+            <div
+                style="background-color: white; margin: 10% auto; padding: 25px; border-radius: var(--border-radius); box-shadow: var(--shadow-lg); width: 60%; max-width: 550px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0; color: var(--primary-color);" id="eventModalTitle">Dettagli Evento</h2>
+                    <span id="closeEventModal" style="cursor: pointer; font-size: 1.8rem;">&times;</span>
+                </div>
+        
+                <!-- Visualizzazione evento (modalità lettura) -->
+                <div id="eventViewMode">
+                    <div style="margin-bottom: 20px; display: flex; align-items: center;">
+                        <i class="fas fa-calendar-day"
+                            style="color: var(--primary-color); margin-right: 10px; font-size: 1.2rem;"></i>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 3px;">Data e ora:</div>
+                            <div id="eventDateTime" style="color: var(--text-muted);"></div>
+                        </div>
+                    </div>
+        
+                    <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
+                        <i class="fas fa-align-left"
+                            style="color: var(--primary-color); margin-right: 10px; font-size: 1.2rem; margin-top: 3px;"></i>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">Descrizione:</div>
+                            <div id="eventDescription"
+                                style="color: var(--text-dark); background: var(--light-gray); padding: 12px; border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
+                        <button id="deleteEventBtn"
+                            style="padding: 10px 20px; background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                            <i class="fas fa-trash"></i> Elimina
+                        </button>
+                        <button id="editEventBtn"
+                            style="padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                            <i class="fas fa-edit"></i> Modifica
+                        </button>
+                    </div>
+                </div>
+        
+                <!-- Modifica evento (modalità modifica) -->
+                <div id="eventEditMode" style="display: none;">
+                    <form id="editEventForm">
+                        <div style="margin-bottom: 15px;">
+                            <label for="editEventDate" style="display: block; margin-bottom: 8px; font-weight: 500;">Data e
+                                ora:</label>
+                            <input type="datetime-local" id="editEventDate" required
+                                style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label for="editEventDescription"
+                                style="display: block; margin-bottom: 8px; font-weight: 500;">Descrizione:</label>
+                            <textarea id="editEventDescription" rows="4" required
+                                style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;"></textarea>
+                        </div>
+        
+                        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
+                            <button type="button" id="cancelEdit"
+                                style="padding: 10px 20px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Annulla</button>
+                            <button type="submit"
+                                style="padding: 10px 25px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Salva
+                                modifiche</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <div class="calendar-container">
@@ -1818,54 +1920,242 @@
     </div>
 
     <script>
-        // Inizializzazione di FullCalendar
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
+// Inizializzazione di FullCalendar
+document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    let currentEvent = null;
 
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'it',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                buttonText: {
-                    today: 'Oggi',
-                    month: 'Mese',
-                    week: 'Settimana',
-                    day: 'Giorno'
-                },
-                events: [
-                    {
-                        title: 'Ritiro farmaci',
-                        start: '2025-03-25',
-                        color: '#52B788'
-                    },
-                    {
-                        title: 'Consulto farmacista',
-                        start: '2025-03-28T15:30:00',
-                        color: '#3366FF'
-                    },
-                    {
-                        title: 'Controllo pressione',
-                        start: '2025-04-05T10:00:00',
-                        color: '#F59E0B'
-                    }
-                ],
-                eventClick: function (info) {
-                    alert('Evento: ' + info.event.title + '\nData: ' + info.event.start.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
-                }
-            });
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'it',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Oggi',
+            month: 'Mese',
+            week: 'Settimana',
+            day: 'Giorno'
+        },
+        events: [
+            {
+                title: 'Ritiro farmaci',
+                start: '2025-03-25',
+                color: '#52B788'
+            },
+            {
+                title: 'Consulto farmacista',
+                start: '2025-03-28T15:30:00',
+                color: '#3366FF'
+            },
+            {
+                title: 'Controllo pressione',
+                start: '2025-04-05T10:00:00',
+                color: '#F59E0B'
+            }
+        ],
+        eventClick: function (info) {
+            // Salva il riferimento all'evento corrente
+            currentEvent = info.event;
+            
+            // Popola il modal con i dati dell'evento
+            document.getElementById('eventModalTitle').innerText = 'Dettagli Evento';
+            
+            // Formatta la data e l'ora in formato leggibile
+            const eventDate = info.event.start;
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
+            
+            // Imposta la descrizione
+            document.getElementById('eventDescription').innerText = info.event.title;
+            
+            // Imposta anche i valori nei campi di modifica
+            document.getElementById('editEventDate').value = formatDateForInput(eventDate);
+            document.getElementById('editEventDescription').value = info.event.title;
+            
+            // Mostra il modal in modalità visualizzazione
+            document.getElementById('eventViewMode').style.display = 'block';
+            document.getElementById('eventEditMode').style.display = 'none';
+            document.getElementById('eventModal').style.display = 'block';
+        },
+        // Aggiunta della funzionalità per cliccare su una data
+        dateClick: function(info) {
+            // Pre-popola il campo data con la data selezionata
+            document.getElementById('reminderDate').value = info.dateStr + 'T12:00'; // Imposta mezzogiorno come ora predefinita
+            openReminderModal();
+        }
+    });
 
-            calendar.render();
+    calendar.render();
 
-            // Configurazione della chat
-            setupChat();
+    // Funzione per formattare la data nel formato richiesto dall'input datetime-local
+    function formatDateForInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
 
-            // Inizializzazione del WebSocket e contatore visitatori
-            setupVisitorCounter();
-        });
+    // Riferimenti UI elementi del modal per nuovo promemoria
+    const reminderModal = document.getElementById('reminderModal');
+    const newReminderBtn = document.getElementById('newReminderBtn');
+    const closeReminderModalBtn = document.getElementById('closeReminderModal');
+    const cancelReminderBtn = document.getElementById('cancelReminder');
+    const reminderForm = document.getElementById('reminderForm');
+    const reminderDate = document.getElementById('reminderDate');
+    const reminderDescription = document.getElementById('reminderDescription');
+
+    // Imposta la data di default a oggi
+    const today = new Date();
+    const formattedDate = formatDateForInput(today);
+    reminderDate.value = formattedDate;
+
+    // Funzione per aprire il modal del promemoria
+    function openReminderModal() {
+        reminderModal.style.display = 'block';
+    }
+
+    // Funzione per chiudere il modal del promemoria
+    function closeReminderModal() {
+        reminderModal.style.display = 'none';
+        // Reset del form
+        reminderForm.reset();
+        reminderDate.value = formattedDate;
+    }
+
+    // Event listeners per aprire/chiudere il modal del promemoria
+    newReminderBtn.addEventListener('click', openReminderModal);
+    closeReminderModalBtn.addEventListener('click', closeReminderModal);
+    cancelReminderBtn.addEventListener('click', closeReminderModal);
+
+    // Chiudi il modal se l'utente clicca fuori da esso
+    window.addEventListener('click', (event) => {
+        if (event.target === reminderModal) {
+            closeReminderModal();
+        }
+    });
+
+    // Gestione del submit del form per nuovo promemoria
+    reminderForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Recupera i valori dal form
+        const date = reminderDate.value;
+        const description = reminderDescription.value;
+        
+        // Colore casuale per il promemoria (selezionato da una palette)
+        const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Aggiungi l'evento al calendario
+        const newEvent = {
+            title: description,
+            start: date,
+            color: randomColor,
+            extendedProps: {
+                type: 'reminder'
+            }
+        };
+        
+        // Aggiungi l'evento al calendario
+        calendar.addEvent(newEvent);
+        
+        // Notifica l'utente
+        alert('Promemoria aggiunto con successo!');
+        
+        // Chiudi il modal
+        closeReminderModal();
+    });
+
+    // Riferimenti UI elementi del modal per gestione eventi
+    const eventModal = document.getElementById('eventModal');
+    const closeEventModalBtn = document.getElementById('closeEventModal');
+    const deleteEventBtn = document.getElementById('deleteEventBtn');
+    const editEventBtn = document.getElementById('editEventBtn');
+    const cancelEditBtn = document.getElementById('cancelEdit');
+    const editEventForm = document.getElementById('editEventForm');
+    const eventViewMode = document.getElementById('eventViewMode');
+    const eventEditMode = document.getElementById('eventEditMode');
+
+    // Funzione per chiudere il modal degli eventi
+    function closeEventModal() {
+        eventModal.style.display = 'none';
+    }
+
+    // Event listener per chiudere il modal degli eventi
+    closeEventModalBtn.addEventListener('click', closeEventModal);
+
+    // Chiudi il modal se l'utente clicca fuori da esso
+    window.addEventListener('click', (event) => {
+        if (event.target === eventModal) {
+            closeEventModal();
+        }
+    });
+
+    // Event listener per passare alla modalità di modifica
+    editEventBtn.addEventListener('click', function() {
+        eventViewMode.style.display = 'none';
+        eventEditMode.style.display = 'block';
+    });
+
+    // Event listener per tornare alla modalità di visualizzazione
+    cancelEditBtn.addEventListener('click', function() {
+        eventViewMode.style.display = 'block';
+        eventEditMode.style.display = 'none';
+    });
+
+    // Event listener per eliminare un evento
+    deleteEventBtn.addEventListener('click', function() {
+        if (confirm('Sei sicuro di voler eliminare questo evento?')) {
+            if (currentEvent) {
+                // Rimuovi l'evento dal calendario
+                currentEvent.remove();
+                // Chiudi il modal
+                closeEventModal();
+                // Notifica l'utente
+                alert('Evento eliminato con successo!');
+            }
+        }
+    });
+
+    // Event listener per salvare le modifiche a un evento
+    editEventForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (currentEvent) {
+            // Ottieni i nuovi valori
+            const newDate = document.getElementById('editEventDate').value;
+            const newDescription = document.getElementById('editEventDescription').value;
+            
+            // Aggiorna l'evento
+            currentEvent.setProp('title', newDescription);
+            currentEvent.setStart(new Date(newDate));
+            
+            // Torna alla modalità visualizzazione
+            eventViewMode.style.display = 'block';
+            eventEditMode.style.display = 'none';
+            
+            // Aggiorna i dettagli nel modal
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('eventDateTime').innerText = new Date(newDate).toLocaleDateString('it-IT', options);
+            document.getElementById('eventDescription').innerText = newDescription;
+            
+            // Notifica l'utente
+            alert('Evento aggiornato con successo!');
+        }
+    });
+
+    // Configurazione della chat
+    setupChat();
+
+    // Inizializzazione del WebSocket e contatore visitatori
+    setupVisitorCounter();
+});
 
         function logout() {
             fetch('/logout', {
