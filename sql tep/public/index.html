@@ -504,44 +504,32 @@
         function checkAuthStatus() {
             // Verifica se c'è un token nel localStorage
             const token = localStorage.getItem('jwtToken');
+    let headers = {};
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
-            if (token) {
-                // Se c'è un token, aggiungiamolo all'header della richiesta
-                fetch('/api/check-auth', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.isAuthenticated) {
-                            // Se l'utente è autenticato, reindirizza alla pagina appropriata
-                            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
-                            window.location.href = redirectPage;
-                        } else {
-                            // Se il token non è più valido, lo rimuoviamo
-                            localStorage.removeItem('jwtToken');
-                            localStorage.removeItem('user');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Errore durante la verifica dell\'autenticazione:', error);
-                    });
+    fetch('/api/check-auth', { headers })
+        .then(response => response.json())
+        .then(data => {
+            if (data.isAuthenticated) {
+                // Se l'utente è autenticato, reindirizza alla pagina appropriata
+                const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
+                window.location.href = redirectPage;
             } else {
-                // Facciamo comunque una verifica con il server (per il caso dei cookie)
-                fetch('/api/check-auth')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.isAuthenticated) {
-                            // L'utente è autenticato tramite cookie ma non localStorage
-                            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
-                            window.location.href = redirectPage;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Errore durante la verifica dell\'autenticazione:', error);
-                    });
+                // Solo in caso di token non valido
+                if (token) {
+                    localStorage.removeItem('jwtToken');
+                    localStorage.removeItem('user');
+                }
+                // Non reindirizzare, rimani nella pagina di login
             }
+        })
+        .catch(error => {
+            console.error('Errore durante la verifica dell\'autenticazione:', error);
+            // Non reindirizzare in caso di errore, rimani nella pagina di login
+        });
         }
 
         // Funzione per cambiare tab tra Login e Registrazione
@@ -732,6 +720,65 @@
                     window.location.href = '/';
                 });
         }
+
+        // Sostituisci il codice JavaScript esistente nella tua pagina index.html con questo:
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Verifica se stiamo tornando da un reindirizzamento (usiamo session storage per tracciarlo)
+    const hasCheckedAuth = sessionStorage.getItem('authCheckDone');
+    if (!hasCheckedAuth) {
+        checkAuthStatus();
+        // Impostiamo un flag per evitare controlli ripetuti nella stessa sessione
+        sessionStorage.setItem('authCheckDone', 'true');
+    }
+    
+    // Reset del flag quando l'utente cambia tab o interagisce con i form
+    document.querySelectorAll('.tab-button, form').forEach(el => {
+        el.addEventListener('click', () => {
+            sessionStorage.removeItem('authCheckDone');
+        });
+    });
+});
+
+function checkAuthStatus() {
+    console.log('Controllo stato autenticazione...');
+    const token = localStorage.getItem('jwtToken');
+    let headers = {};
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('/api/check-auth', { 
+        headers,
+        // Aggiungiamo un timestamp per evitare caching
+        cache: 'no-store'
+    })
+    .then(response => {
+        if (!response.ok && response.status !== 401) {
+            throw new Error('Errore di rete');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.isAuthenticated) {
+            // Reindirizzamento se autenticato
+            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
+            window.location.href = redirectPage;
+        } else if (token) {
+            // Rimuovi token non valido
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('user');
+        }
+        // Se non autenticato, non fare nulla e lascia l'utente nella pagina di login
+    })
+    .catch(error => {
+        console.error('Errore nella verifica di autenticazione:', error);
+        // In caso di errore di rete, non ricaricare la pagina
+    });
+}
+
+// Le altre funzioni (openTab, registerUser, loginUser, fetchUsers, logout) restano invariate
     </script>
 </body>
 

@@ -725,11 +725,27 @@ hbs.registerHelper('eq', function(a, b) {
     return a === b;
 });
 
+// Aggiungi questa importazione all'inizio del file
+const session = require('express-session');
+
+// Aggiungi questo PRIMA di passport.initialize()
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'temporary-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60000 // breve durata, solo per il processo di autenticazione
+  }
+}));
+
+// Poi inizializza Passport (lascia queste righe così come sono)
+app.use(passport.initialize());
+
 // Servire i file statici dalla cartella 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Inizializza Passport (solo la parte necessaria, non utilizziamo più le sessioni)
-app.use(passport.initialize());
+
 
 // Funzione di utilità per generare il token JWT
 function generateToken(user) {
@@ -746,67 +762,74 @@ function generateToken(user) {
     );
 }
 
-// Configurazione per il login tramite Google (rimane simile)
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/auth/google/callback'
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/auth/google/callback'  // URL assoluto
 }, (accessToken, refreshToken, profile, done) => {
-    try {
-        // Crea un utente di base dal profilo Google
-        const user = {
-            id: profile.id,
-            nome: profile.name.givenName || profile.displayName,
-            cognome: profile.name.familyName || '',
-            email: profile.emails[0].value,
-            ruolo: profile.emails[0].value.endsWith('@admin') ? 'admin' : 'user'
-        };
-        return done(null, user);
-    } catch (error) {
-        return done(error, null);
-    }
+  // Il resto del codice rimane invariato
+  try {
+      // Crea un utente di base dal profilo Google
+      const user = {
+          id: profile.id,
+          nome: profile.name.givenName || profile.displayName,
+          cognome: profile.name.familyName || '',
+          email: profile.emails[0].value,
+          ruolo: profile.emails[0].value.endsWith('@admin') ? 'admin' : 'user'
+      };
+      return done(null, user);
+  } catch (error) {
+      return done(error, null);
+  }
 }));
 
 // Manteniamo queste funzioni per compatibilità con Passport Google
+// Assicurati che questi metodi siano presenti
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+  done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-    const user = db.getUserById(id);
-    if (!user) {
-        return done(new Error('User not found'), null);
-    }
-    done(null, user);
+  const user = db.getUserById(id) || { id }; // Fallback se l'utente non è nel DB
+  done(null, user);
 });
 
 // Nuovo middleware per verificare il token JWT
 function verifyToken(req, res, next) {
-    // Ottieni il token dall'header Authorization
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Formato Bearer TOKEN
-    
-    // Controlla anche se il token è nei cookie
-    const cookieToken = req.cookies?.jwt;
-    
-    // Usa il token dall'header o dal cookie
-    const finalToken = token || cookieToken;
-    
-    if (!finalToken) {
-        console.log('Nessun token fornito');
-        return res.redirect('/');
-    }
-    
-    jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            console.error('Verifica del token fallita:', err.message);
-            return res.redirect('/');
-        }
-        
-        // Imposta l'utente nella richiesta
-        req.user = decoded;
-        next();
-    });
+  // Ottieni il token dall'header Authorization
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Formato Bearer TOKEN
+  
+  // Controlla anche se il token è nei cookie
+  const cookieToken = req.cookies?.jwt;
+  
+  // Usa il token dall'header o dal cookie
+  const finalToken = token || cookieToken;
+  
+  if (!finalToken) {
+      if (req.path === '/api/check-auth') {
+          // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
+          return res.status(401).json({ isAuthenticated: false });
+      }
+      // Per le pagine web, reindirizza alla homepage
+      return res.redirect('/');
+  }
+  
+  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+      if (err) {
+          console.error('Verifica del token fallita:', err.message);
+          if (req.path === '/api/check-auth') {
+              // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
+              return res.status(401).json({ isAuthenticated: false });
+          }
+          // Per le pagine web, reindirizza alla homepage
+          return res.redirect('/');
+      }
+      
+      // Imposta l'utente nella richiesta
+      req.user = decoded;
+      next();
+  });
 }
 
 // Middleware per verificare se l'utente è admin
@@ -891,32 +914,32 @@ app.get('/dati', verifyToken, (req, res) => {
     res.render('dati', { user: user });
 });
 
-// API per verificare lo stato di autenticazione dell'utente
+// Sostituisci la route /api/check-auth con questa versione:
+
 app.get('/api/check-auth', (req, res) => {
-    const token = req.cookies?.jwt || (req.headers['authorization']?.split(' ')[1]);
-    
-    if (!token) {
-        return res.json({ isAuthenticated: false });
-    }
-    
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            return res.json({ isAuthenticated: false });
-        }
-        
-        res.json({
-            isAuthenticated: true,
-            role: decoded.ruolo,
-            nome: decoded.nome
-        });
-    });
+  const token = req.cookies?.jwt || (req.headers['authorization']?.split(' ')[1]);
+  
+  if (!token) {
+      return res.status(200).json({ isAuthenticated: false });
+  }
+  
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return res.status(200).json({
+          isAuthenticated: true,
+          role: decoded.ruolo,
+          nome: decoded.nome
+      });
+  } catch (err) {
+      console.log('Token di autenticazione non valido:', err.message);
+      return res.status(200).json({ isAuthenticated: false });
+  }
 });
 
 // API per il logout
 app.post('/logout', (req, res) => {
     // Cancella il cookie JWT
     res.clearCookie('jwt');
-    console.log('Utente disconnesso');
     
     // Reindirizza alla homepage
     res.redirect('/');

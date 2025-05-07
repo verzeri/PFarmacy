@@ -118,6 +118,82 @@
             border: 2px solid rgba(255, 255, 255, 0.4);
         }
 
+        /* Logout Button Styling - Versione migliorata */
+        .logout-btn {
+            margin-left: 14px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: white;
+            padding: 9px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-btn:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .logout-btn:hover:before {
+            transform: translateY(0);
+        }
+
+        .logout-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .logout-btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .logout-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        .logout-btn span {
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover span {
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .logout-btn {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+                padding: 10px;
+            }
+        }
+
         /* Main Navigation */
         .main-nav {
             background: white;
@@ -1644,6 +1720,10 @@
                         <span id="chatBadge">0</span>
                     </div>
                 </div>
+                <button class="logout-btn" id="logoutBtn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
     </header>
@@ -1787,6 +1867,20 @@
             setupVisitorCounter();
         });
 
+        function logout() {
+            fetch('/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+                .then(() => {
+                    window.location.href = '/';  // Redirect alla homepage dopo il logout
+                })
+                .catch(error => {
+                    console.error('Errore durante il logout:', error);
+                    window.location.href = '/';  // Redirect alla homepage anche in caso di errore
+                });
+        }
+
         // Funzione di configurazione della chat
         function setupChat() {
             const chatIcon = document.getElementById('chatIcon');
@@ -1928,7 +2022,9 @@
 
                 chatBody.appendChild(messageDiv);
                 chatBody.scrollTop = chatBody.scrollHeight;
-            }        // Simulazione di un messaggio dopo un po' di tempo per attirare l'attenzione
+            }
+
+            // Simulazione di un messaggio dopo un po' di tempo per attirare l'attenzione
             setTimeout(() => {
                 if (!chatOpen) {
                     unreadMessages++;
@@ -1969,7 +2065,7 @@
                     type: 'register',
                     page: 'paziente',
                     user: 'Miftarve',
-                    timestamp: '2025-03-23 16:22:49'
+                    timestamp: new Date().toISOString()
                 }));
             });
 
