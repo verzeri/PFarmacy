@@ -29,8 +29,69 @@ class DBMock {
         // Inizializza strutture dati per la chat
         this.messages = []; // Memorizza tutti i messaggi
         this.onlineUsers = new Map(); // Traccia gli utenti online
-    }
 
+        this.calendarEvents = [];
+        this.calendarEventCounter = 1;
+    }
+// Metodo per ottenere tutti gli eventi del calendario per un utente
+getCalendarEvents(userId) {
+    userId = String(userId);
+    console.log(`Recupero eventi calendario per utente ${userId}`);
+    return this.calendarEvents.filter(event => String(event.userId) === userId);
+}
+
+// Metodo per aggiungere un evento al calendario
+addCalendarEvent(eventData) {
+    const newEvent = {
+        ...eventData,
+        id: this.calendarEventCounter++,
+        createdAt: new Date().toISOString()
+    };
+    
+    console.log(`Aggiunto nuovo evento calendario: ${JSON.stringify(newEvent)}`);
+    this.calendarEvents.push(newEvent);
+    return newEvent;
+}
+
+// Metodo per ottenere un evento del calendario per ID
+getCalendarEventById(eventId) {
+    eventId = String(eventId);
+    return this.calendarEvents.find(event => String(event.id) === eventId);
+}
+
+// Metodo per aggiornare un evento del calendario
+updateCalendarEvent(eventId, eventData) {
+    eventId = String(eventId);
+    const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
+    
+    if (index !== -1) {
+        const updatedEvent = {
+            ...this.calendarEvents[index],
+            ...eventData,
+            updatedAt: new Date().toISOString()
+        };
+        
+        this.calendarEvents[index] = updatedEvent;
+        console.log(`Aggiornato evento calendario ${eventId}`);
+        return updatedEvent;
+    }
+    
+    return null;
+}
+
+// Metodo per eliminare un evento del calendario
+deleteCalendarEvent(eventId) {
+    eventId = String(eventId);
+    const initialLength = this.calendarEvents.length;
+    this.calendarEvents = this.calendarEvents.filter(event => String(event.id) !== eventId);
+    
+    const success = this.calendarEvents.length < initialLength;
+    if (success) {
+        console.log(`Eliminato evento calendario ${eventId}`);
+    }
+    return success;
+}
+    
     // Ottieni tutti gli utenti
     getAllUsers() {
         return this.users.map(user => ({ ...user, password: undefined })); // Escludi la password
@@ -139,6 +200,43 @@ class DBMock {
         return message;
     }
 
+    // Aggiungi questa funzione alla classe DBMock
+getCalendarEvents(userId) {
+    console.log(`Recupero eventi calendario per utente ${userId}`);
+    
+    // Eventi base che verranno restituiti per tutti gli utenti
+    const baseEvents = [
+      {
+        id: 1,
+        title: 'Visita Medica',
+        start: '2024-12-14T10:00:00',
+        end: '2024-12-14T11:00:00',
+        description: 'Visita di controllo generale'
+      },
+      {
+        id: 2,
+        title: 'Check-up Fisico',
+        start: '2024-12-15T09:00:00',
+        end: '2024-12-15T10:00:00',
+        description: 'Visita di controllo cardiaco'
+      }
+    ];
+    
+    // Eventi personalizzati basati sull'ID utente (opzionale)
+    // Esempio: se l'ID finisce con un numero specifico, aggiungi un evento personalizzato
+    const lastDigit = String(userId).slice(-1);
+    if (lastDigit === '4') {
+      baseEvents.push({
+        id: 3,
+        title: 'Consulenza Specialistica',
+        start: '2024-12-17T14:00:00',
+        end: '2024-12-17T15:00:00',
+        description: 'Consulenza con cardiologo'
+      });
+    }
+    
+    return baseEvents;
+  }
     // Ottieni messaggi tra due utenti
     getMessagesBetweenUsers(userId1, userId2) {
         // Assicura che gli ID siano stringhe per confronti coerenti

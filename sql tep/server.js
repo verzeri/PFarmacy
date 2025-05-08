@@ -1105,7 +1105,7 @@ function generateToken(user) {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'https://fictional-space-funicular-wwj6gvqwv6p2994x.github.dev/auth/google/callback'  // URL assoluto
+  callbackURL: 'http://localhost:3000/auth/google/callback' // URL assoluto
 }, (accessToken, refreshToken, profile, done) => {
   // Il resto del codice rimane invariato
   try {
@@ -1647,6 +1647,139 @@ app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
   }
 });
 
+// API per ottenere gli eventi del calendario
+app.get('/events', verifyToken, (req, res) => {
+  try {
+    console.log('Richiesta eventi calendario per utente ID:', req.user.id);
+    const events = db.getCalendarEvents(req.user.id);
+    res.json(events);
+  } catch (error) {
+    console.error('Errore nel recupero degli eventi calendario:', error);
+    // Fallback agli eventi statici in caso di errore
+    const staticEvents = [
+      {
+        title: 'Visita Medica',
+        start: '2024-12-14T10:00:00',
+        end: '2024-12-14T11:00:00',
+        description: 'Visita di controllo generale'
+      },
+      {
+        title: 'Check-up Fisico',
+        start: '2024-12-15T09:00:00',
+        end: '2024-12-15T10:00:00',
+        description: 'Visita di controllo cardiaco'
+      }
+    ];
+    res.json(staticEvents);
+  }
+});
+
+// GET: Ottiene tutti gli eventi del calendario per l'utente corrente
+app.get('/api/calendar-events', verifyToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(`Richiesta eventi calendario per utente ID: ${userId}`);
+    
+    // Recupera gli eventi dal database per l'utente specificato
+    const events = db.getCalendarEvents(userId);
+    
+    console.log(`Restituiti ${events.length} eventi per l'utente`);
+    res.json(events);
+  } catch (error) {
+    console.error('Errore nel recupero degli eventi calendario:', error);
+    res.status(500).json({ error: 'Errore nel recupero degli eventi' });
+  }
+});
+
+// POST: Crea un nuovo evento calendario
+app.post('/api/calendar-events', verifyToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const eventData = req.body;
+    
+    console.log(`Creazione nuovo evento per utente ID: ${userId}`, eventData);
+    
+    // Assicurati che l'evento contenga i dati minimi necessari
+    if (!eventData.title || !eventData.start) {
+      return res.status(400).json({ error: 'Titolo e data di inizio sono obbligatori' });
+    }
+    
+    // Aggiungi l'ID utente all'evento
+    eventData.userId = userId;
+    
+    // Salva l'evento nel database
+    const savedEvent = db.addCalendarEvent(eventData);
+    
+    console.log(`Evento salvato con ID: ${savedEvent.id}`);
+    res.json(savedEvent);
+  } catch (error) {
+    console.error('Errore nel salvare l\'evento calendario:', error);
+    res.status(500).json({ error: 'Errore nel salvare l\'evento' });
+  }
+});
+
+// PUT: Aggiorna un evento esistente
+app.put('/api/calendar-events/:id', verifyToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const eventId = req.params.id;
+    const eventData = req.body;
+    
+    console.log(`Aggiornamento evento ID: ${eventId} per utente ID: ${userId}`);
+    
+    // Verifica che l'evento esista e appartenga all'utente
+    const event = db.getCalendarEventById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Evento non trovato' });
+    }
+    
+    if (String(event.userId) !== String(userId)) {
+      return res.status(403).json({ error: 'Non hai il permesso di modificare questo evento' });
+    }
+    
+    // Aggiorna l'evento
+    const updatedEvent = db.updateCalendarEvent(eventId, eventData);
+    
+    console.log(`Evento ${eventId} aggiornato con successo`);
+    res.json(updatedEvent);
+  } catch (error) {
+    console.error('Errore nell\'aggiornare l\'evento calendario:', error);
+    res.status(500).json({ error: 'Errore nell\'aggiornare l\'evento' });
+  }
+});
+
+// DELETE: Elimina un evento
+app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const eventId = req.params.id;
+    
+    console.log(`Eliminazione evento ID: ${eventId} per utente ID: ${userId}`);
+    
+    // Verifica che l'evento esista e appartenga all'utente
+    const event = db.getCalendarEventById(eventId);
+    if (!event) {
+      return res.status(404).json({ error: 'Evento non trovato' });
+    }
+    
+    if (String(event.userId) !== String(userId)) {
+      return res.status(403).json({ error: 'Non hai il permesso di eliminare questo evento' });
+    }
+    
+    // Elimina l'evento
+    const success = db.deleteCalendarEvent(eventId);
+    
+    if (success) {
+      console.log(`Evento ${eventId} eliminato con successo`);
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Errore nell\'eliminare l\'evento' });
+    }
+  } catch (error) {
+    console.error('Errore nell\'eliminare l\'evento calendario:', error);
+    res.status(500).json({ error: 'Errore nell\'eliminare l\'evento' });
+  }
+});
 // Avvio del server (modificato per usare http.server con socket.io)
 server.listen(port, () => {
   console.log(`Server in esecuzione su http://localhost:${port}`);
