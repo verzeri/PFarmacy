@@ -44,6 +44,49 @@ Attendere il completamento delle operazioni.
 5. Accesso all'applicazione
 -Aprire un browser e digitare: http://localhost:3000/
 
+### Installazione con GitHub Codespaces
+
+1. **Avvio di un nuovo Codespace**:
+   - Clicca sul pulsante verde "New codespace"
+   - Seleziona "Blank" per un codespace vuoto
+   - Scegli la regione più vicina a te e la configurazione standard (2-core)
+   - Clicca "Create codespace"
+
+2. **Clona il Repository**:
+   - Apri il terminale (Ctrl+` o Terminal → New Terminal)
+   - Esegui:
+     ```bash
+     git clone https://github.com/verzeri/PFarmacy.git
+     cd PFarmacy/sql\ tep
+     ```
+   - **File .env**:
+     ```bash
+     cat > .env << 'EOL'
+     # Google OAuth credentials
+     GOOGLE_CLIENT_ID=your_client_id
+     GOOGLE_CLIENT_SECRET=your_client_secret
+     JWT_SECRET=your_jwt_secret_key
+     SESSION_SECRET=your_session_secret
+     EOL
+     ```
+
+3. **Installa Dipendenze e Avvia**:
+   - Metodo (Con Docker):
+     ```bash
+     docker-compose up --build
+     ```
+
+4. **Accedi all'Applicazione**:
+   - Cerca nella barra inferiore la scheda "PORTS"
+   - Troverai la porta 3000 listata automaticamente
+   - Clicca sull'icona del browser accanto alla porta per aprire l'app
+   - Se non appare automaticamente:
+     - Clicca su "Add Port"
+     - Inserisci 3000
+     - Premi invio
+     - Clicca sull'icona del browser
+    
+       
 ### Descrizione
 Un'app che aiuta gli utenti con esigenze farmaceutiche a gestire la propria routine, permettendo di impostare promemoria per l'assunzione dei farmaci e di scrivere note per consentire ai medici di monitorarne i progressi. 
 
