@@ -1,1 +1,13 @@
-services: app: build: . ports: - "3000:3000" env_file: - .env volumes: - .:/app stdin_open: true tty: true
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
