@@ -765,7 +765,7 @@ function generateToken(user) {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3000/auth/google/callback'  // URL assoluto
+  callbackURL: 'https://crispy-space-tribble-5wp6xv7w4rwhvxvv-3000.app.github.dev/auth/google/callback'  // URL assoluto
 }, (accessToken, refreshToken, profile, done) => {
   // Il resto del codice rimane invariato
   try {
