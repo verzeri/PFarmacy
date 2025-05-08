@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,10 +18,10 @@
             --light: #f8f9fa;
             --dark: #343a40;
             --white: #ffffff;
-            --shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 
-                       0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 
-                       0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 
-                       0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
+            --shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03),
+                0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03),
+                0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05),
+                0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
             --border-radius: 0.25rem;
         }
 
@@ -170,7 +171,8 @@
             border-spacing: 0;
         }
 
-        .users-table th, .users-table td {
+        .users-table th,
+        .users-table td {
             padding: 1rem;
             text-align: left;
         }
@@ -298,6 +300,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -408,7 +411,8 @@
                 align-items: flex-start;
             }
 
-            .users-table th, .users-table td {
+            .users-table th,
+            .users-table td {
                 padding: 0.75rem 0.5rem;
                 font-size: 0.875rem;
             }
@@ -424,17 +428,29 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
+
 <body>
+
     <div class="container">
         <div class="admin-header">
             <h1><i class="fas fa-clinic-medical"></i> PFarmacy - Pannello Amministratore</h1>
             <div class="admin-info">
                 <span id="adminName">{{ admin.nome }}</span>
+                <div class="action-button">
+                    <a href="/chat" class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Chat con pazienti
+                    </a>
+                </div>
                 <button id="logoutBtn" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -481,7 +497,8 @@
                         <td>{{ email }}</td>
                         <td>{{ sesso }}</td>
                         <td>{{ eta }}</td>
-                        <td><span class="badge {{#if (eq ruolo 'admin')}}admin-badge{{else}}user-badge{{/if}}">{{ ruolo }}</span></td>
+                        <td><span class="badge {{#if (eq ruolo 'admin')}}admin-badge{{else}}user-badge{{/if}}">{{ ruolo
+                                }}</span></td>
                         <td class="action-buttons">
                             <button class="btn edit-btn" onclick="editUser({{ id }})">
                                 <i class="fas fa-edit"></i> Modifica
@@ -536,7 +553,8 @@
                     </div>
                     <div class="form-group">
                         <label for="userPassword">Password:</label>
-                        <input type="password" id="userPassword" class="form-control" placeholder="Lascia vuoto per mantenere la password attuale">
+                        <input type="password" id="userPassword" class="form-control"
+                            placeholder="Lascia vuoto per mantenere la password attuale">
                     </div>
                     <div class="form-actions">
                         <button type="button" class="cancel-btn" onclick="closeModal()">Annulla</button>
@@ -549,28 +567,28 @@
 
     <script>
         // Verificare se l'utente è un amministratore
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Controlla se l'utente è autenticato e ha il ruolo di admin
             fetch('/api/check-auth', {
                 method: 'GET',
                 credentials: 'include'
             })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.isAuthenticated || data.role !== 'admin') {
-                    // Reindirizza alla pagina principale se non è un admin
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.isAuthenticated || data.role !== 'admin') {
+                        // Reindirizza alla pagina principale se non è un admin
+                        window.location.href = '/';
+                    } else {
+                        // Mostra il nome dell'admin
+                        document.getElementById('adminName').textContent = data.nome || 'Admin';
+                        // Carica gli utenti
+                        fetchAllUsers();
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore di autenticazione:', error);
                     window.location.href = '/';
-                } else {
-                    // Mostra il nome dell'admin
-                    document.getElementById('adminName').textContent = data.nome || 'Admin';
-                    // Carica gli utenti
-                    fetchAllUsers();
-                }
-            })
-            .catch(error => {
-                console.error('Errore di autenticazione:', error);
-                window.location.href = '/';
-            });
+                });
         });
 
         // Recupera tutti gli utenti
@@ -580,14 +598,14 @@
             document.getElementById('onlyUsersBtn').classList.remove('active');
 
             fetch('/utentii')
-            .then(response => response.json())
-            .then(data => {
-                displayUsers(data.users);
-            })
-            .catch(error => {
-                console.error('Errore durante il recupero degli utenti:', error);
-                showNotification('Si è verificato un errore nel caricamento degli utenti.', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    displayUsers(data.users);
+                })
+                .catch(error => {
+                    console.error('Errore durante il recupero degli utenti:', error);
+                    showNotification('Si è verificato un errore nel caricamento degli utenti.', 'error');
+                });
         }
 
         // Filtra gli utenti per ruolo
@@ -597,15 +615,15 @@
             document.getElementById('onlyUsersBtn').classList.add('active');
 
             fetch('/utentii')
-            .then(response => response.json())
-            .then(data => {
-                const filteredUsers = data.users.filter(user => user.ruolo === role);
-                displayUsers(filteredUsers);
-            })
-            .catch(error => {
-                console.error('Errore durante il filtraggio degli utenti:', error);
-                showNotification('Si è verificato un errore nel filtraggio degli utenti.', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    const filteredUsers = data.users.filter(user => user.ruolo === role);
+                    displayUsers(filteredUsers);
+                })
+                .catch(error => {
+                    console.error('Errore durante il filtraggio degli utenti:', error);
+                    showNotification('Si è verificato un errore nel filtraggio degli utenti.', 'error');
+                });
         }
 
         // Visualizza gli utenti nella tabella
@@ -661,22 +679,22 @@
 
             // Recupera i dati dell'utente
             fetch(`/utentii/${userId}`)
-            .then(response => response.json())
-            .then(user => {
-                document.getElementById('userNome').value = user.nome;
-                document.getElementById('userCognome').value = user.cognome;
-                document.getElementById('userEmail').value = user.email;
-                document.getElementById('userSesso').value = user.sesso;
-                document.getElementById('userEta').value = user.eta;
-                document.getElementById('userRuolo').value = user.ruolo;
-                document.getElementById('userPassword').value = '';
+                .then(response => response.json())
+                .then(user => {
+                    document.getElementById('userNome').value = user.nome;
+                    document.getElementById('userCognome').value = user.cognome;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userSesso').value = user.sesso;
+                    document.getElementById('userEta').value = user.eta;
+                    document.getElementById('userRuolo').value = user.ruolo;
+                    document.getElementById('userPassword').value = '';
 
-                document.getElementById('userModal').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Errore durante il recupero dei dati utente:', error);
-                showNotification('Si è verificato un errore nel recupero dei dati utente.', 'error');
-            });
+                    document.getElementById('userModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Errore durante il recupero dei dati utente:', error);
+                    showNotification('Si è verificato un errore nel recupero dei dati utente.', 'error');
+                });
         }
 
         // Chiude il modale
@@ -690,24 +708,24 @@
                 fetch(`/utentii/${userId}`, {
                     method: 'DELETE'
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Utente eliminato con successo.');
-                        fetchAllUsers();
-                    } else {
-                        showNotification('Errore durante l\'eliminazione dell\'utente.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Errore durante l\'eliminazione dell\'utente:', error);
-                    showNotification('Si è verificato un errore durante l\'eliminazione dell\'utente.', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('Utente eliminato con successo.');
+                            fetchAllUsers();
+                        } else {
+                            showNotification('Errore durante l\'eliminazione dell\'utente.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore durante l\'eliminazione dell\'utente:', error);
+                        showNotification('Si è verificato un errore durante l\'eliminazione dell\'utente.', 'error');
+                    });
             }
         }
 
         // Gestisce l'invio del form utente (aggiunta/modifica)
-        document.getElementById('userForm').addEventListener('submit', function(e) {
+        document.getElementById('userForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const userId = document.getElementById('userId').value;
@@ -734,39 +752,39 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success || data.message) {
-                    showNotification(userId ? 'Utente aggiornato con successo.' : 'Utente aggiunto con successo.');
-                    closeModal();
-                    fetchAllUsers();
-                } else {
-                    showNotification('Errore: ' + (data.error || 'Si è verificato un errore durante l\'operazione.'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Errore durante l\'operazione:', error);
-                showNotification('Si è verificato un errore durante l\'operazione.', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success || data.message) {
+                        showNotification(userId ? 'Utente aggiornato con successo.' : 'Utente aggiunto con successo.');
+                        closeModal();
+                        fetchAllUsers();
+                    } else {
+                        showNotification('Errore: ' + (data.error || 'Si è verificato un errore durante l\'operazione.'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore durante l\'operazione:', error);
+                    showNotification('Si è verificato un errore durante l\'operazione.', 'error');
+                });
         });
 
         // Gestisce il logout
-        document.getElementById('logoutBtn').addEventListener('click', function() {
+        document.getElementById('logoutBtn').addEventListener('click', function () {
             fetch('/logout', {
                 method: 'POST',
                 credentials: 'include'
             })
-            .then(() => {
-                window.location.href = '/';
-            })
-            .catch(error => {
-                console.error('Errore durante il logout:', error);
-                window.location.href = '/';
-            });
+                .then(() => {
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    console.error('Errore durante il logout:', error);
+                    window.location.href = '/';
+                });
         });
 
         // Chiude il modale quando si clicca al di fuori di esso
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('userModal');
             if (event.target == modal) {
                 closeModal();
@@ -774,5 +792,5 @@
         };
     </script>
 </body>
-</html>
 
+</html>

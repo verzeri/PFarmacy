@@ -25,6 +25,10 @@ class DBMock {
         ];
 
         this.userCounter = this.users.length ? this.users[this.users.length - 1].id + 1 : 1;
+
+        // Inizializza strutture dati per la chat
+        this.messages = []; // Memorizza tutti i messaggi
+        this.onlineUsers = new Map(); // Traccia gli utenti online
     }
 
     // Ottieni tutti gli utenti
@@ -34,6 +38,9 @@ class DBMock {
 
     // Ottieni un utente per ID
     getUserById(id) {
+        // Assicura che l'ID sia un numero per la ricerca
+        id = typeof id === 'string' ? parseInt(id, 10) : id;
+
         const user = this.users.find(user => user.id === id);
         if (user) {
             const { password, ...userWithoutPassword } = user;
@@ -109,6 +116,110 @@ class DBMock {
         }
         this.users.splice(userIndex, 1);
         return true;
+    }
+
+    // === FUNZIONALITÀ DI CHAT ===
+
+    // Aggiungi un nuovo messaggio
+    addMessage(senderId, recipientId, content) {
+        // Assicura che gli ID siano stringhe per confronti coerenti
+        senderId = String(senderId);
+        recipientId = String(recipientId);
+
+        const message = {
+            id: this.messages.length + 1,
+            senderId,
+            recipientId,
+            content,
+            timestamp: new Date().toISOString()
+        };
+
+        console.log(`Salvataggio messaggio: ${senderId} -> ${recipientId}: "${content}"`);
+        this.messages.push(message);
+        return message;
+    }
+
+    // Ottieni messaggi tra due utenti
+    getMessagesBetweenUsers(userId1, userId2) {
+        // Assicura che gli ID siano stringhe per confronti coerenti
+        userId1 = String(userId1);
+        userId2 = String(userId2);
+
+        console.log(`Recupero messaggi tra ${userId1} e ${userId2}`);
+
+        const messages = this.messages.filter(message =>
+            (message.senderId === userId1 && message.recipientId === userId2) ||
+            (message.senderId === userId2 && message.recipientId === userId1)
+        ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        console.log(`Trovati ${messages.length} messaggi`);
+        return messages;
+    }
+
+    // Imposta lo stato online di un utente
+    setUserOnlineStatus(userId, isOnline) {
+        userId = String(userId);
+        console.log(`Impostazione stato utente ${userId}: ${isOnline ? 'online' : 'offline'}`);
+        this.onlineUsers.set(userId, isOnline);
+    }
+
+    // Ottieni lo stato online di un utente
+    getUserOnlineStatus(userId) {
+        userId = String(userId);
+        return this.onlineUsers.get(userId) || false;
+    }
+
+    // Ottieni tutti gli utenti online
+    getOnlineUsers() {
+        const result = [];
+        this.onlineUsers.forEach((isOnline, userId) => {
+            if (isOnline) {
+                result.push(userId);
+            }
+        });
+        return result;
+    }
+
+    // Ottieni lo stato di tutti gli utenti
+    getAllUsersStatus() {
+        const result = [];
+        this.onlineUsers.forEach((isOnline, userId) => {
+            result.push({ userId, online: isOnline });
+        });
+        return result;
+    }
+
+    // Ottieni utenti disponibili per la chat in base al ruolo
+    // Ottieni utenti disponibili per la chat in base al ruolo
+    getChatUsers(userRole, userId) {
+        console.log(`Ottenendo utenti chat per ${userRole} con ID ${userId}`);
+
+        // Versione semplificata che non dipende da getUserOnlineStatus
+        if (userRole === 'admin') {
+            // Admin vede tutti gli utenti normali
+            const users = this.users
+                .filter(user => user.ruolo === 'user')
+                .map(user => ({
+                    id: String(user.id),
+                    nome: user.nome,
+                    cognome: user.cognome || '',
+                    connected: false
+                }));
+            console.log(`Trovati ${users.length} utenti per admin`);
+            return users;
+        } else {
+            // Utente normale vede solo gli admin
+            const admins = this.users
+                .filter(user => user.ruolo === 'admin')
+                .map(user => ({
+                    id: String(user.id),
+                    nome: user.nome,
+                    cognome: user.cognome || '',
+                    connected: false
+                }));
+            console.log(`Trovati ${admins.length} admin per utente`);
+            return admins;
+        }
     }
 }
 

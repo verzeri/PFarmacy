@@ -7,12 +7,19 @@ require('dotenv').config();
 const app = express();
 const port = 3000;
 
+// Socket.IO setup
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
 // Chiave segreta per JWT - dovrebbe essere in variabili d'ambiente
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 // Importa DBMock anziché SQLite
 const DBMock = require('./DBMock');
 const db = new DBMock();
+
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -47,6 +54,10 @@ const swaggerDocument = {
     {
       "name": "Eventi",
       "description": "Operazioni relative agli eventi del calendario"
+    },
+    {
+      "name": "Chat",
+      "description": "Operazioni relative alla chat tra utenti e admin"
     }
   ],
   "paths": {
@@ -560,6 +571,73 @@ const swaggerDocument = {
           }
         }
       }
+    },
+    "/api/chat/messages/{userId}": {
+      "get": {
+        "summary": "Ottiene i messaggi tra l'utente corrente e un altro utente",
+        "tags": ["Chat"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID dell'utente con cui recuperare i messaggi",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista dei messaggi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/users": {
+      "get": {
+        "summary": "Ottiene la lista degli utenti disponibili per la chat",
+        "tags": ["Chat"],
+        "responses": {
+          "200": {
+            "description": "Lista degli utenti disponibili",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatUser"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat": {
+      "get": {
+        "summary": "Pagina di chat dell'applicazione",
+        "tags": ["Chat"],
+        "responses": {
+          "200": {
+            "description": "Pagina HTML della chat"
+          },
+          "302": {
+            "description": "Reindirizzamento alla pagina di login se non autenticato"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -695,6 +773,53 @@ const swaggerDocument = {
             "example": "Visita di controllo generale"
           }
         }
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID univoco del messaggio"
+          },
+          "senderId": {
+            "type": "string",
+            "description": "ID dell'utente che ha inviato il messaggio"
+          },
+          "recipientId": {
+            "type": "string",
+            "description": "ID dell'utente che ha ricevuto il messaggio"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenuto del messaggio"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e ora di invio del messaggio"
+          }
+        }
+      },
+      "ChatUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID univoco dell'utente"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome dell'utente"
+          },
+          "cognome": {
+            "type": "string",
+            "description": "Cognome dell'utente"
+          },
+          "connected": {
+            "type": "boolean",
+            "description": "Indica se l'utente è attualmente online"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -721,8 +846,8 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'public')); // Assicurati che le tue pagine .hbs siano nella cartella 'public'
 
 // Registra l'helper eq per le comparazioni in Handlebars
-hbs.registerHelper('eq', function(a, b) {
-    return a === b;
+hbs.registerHelper('eq', function (a, b) {
+  return a === b;
 });
 
 // Aggiungi questa importazione all'inizio del file
@@ -733,7 +858,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'temporary-session-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60000 // breve durata, solo per il processo di autenticazione
   }
@@ -745,21 +870,236 @@ app.use(passport.initialize());
 // Servire i file statici dalla cartella 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Mappa delle connessioni socket attive
+const socketConnections = new Map();
 
+// Setup Socket.IO con autenticazione basata su JWT
+// Replace the Socket.IO setup section in server.js with this improved version
+
+// Socket.IO setup with better authentication
+// Modifica questa parte nel server.js
+io.use((socket, next) => {
+  try {
+    // Ottieni il token dal cookie o dall'auth
+    let token = null;
+    
+    // Prova a ottenere il token dall'auth
+    if (socket.handshake.auth && socket.handshake.auth.token) {
+      token = socket.handshake.auth.token;
+      console.log("Token trovato in auth");
+    } 
+    // Prova a ottenere il token dai cookie
+    else if (socket.handshake.headers.cookie) {
+      const cookies = socket.handshake.headers.cookie.split(';');
+      const jwtCookie = cookies.find(c => c.trim().startsWith('jwt='));
+      if (jwtCookie) {
+        token = jwtCookie.split('=')[1];
+        console.log("Token trovato nei cookie");
+      }
+    }
+    
+    if (!token) {
+      console.log("Socket auth fallita: Nessun token");
+      // Passa comunque alla prossima fase per debugging
+      socket.user = { id: 'anonymous', nome: 'Anonimo', ruolo: 'guest' };
+      console.log("Utente anonimo creato per debugging");
+      return next();
+    }
+    
+    const decoded = jwt.verify(token, JWT_SECRET);
+    socket.user = decoded;
+    console.log(`Socket autenticato per l'utente: ${decoded.id} (${decoded.nome})`);
+    next();
+  } catch (err) {
+    console.log("Socket auth fallita:", err.message);
+    // Per debugging, procedere comunque
+    socket.user = { id: 'error', nome: 'Error', ruolo: 'guest' };
+    console.log("Utente error creato per debugging");
+    next();
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.user.id} (${socket.user.nome} - ${socket.user.ruolo})`);
+  
+  // Store socket connection with consistent string ID
+  const userId = String(socket.user.id);
+  socketConnections.set(userId, socket);
+  
+  // Set user as online
+  db.setUserOnlineStatus(userId, true);
+  
+  // Broadcast user status to all clients - CORREGGI QUI
+  io.emit('users_status', db.getAllUsersStatus());
+  
+  // Handle private messages
+  socket.on('send_message', (message) => {
+    // Ensure IDs are strings for consistency
+    const senderId = String(socket.user.id);
+    const recipientId = String(message.recipientId);
+    
+    console.log(`Message from ${senderId} (${socket.user.nome}) to ${recipientId}: ${message.content}`);
+    
+    // Save message to database
+    const savedMessage = db.addMessage(
+      senderId, 
+      recipientId, 
+      message.content
+    );
+    
+    // Add sender info to message
+    const messageToSend = {
+      ...savedMessage,
+      senderName: `${socket.user.nome} ${socket.user.cognome || ''}`
+    };
+    
+    // Send confirmation to sender
+    socket.emit('private_message', savedMessage);
+    
+    // Find recipient socket
+    const recipientSocket = socketConnections.get(recipientId);
+    
+    // Send to recipient if online
+    if (recipientSocket) {
+      console.log(`Delivering message to recipient ${recipientId}`);
+      recipientSocket.emit('private_message', messageToSend);
+    } else {
+      console.log(`Recipient ${recipientId} is offline, message saved in DB only`);
+    }
+  });
+  
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    const userId = String(socket.user.id);
+    console.log(`User disconnected: ${userId} (${socket.user.nome})`);
+    
+    // Remove socket connection
+    socketConnections.delete(userId);
+    
+    // Set user as offline
+    db.setUserOnlineStatus(userId, false);
+    
+    // Broadcast updated user status - CORREGGI QUI
+    io.emit('users_status', db.getAllUsersStatus());
+  });
+});
+
+app.get('/api/test/socket', (req, res) => {
+  try {
+    const socketStatus = {
+      serverRunning: true,
+      socketConnectionsCount: socketConnections.size,
+      socketConnectionsIds: Array.from(socketConnections.keys()),
+      dbImplemented: {
+        setUserOnlineStatus: typeof db.setUserOnlineStatus === 'function',
+        getAllUsersStatus: typeof db.getAllUsersStatus === 'function',
+        addMessage: typeof db.addMessage === 'function',
+        getMessagesBetweenUsers: typeof db.getMessagesBetweenUsers === 'function',
+        getUserOnlineStatus: typeof db.getUserOnlineStatus === 'function',
+        getChatUsers: typeof db.getChatUsers === 'function'
+      }
+    };
+    
+    // Prova a vedere cosa restituisce getChatUsers per admin e user
+    try {
+      socketStatus.chatUsersForAdmin = db.getChatUsers ? db.getChatUsers('admin', 1) : "function not implemented";
+      socketStatus.chatUsersForUser = db.getChatUsers ? db.getChatUsers('user', 2) : "function not implemented";
+    } catch (e) {
+      socketStatus.chatUsersFunctionError = e.message;
+    }
+    
+    res.json({
+      success: true,
+      status: socketStatus
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
+// Mantieni solo questo handler socket.io:
+io.on('connection', (socket) => {
+  console.log(`User connected: ${socket.user.id} (${socket.user.nome} - ${socket.user.ruolo})`);
+  
+  // Store socket connection with consistent string ID
+  const userId = String(socket.user.id);
+  socketConnections.set(userId, socket);
+  
+  // Set user as online
+  db.setUserOnlineStatus(userId, true);
+  
+  // Broadcast user status to all clients
+  io.emit('users_status', db.getAllUsersStatus());
+  
+  // Handle private messages
+  socket.on('send_message', (message) => {
+    // Ensure IDs are strings for consistency
+    const senderId = String(socket.user.id);
+    const recipientId = String(message.recipientId);
+    
+    console.log(`Message from ${senderId} (${socket.user.nome}) to ${recipientId}: ${message.content}`);
+    
+    // Save message to database
+    const savedMessage = db.addMessage(
+      senderId, 
+      recipientId, 
+      message.content
+    );
+    
+    // Add sender info to message
+    const messageToSend = {
+      ...savedMessage,
+      senderName: `${socket.user.nome} ${socket.user.cognome || ''}`
+    };
+    
+    // Send confirmation to sender
+    socket.emit('private_message', savedMessage);
+    
+    // Find recipient socket
+    const recipientSocket = socketConnections.get(recipientId);
+    
+    // Send to recipient if online
+    if (recipientSocket) {
+      console.log(`Delivering message to recipient ${recipientId}`);
+      recipientSocket.emit('private_message', messageToSend);
+    } else {
+      console.log(`Recipient ${recipientId} is offline, message saved in DB only`);
+    }
+  });
+  
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    const userId = String(socket.user.id);
+    console.log(`User disconnected: ${userId} (${socket.user.nome})`);
+    
+    // Remove socket connection
+    socketConnections.delete(userId);
+    
+    // Set user as offline
+    db.setUserOnlineStatus(userId, false);
+    
+    // Broadcast updated user status
+    io.emit('users_status', db.getAllUsersStatus());
+  });
+});
 
 // Funzione di utilità per generare il token JWT
 function generateToken(user) {
-    return jwt.sign(
-        { 
-            id: user.id,
-            email: user.email,
-            ruolo: user.ruolo,
-            nome: user.nome,
-            cognome: user.cognome 
-        }, 
-        JWT_SECRET, 
-        { expiresIn: '7d' } // Il token scade dopo 7 giorni
-    );
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      ruolo: user.ruolo,
+      nome: user.nome,
+      cognome: user.cognome
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' } // Il token scade dopo 7 giorni
+  );
 }
 
 passport.use(new GoogleStrategy({
@@ -769,17 +1109,17 @@ passport.use(new GoogleStrategy({
 }, (accessToken, refreshToken, profile, done) => {
   // Il resto del codice rimane invariato
   try {
-      // Crea un utente di base dal profilo Google
-      const user = {
-          id: profile.id,
-          nome: profile.name.givenName || profile.displayName,
-          cognome: profile.name.familyName || '',
-          email: profile.emails[0].value,
-          ruolo: profile.emails[0].value.endsWith('@admin') ? 'admin' : 'user'
-      };
-      return done(null, user);
+    // Crea un utente di base dal profilo Google
+    const user = {
+      id: profile.id,
+      nome: profile.name.givenName || profile.displayName,
+      cognome: profile.name.familyName || '',
+      email: profile.emails[0].value,
+      ruolo: profile.emails[0].value.endsWith('@admin') ? 'admin' : 'user'
+    };
+    return done(null, user);
   } catch (error) {
-      return done(error, null);
+    return done(error, null);
   }
 }));
 
@@ -799,337 +1139,406 @@ function verifyToken(req, res, next) {
   // Ottieni il token dall'header Authorization
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Formato Bearer TOKEN
-  
+
   // Controlla anche se il token è nei cookie
   const cookieToken = req.cookies?.jwt;
-  
+
   // Usa il token dall'header o dal cookie
   const finalToken = token || cookieToken;
-  
+
   if (!finalToken) {
+    if (req.path === '/api/check-auth') {
+      // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
+      return res.status(401).json({ isAuthenticated: false });
+    }
+    // Per le pagine web, reindirizza alla homepage
+    return res.redirect('/');
+  }
+
+  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('Verifica del token fallita:', err.message);
       if (req.path === '/api/check-auth') {
-          // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
-          return res.status(401).json({ isAuthenticated: false });
+        // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
+        return res.status(401).json({ isAuthenticated: false });
       }
       // Per le pagine web, reindirizza alla homepage
       return res.redirect('/');
-  }
-  
-  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
-      if (err) {
-          console.error('Verifica del token fallita:', err.message);
-          if (req.path === '/api/check-auth') {
-              // Per le richieste API, restituisci uno stato 401 invece di reindirizzare
-              return res.status(401).json({ isAuthenticated: false });
-          }
-          // Per le pagine web, reindirizza alla homepage
-          return res.redirect('/');
-      }
-      
-      // Imposta l'utente nella richiesta
-      req.user = decoded;
-      next();
+    }
+
+    // Imposta l'utente nella richiesta
+    req.user = decoded;
+    next();
   });
 }
 
 // Middleware per verificare se l'utente è admin
 function ensureAdmin(req, res, next) {
-    if (!req.user) {
-        console.log('Utente non autenticato');
-        return res.redirect('/');
-    }
-    
-    if (req.user.ruolo === 'admin') {
-        console.log('Utente admin autenticato');
-        return next();
-    }
-    
-    console.log('Accesso admin negato');
-    res.status(403).json({ error: 'Accesso negato' });
+  if (!req.user) {
+    console.log('Utente non autenticato');
+    return res.redirect('/');
+  }
+
+  if (req.user.ruolo === 'admin') {
+    console.log('Utente admin autenticato');
+    return next();
+  }
+
+  console.log('Accesso admin negato');
+  res.status(403).json({ error: 'Accesso negato' });
+}
+
+// Utility per ottenere le iniziali da un nome
+function getInitials(name) {
+  if (!name) return '?';
+  return name.charAt(0).toUpperCase();
 }
 
 // Rotte per il login tramite Google
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback', passport.authenticate('google', {
-    failureRedirect: '/'
+  failureRedirect: '/'
 }), (req, res) => {
-    // Genera un token JWT per l'utente autenticato
-    const token = generateToken(req.user);
-    
-    // Imposta il token in un cookie HTTP-only per sicurezza
-    res.cookie('jwt', token, { 
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
-    });
-    
-    console.log('Login Google completato per:', req.user.email);
-    
-    // Reindirizza in base al ruolo
-    const redirectPage = req.user.ruolo === 'admin' ? '/admin' : '/paziente';
-    res.redirect(redirectPage);
+  // Genera un token JWT per l'utente autenticato
+  const token = generateToken(req.user);
+
+  // Imposta il token in un cookie HTTP-only per sicurezza
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+  });
+
+  console.log('Login Google completato per:', req.user.email);
+
+  // Reindirizza in base al ruolo
+  const redirectPage = req.user.ruolo === 'admin' ? '/admin' : '/paziente';
+  res.redirect(redirectPage);
 });
 
 // Route principale (login page)
 app.get('/', (req, res) => {
-    // Verifica se l'utente ha un token JWT valido
-    const token = req.cookies?.jwt;
-    
-    if (token) {
-        // Verifica il token
-        jwt.verify(token, JWT_SECRET, (err, decoded) => {
-            if (!err) {
-                // Token valido, reindirizza in base al ruolo
-                const redirectPage = decoded.ruolo === 'admin' ? '/admin' : '/paziente';
-                return res.redirect(redirectPage);
-            }
-            // Se la verifica del token fallisce, serve la pagina di login
-        });
-    }
-    
-    // Serve la pagina di login per gli utenti non autenticati
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // Verifica se l'utente ha un token JWT valido
+  const token = req.cookies?.jwt;
+
+  if (token) {
+    // Verifica il token
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (!err) {
+        // Token valido, reindirizza in base al ruolo
+        const redirectPage = decoded.ruolo === 'admin' ? '/admin' : '/paziente';
+        return res.redirect(redirectPage);
+      }
+      // Se la verifica del token fallisce, serve la pagina di login
+    });
+  }
+
+  // Serve la pagina di login per gli utenti non autenticati
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Route per la pagina paziente (protetta)
 app.get('/paziente', verifyToken, (req, res) => {
-    // Renderizza paziente.hbs con i dati dell'utente
-    res.render('paziente', { patient: { nome: req.user.nome, cognome: req.user.cognome || '' } });
+  // Renderizza paziente.hbs con i dati dell'utente
+  res.render('paziente', { patient: { nome: req.user.nome, cognome: req.user.cognome || '' } });
 });
 
 // Route per la pagina admin (protetta)
 app.get('/admin', verifyToken, ensureAdmin, (req, res) => {
-    // Renderizza admin.hbs con i dati dell'admin e tutti gli utenti
-    res.render('admin', { admin: { nome: req.user.nome }, users: db.getAllUsers() });
+  // Renderizza admin.hbs con i dati dell'admin e tutti gli utenti
+  res.render('admin', { admin: { nome: req.user.nome }, users: db.getAllUsers() });
 });
 
 // Route per la pagina dati utente (protetta)
 app.get('/dati', verifyToken, (req, res) => {
-    // Ottieni i dati completi dell'utente dal database usando l'ID nel token
-    const user = db.getUserById(req.user.id);
-    console.log('Renderizzazione pagina dati per:', user.nome);
-    
-    // Renderizza dati.hbs con i dati dell'utente
-    res.render('dati', { user: user });
+  // Ottieni i dati completi dell'utente dal database usando l'ID nel token
+  const user = db.getUserById(req.user.id);
+  console.log('Renderizzazione pagina dati per:', user.nome);
+
+  // Renderizza dati.hbs con i dati dell'utente
+  res.render('dati', { user: user });
 });
 
-// Sostituisci la route /api/check-auth con questa versione:
+// Route per la pagina chat (protetta)
+app.get('/chat', verifyToken, (req, res) => {
+  // Renderizza la pagina di chat con i dati dell'utente
+  const isAdmin = req.user.ruolo === 'admin';
 
+  res.render('chat', {
+    userId: req.user.id,
+    userName: req.user.nome,
+    userSurname: req.user.cognome || '',
+    userRole: req.user.ruolo,
+    userInitials: getInitials(req.user.nome),
+    isAdmin: isAdmin
+  });
+});
+
+// API per controllare l'autenticazione
 app.get('/api/check-auth', (req, res) => {
   const token = req.cookies?.jwt || (req.headers['authorization']?.split(' ')[1]);
-  
+
   if (!token) {
-      return res.status(200).json({ isAuthenticated: false });
+    return res.status(200).json({ isAuthenticated: false });
   }
-  
+
   try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      return res.status(200).json({
-          isAuthenticated: true,
-          role: decoded.ruolo,
-          nome: decoded.nome
-      });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return res.status(200).json({
+      isAuthenticated: true,
+      role: decoded.ruolo,
+      nome: decoded.nome
+    });
   } catch (err) {
-      console.log('Token di autenticazione non valido:', err.message);
-      return res.status(200).json({ isAuthenticated: false });
+    console.log('Token di autenticazione non valido:', err.message);
+    return res.status(200).json({ isAuthenticated: false });
   }
 });
 
 // API per il logout
 app.post('/logout', (req, res) => {
-    // Cancella il cookie JWT
-    res.clearCookie('jwt');
-    
-    // Reindirizza alla homepage
-    res.redirect('/');
+  // Cancella il cookie JWT
+  res.clearCookie('jwt');
+
+  // Reindirizza alla homepage
+  res.redirect('/');
+});
+
+// Replace the chat API routes in server.js with these improved versions
+
+// Rimuovi questa linea poiché ora la funzionalità è integrata in DBMock
+// const DBMockChat = require('./DBMockChat');
+// const chatDb = new DBMockChat();
+
+// Poi aggiorna tutte le referenze a chatDb con db:
+
+// Esempio:
+// Invece di:
+// chatDb.addMessage(senderId, recipientId, content);
+// Usa:
+// db.addMessage(senderId, recipientId, content);
+
+
+
+// API per gli utenti chat - versione di debug avanzata
+app.get('/api/chat/users', verifyToken, (req, res) => {
+  try {
+      console.log('------------------------------------');
+      console.log('RICHIESTA UTENTI CHAT');
+      console.log('Utente:', req.user.nome, req.user.id, req.user.ruolo);
+      
+      // Log tutti gli utenti nel database
+      const allUsers = db.getAllUsers();
+      console.log('Tutti gli utenti nel DB:', allUsers.length);
+      allUsers.forEach(u => console.log(`- ${u.id}: ${u.nome} (${u.ruolo})`));
+      
+      let chatUsers = [];
+      
+      if (req.user.ruolo === 'admin') {
+          // Admin vede tutti gli utenti normali
+          chatUsers = db.getAllUsers()
+              .filter(user => user.ruolo === 'user')
+              .map(user => ({
+                  id: String(user.id),
+                  nome: user.nome || 'Utente',
+                  cognome: user.cognome || '',
+                  connected: false
+              }));
+          console.log(`Admin: restituisco ${chatUsers.length} pazienti`);
+      } else {
+          // Utente normale vede solo gli admin
+          chatUsers = db.getAllUsers()
+              .filter(user => user.ruolo === 'admin')
+              .map(user => ({
+                  id: String(user.id),
+                  nome: user.nome || 'Admin',
+                  cognome: user.cognome || '',
+                  connected: false
+              }));
+          console.log(`Utente: restituisco ${chatUsers.length} admin`);
+      }
+      
+      console.log('Utenti chat trovati:', chatUsers);
+      console.log('------------------------------------');
+      
+      return res.json(chatUsers);
+  } catch (error) {
+      console.error('ERRORE API CHAT USERS:', error);
+      return res.status(500).json({ error: 'Errore nel recupero degli utenti' });
+  }
+});
+// Aggiorna l'API per i messaggi chat:
+app.get('/api/chat/messages/:userId', verifyToken, (req, res) => {
+  const currentUserId = String(req.user.id);
+  const otherUserId = String(req.params.userId);
+
+  console.log(`Messages requested between ${currentUserId} and ${otherUserId}`);
+
+  // Get messages between the two users
+  const messages = db.getMessagesBetweenUsers(currentUserId, otherUserId);
+
+  console.log(`Returning ${messages.length} messages`);
+  res.json(messages);
 });
 
 // API per ottenere la lista degli utenti con filtri opzionali
 app.get('/utentii', (req, res) => {
-    const { eta } = req.query;
+  const { eta } = req.query;
 
-    // Ottieni tutti gli utenti
-    let users = db.getAllUsers();
+  // Ottieni tutti gli utenti
+  let users = db.getAllUsers();
 
-    // Filtra in base all'età se necessario
-    if (eta === 'max20') {
-        users = users.filter(user => user.eta <= 20);
-    } else if (eta === 'min21') {
-        users = users.filter(user => user.eta > 20);
-    }
+  // Filtra in base all'età se necessario
+  if (eta === 'max20') {
+    users = users.filter(user => user.eta <= 20);
+  } else if (eta === 'min21') {
+    users = users.filter(user => user.eta > 20);
+  }
 
-    res.json({ users });
+  res.json({ users });
 });
 
 // API per ottenere un utente specifico per ID
 app.get('/utentii/:id', (req, res) => {
-    const userId = parseInt(req.params.id);
-    const user = db.getUserById(userId);
+  const userId = parseInt(req.params.id);
+  const user = db.getUserById(userId);
 
-    if (user) {
-        res.json(user);
-    } else {
-        res.status(404).json({ error: 'Utente non trovato' });
-    }
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404).json({ error: 'Utente non trovato' });
+  }
 });
 
 // API per registrare un nuovo utente
 app.post('/utentii', (req, res) => {
-    console.log('Dati ricevuti per registrazione:', req.body);
-    const { nome, cognome, email, password, sesso, eta } = req.body;
+  console.log('Dati ricevuti per registrazione:', req.body);
+  const { nome, cognome, email, password, sesso, eta } = req.body;
 
-    if (!nome || !cognome || !email || !password || !sesso || !eta) {
-        console.error('Errore: campi mancanti');
-        return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
-    }
+  if (!nome || !cognome || !email || !password || !sesso || !eta) {
+    console.error('Errore: campi mancanti');
+    return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+  }
 
-    try {
-        const newUser = db.createUser({ nome, cognome, email, password, sesso, eta });
-        res.status(201).json({ message: 'Registrazione avvenuta con successo' });
-    } catch (error) {
-        console.error('Errore durante la registrazione:', error);
-        res.status(500).json({ error: 'Errore durante la registrazione' });
-    }
+  try {
+    const newUser = db.createUser({ nome, cognome, email, password, sesso, eta });
+    res.status(201).json({ message: 'Registrazione avvenuta con successo' });
+  } catch (error) {
+    console.error('Errore durante la registrazione:', error);
+    res.status(500).json({ error: 'Errore durante la registrazione' });
+  }
 });
 
 // API per aggiornare un utente esistente
 app.put('/utentii/:id', (req, res) => {
-    const userId = parseInt(req.params.id);
-    const updates = req.body;
+  const userId = parseInt(req.params.id);
+  const updates = req.body;
 
-    const updatedUser = db.updateUser(userId, updates);
-    if (updatedUser) {
-        res.json({ success: true, user: updatedUser });
-    } else {
-        res.status(404).json({ error: 'Utente non trovato' });
-    }
+  const updatedUser = db.updateUser(userId, updates);
+  if (updatedUser) {
+    res.json({ success: true, user: updatedUser });
+  } else {
+    res.status(404).json({ error: 'Utente non trovato' });
+  }
 });
 
 // API per eliminare un utente
 app.delete('/utentii/:id', (req, res) => {
-    const userId = parseInt(req.params.id);
-    const success = db.deleteUser(userId);
+  const userId = parseInt(req.params.id);
+  const success = db.deleteUser(userId);
 
-    if (success) {
-        res.json({ success: true });
-    } else {
-        res.status(404).json({ error: 'Utente non trovato' });
-    }
+  if (success) {
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ error: 'Utente non trovato' });
+  }
 });
 
 // API per il login di un utente - restituisce JWT
 app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const result = db.verifyCredentials(email, password);
-    
-    if (result.success) {
-        // Genera il token JWT
-        const token = generateToken(result.user);
-        
-        // Imposta il token in un cookie HTTP-only
-        res.cookie('jwt', token, { 
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
-        });
-        
-        // Restituisce anche il token nella risposta per i client API
-        const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
-        res.json({
-            success: true,
-            token: token,
-            redirectPage
-        });
-    } else {
-        console.log('Login fallito:', result.message);
-        res.json({
-            success: false,
-            message: result.message
-        });
-    }
+  const result = db.verifyCredentials(email, password);
+
+  if (result.success) {
+    // Genera il token JWT
+    const token = generateToken(result.user);
+
+    // Imposta il token in un cookie HTTP-only
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
+    });
+
+    // Restituisce anche il token nella risposta per i client API
+    const redirectPage = result.user.ruolo === 'admin' ? '/admin' : '/paziente';
+    res.json({
+      success: true,
+      token: token,
+      redirectPage
+    });
+  } else {
+    console.log('Login fallito:', result.message);
+    res.json({
+      success: false,
+      message: result.message
+    });
+  }
 });
 
 // API per ottenere gli eventi del calendario
 app.get('/events', (req, res) => {
-    // Esempio di eventi statici
-    const events = [
-        {
-            title: 'Visita Medica',
-            start: '2024-12-14T10:00:00',
-            end: '2024-12-14T11:00:00',
-            description: 'Visita di controllo generale'
-        },
-        {
-            title: 'Check-up Fisico',
-            start: '2024-12-15T09:00:00',
-            end: '2024-12-15T10:00:00',
-            description: 'Visita di controllo cardiaco'
-        }
-    ];
+  // Esempio di eventi statici
+  const events = [
+    {
+      title: 'Visita Medica',
+      start: '2024-12-14T10:00:00',
+      end: '2024-12-14T11:00:00',
+      description: 'Visita di controllo generale'
+    },
+    {
+      title: 'Check-up Fisico',
+      start: '2024-12-15T09:00:00',
+      end: '2024-12-15T10:00:00',
+      description: 'Visita di controllo cardiaco'
+    }
+  ];
 
-    res.json(events);
+  res.json(events);
 });
 
 // API per aggiornare la password dell'utente
 app.post('/update-password', verifyToken, (req, res) => {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
-    
-    console.log('Tentativo di aggiornamento password per utente ID:', userId);
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user.id;
 
-    const user = db.getUserById(userId);
-    if (!user) {
-        console.log('Utente non trovato per ID:', userId);
-        return res.status(404).json({ success: false, message: 'Utente non trovato.' });
-    }
+  console.log('Tentativo di aggiornamento password per utente ID:', userId);
 
-    if (user.password === currentPassword) { // In un sistema reale, usa l'hashing
-        const updatedUser = db.updateUser(userId, { password: newPassword });
-        if (updatedUser) {
-            console.log('Password aggiornata con successo per:', user.email);
-            return res.json({ success: true, message: 'Password aggiornata con successo.' });
-        } else {
-            console.log('Errore durante l\'aggiornamento della password');
-            return res.status(500).json({ success: false, message: 'Errore durante l\'aggiornamento della password.' });
-        }
+  const user = db.getUserById(userId);
+  if (!user) {
+    console.log('Utente non trovato per ID:', userId);
+    return res.status(404).json({ success: false, message: 'Utente non trovato.' });
+  }
+
+  if (user.password === currentPassword) { // In un sistema reale, usa l'hashing
+    const updatedUser = db.updateUser(userId, { password: newPassword });
+    if (updatedUser) {
+      console.log('Password aggiornata con successo per:', user.email);
+      return res.json({ success: true, message: 'Password aggiornata con successo.' });
     } else {
-        console.log('Password attuale non corretta');
-        return res.status(401).json({ success: false, message: 'La password attuale non è corretta.' });
+      console.log('Errore durante l\'aggiornamento della password');
+      return res.status(500).json({ success: false, message: 'Errore durante l\'aggiornamento della password.' });
     }
+  } else {
+    console.log('Password attuale non corretta');
+    return res.status(401).json({ success: false, message: 'La password attuale non è corretta.' });
+  }
 });
 
-
-
-// Route di test per debugging
-app.get('/test-paziente', (req, res) => {
-    console.log('Accesso alla route di test paziente');
-    
-    // Crea un utente di test
-    const testUser = {
-        id: 999,
-        nome: 'Test',
-        cognome: 'Utente',
-        email: 'test@example.com',
-        ruolo: 'user'
-    };
-    
-    // Genera JWT per l'utente di test
-    const token = generateToken(testUser);
-    
-    // Imposta il token nel cookie
-    res.cookie('jwt', token, { 
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 giorni
-    });
-    
-    res.redirect('/paziente');
-});
-
-// Avvio del server
-app.listen(port, () => {
-    console.log(`Server API in esecuzione su http://localhost:${port}`);
-    console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
+// Avvio del server (modificato per usare http.server con socket.io)
+server.listen(port, () => {
+  console.log(`Server in esecuzione su http://localhost:${port}`);
+  console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
 });

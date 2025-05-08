@@ -1703,6 +1703,9 @@
 </head>
 
 <body>
+    <a href="/chat" class="navbar-link">
+        <i class="fas fa-comments"></i> Chat
+    </a>
     <header class="main-header">
         <div class="container">
             <div class="logo">
@@ -1714,11 +1717,10 @@
                     <div class="profile-name" id="patientName">{{ patient.nome }} {{ patient.cognome }}</div>
                     <div class="profile-status">Area Paziente</div>
                 </div>
-                <div class="profile-avatar">
-                    <i class="fas fa-user"></i>
-                    <div id="chatIcon">
-                        <span id="chatBadge">0</span>
-                    </div>
+                <div class="action-button">
+                    <a href="/chat" class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Chat con assistenza
+                    </a>
                 </div>
                 <button class="logout-btn" id="logoutBtn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
@@ -1828,7 +1830,7 @@
                     <h2 style="margin: 0; color: var(--primary-color);" id="eventModalTitle">Dettagli Evento</h2>
                     <span id="closeEventModal" style="cursor: pointer; font-size: 1.8rem;">&times;</span>
                 </div>
-        
+
                 <!-- Visualizzazione evento (modalità lettura) -->
                 <div id="eventViewMode">
                     <div style="margin-bottom: 20px; display: flex; align-items: center;">
@@ -1839,7 +1841,7 @@
                             <div id="eventDateTime" style="color: var(--text-muted);"></div>
                         </div>
                     </div>
-        
+
                     <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
                         <i class="fas fa-align-left"
                             style="color: var(--primary-color); margin-right: 10px; font-size: 1.2rem; margin-top: 3px;"></i>
@@ -1850,7 +1852,7 @@
                             </div>
                         </div>
                     </div>
-        
+
                     <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
                         <button id="deleteEventBtn"
                             style="padding: 10px 20px; background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500;">
@@ -1862,12 +1864,13 @@
                         </button>
                     </div>
                 </div>
-        
+
                 <!-- Modifica evento (modalità modifica) -->
                 <div id="eventEditMode" style="display: none;">
                     <form id="editEventForm">
                         <div style="margin-bottom: 15px;">
-                            <label for="editEventDate" style="display: block; margin-bottom: 8px; font-weight: 500;">Data e
+                            <label for="editEventDate"
+                                style="display: block; margin-bottom: 8px; font-weight: 500;">Data e
                                 ora:</label>
                             <input type="datetime-local" id="editEventDate" required
                                 style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
@@ -1878,7 +1881,7 @@
                             <textarea id="editEventDescription" rows="4" required
                                 style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;"></textarea>
                         </div>
-        
+
                         <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
                             <button type="button" id="cancelEdit"
                                 style="padding: 10px 20px; background: #f1f5f9; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Annulla</button>
@@ -1920,393 +1923,393 @@
     </div>
 
     <script>
-// Inizializzazione di FullCalendar
-document.addEventListener('DOMContentLoaded', function () {
-    var calendarEl = document.getElementById('calendar');
-    let currentEvent = null;
+        // Inizializzazione di FullCalendar
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            let currentEvent = null;
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'it',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        buttonText: {
-            today: 'Oggi',
-            month: 'Mese',
-            week: 'Settimana',
-            day: 'Giorno'
-        },
-        // Gli eventi predefiniti vengono sostituiti dal caricamento da server
-        events: function(info, successCallback, failureCallback) {
-            // Recupera gli eventi dal server
-            fetch('/api/calendar-events', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Aggiungi il token JWT se disponibile
-                    'Authorization': localStorage.getItem('jwtToken') ? 
-                        `Bearer ${localStorage.getItem('jwtToken')}` : ''
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'it',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                credentials: 'include' // Per includere i cookie nella richiesta
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Errore nel recupero degli eventi');
+                buttonText: {
+                    today: 'Oggi',
+                    month: 'Mese',
+                    week: 'Settimana',
+                    day: 'Giorno'
+                },
+                // Gli eventi predefiniti vengono sostituiti dal caricamento da server
+                events: function (info, successCallback, failureCallback) {
+                    // Recupera gli eventi dal server
+                    fetch('/api/calendar-events', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Aggiungi il token JWT se disponibile
+                            'Authorization': localStorage.getItem('jwtToken') ?
+                                `Bearer ${localStorage.getItem('jwtToken')}` : ''
+                        },
+                        credentials: 'include' // Per includere i cookie nella richiesta
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Errore nel recupero degli eventi');
+                            }
+                            return response.json();
+                        })
+                        .then(events => {
+                            // Formatta le date come oggetti Date
+                            const formattedEvents = events.map(event => ({
+                                ...event,
+                                start: new Date(event.start)
+                            }));
+
+                            // Aggiungi anche gli eventi predefiniti (opzionale)
+                            const defaultEvents = [
+                                {
+                                    title: 'Ritiro farmaci',
+                                    start: '2025-03-25',
+                                    color: '#52B788',
+                                    extendedProps: { type: 'default' }
+                                },
+                                {
+                                    title: 'Consulto farmacista',
+                                    start: '2025-03-28T15:30:00',
+                                    color: '#3366FF',
+                                    extendedProps: { type: 'default' }
+                                },
+                                {
+                                    title: 'Controllo pressione',
+                                    start: '2025-04-05T10:00:00',
+                                    color: '#F59E0B',
+                                    extendedProps: { type: 'default' }
+                                }
+                            ];
+
+                            successCallback([...formattedEvents, ...defaultEvents]);
+                        })
+                        .catch(error => {
+                            console.error('Errore nel recupero degli eventi:', error);
+                            // In caso di errore, mostra almeno gli eventi predefiniti
+                            const defaultEvents = [
+                                {
+                                    title: 'Ritiro farmaci',
+                                    start: '2025-03-25',
+                                    color: '#52B788'
+                                },
+                                {
+                                    title: 'Consulto farmacista',
+                                    start: '2025-03-28T15:30:00',
+                                    color: '#3366FF'
+                                },
+                                {
+                                    title: 'Controllo pressione',
+                                    start: '2025-04-05T10:00:00',
+                                    color: '#F59E0B'
+                                }
+                            ];
+                            successCallback(defaultEvents);
+                        });
+                },
+                eventClick: function (info) {
+                    // Salva il riferimento all'evento corrente
+                    currentEvent = info.event;
+
+                    // Popola il modal con i dati dell'evento
+                    document.getElementById('eventModalTitle').innerText = 'Dettagli Evento';
+
+                    // Formatta la data e l'ora in formato leggibile
+                    const eventDate = info.event.start;
+                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
+
+                    // Imposta la descrizione
+                    document.getElementById('eventDescription').innerText = info.event.title;
+
+                    // Imposta anche i valori nei campi di modifica
+                    document.getElementById('editEventDate').value = formatDateForInput(eventDate);
+                    document.getElementById('editEventDescription').value = info.event.title;
+
+                    // Se è un evento predefinito, disabilita l'eliminazione e la modifica
+                    const isDefaultEvent = info.event.extendedProps && info.event.extendedProps.type === 'default';
+                    document.getElementById('deleteEventBtn').style.display = isDefaultEvent ? 'none' : 'flex';
+                    document.getElementById('editEventBtn').style.display = isDefaultEvent ? 'none' : 'flex';
+
+                    // Mostra il modal in modalità visualizzazione
+                    document.getElementById('eventViewMode').style.display = 'block';
+                    document.getElementById('eventEditMode').style.display = 'none';
+                    document.getElementById('eventModal').style.display = 'block';
+                },
+                // Aggiunta della funzionalità per cliccare su una data
+                dateClick: function (info) {
+                    // Pre-popola il campo data con la data selezionata
+                    document.getElementById('reminderDate').value = info.dateStr + 'T12:00'; // Imposta mezzogiorno come ora predefinita
+                    openReminderModal();
                 }
-                return response.json();
-            })
-            .then(events => {
-                // Formatta le date come oggetti Date
-                const formattedEvents = events.map(event => ({
-                    ...event,
-                    start: new Date(event.start)
-                }));
-                
-                // Aggiungi anche gli eventi predefiniti (opzionale)
-                const defaultEvents = [
-                    {
-                        title: 'Ritiro farmaci',
-                        start: '2025-03-25',
-                        color: '#52B788',
-                        extendedProps: { type: 'default' }
-                    },
-                    {
-                        title: 'Consulto farmacista',
-                        start: '2025-03-28T15:30:00',
-                        color: '#3366FF',
-                        extendedProps: { type: 'default' }
-                    },
-                    {
-                        title: 'Controllo pressione',
-                        start: '2025-04-05T10:00:00',
-                        color: '#F59E0B',
-                        extendedProps: { type: 'default' }
-                    }
-                ];
-                
-                successCallback([...formattedEvents, ...defaultEvents]);
-            })
-            .catch(error => {
-                console.error('Errore nel recupero degli eventi:', error);
-                // In caso di errore, mostra almeno gli eventi predefiniti
-                const defaultEvents = [
-                    {
-                        title: 'Ritiro farmaci',
-                        start: '2025-03-25',
-                        color: '#52B788'
-                    },
-                    {
-                        title: 'Consulto farmacista',
-                        start: '2025-03-28T15:30:00',
-                        color: '#3366FF'
-                    },
-                    {
-                        title: 'Controllo pressione',
-                        start: '2025-04-05T10:00:00',
-                        color: '#F59E0B'
-                    }
-                ];
-                successCallback(defaultEvents);
             });
-        },
-        eventClick: function (info) {
-            // Salva il riferimento all'evento corrente
-            currentEvent = info.event;
-            
-            // Popola il modal con i dati dell'evento
-            document.getElementById('eventModalTitle').innerText = 'Dettagli Evento';
-            
-            // Formatta la data e l'ora in formato leggibile
-            const eventDate = info.event.start;
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
-            
-            // Imposta la descrizione
-            document.getElementById('eventDescription').innerText = info.event.title;
-            
-            // Imposta anche i valori nei campi di modifica
-            document.getElementById('editEventDate').value = formatDateForInput(eventDate);
-            document.getElementById('editEventDescription').value = info.event.title;
-            
-            // Se è un evento predefinito, disabilita l'eliminazione e la modifica
-            const isDefaultEvent = info.event.extendedProps && info.event.extendedProps.type === 'default';
-            document.getElementById('deleteEventBtn').style.display = isDefaultEvent ? 'none' : 'flex';
-            document.getElementById('editEventBtn').style.display = isDefaultEvent ? 'none' : 'flex';
-            
-            // Mostra il modal in modalità visualizzazione
-            document.getElementById('eventViewMode').style.display = 'block';
-            document.getElementById('eventEditMode').style.display = 'none';
-            document.getElementById('eventModal').style.display = 'block';
-        },
-        // Aggiunta della funzionalità per cliccare su una data
-        dateClick: function(info) {
-            // Pre-popola il campo data con la data selezionata
-            document.getElementById('reminderDate').value = info.dateStr + 'T12:00'; // Imposta mezzogiorno come ora predefinita
-            openReminderModal();
-        }
-    });
 
-    calendar.render();
+            calendar.render();
 
-    // Funzione per formattare la data nel formato richiesto dall'input datetime-local
-    function formatDateForInput(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
+            // Funzione per formattare la data nel formato richiesto dall'input datetime-local
+            function formatDateForInput(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
 
-    // Configurazione del modal per nuovo promemoria
-    const reminderModal = document.getElementById('reminderModal');
-    const newReminderBtn = document.getElementById('newReminderBtn');
-    const closeReminderModalBtn = document.getElementById('closeReminderModal');
-    const cancelReminderBtn = document.getElementById('cancelReminder');
-    const reminderForm = document.getElementById('reminderForm');
-    const reminderDate = document.getElementById('reminderDate');
-    const reminderDescription = document.getElementById('reminderDescription');
-
-    // Imposta la data di default a oggi
-    const today = new Date();
-    const formattedDate = formatDateForInput(today);
-    reminderDate.value = formattedDate;
-
-    // Funzione per aprire il modal del promemoria
-    function openReminderModal() {
-        reminderModal.style.display = 'block';
-    }
-
-    // Funzione per chiudere il modal del promemoria
-    function closeReminderModal() {
-        reminderModal.style.display = 'none';
-        // Reset del form
-        reminderForm.reset();
-        reminderDate.value = formattedDate;
-    }
-
-    // Event listeners per aprire/chiudere il modal del promemoria
-    newReminderBtn.addEventListener('click', openReminderModal);
-    closeReminderModalBtn.addEventListener('click', closeReminderModal);
-    cancelReminderBtn.addEventListener('click', closeReminderModal);
-
-    // Chiudi il modal se l'utente clicca fuori da esso
-    window.addEventListener('click', (event) => {
-        if (event.target === reminderModal) {
-            closeReminderModal();
-        }
-    });
-
-    // Gestione del submit del form per nuovo promemoria
-    reminderForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Recupera i valori dal form
-        const date = reminderDate.value;
-        const description = reminderDescription.value;
-        
-        // Colore casuale per il promemoria (selezionato da una palette)
-        const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        
-        // Prima salva l'evento nel server
-        fetch('/api/calendar-events', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('jwtToken') ? 
-                    `Bearer ${localStorage.getItem('jwtToken')}` : ''
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                title: description,
-                start: date,
-                color: randomColor,
-                type: 'reminder'
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Errore nel salvare l\'evento');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
             }
-            return response.json();
-        })
-        .then(savedEvent => {
-            // Dopo aver salvato, aggiungi l'evento al calendario con l'ID ricevuto dal server
-            const newEvent = {
-                id: savedEvent.id,
-                title: description,
-                start: date,
-                color: randomColor,
-                extendedProps: {
-                    type: 'reminder'
+
+            // Configurazione del modal per nuovo promemoria
+            const reminderModal = document.getElementById('reminderModal');
+            const newReminderBtn = document.getElementById('newReminderBtn');
+            const closeReminderModalBtn = document.getElementById('closeReminderModal');
+            const cancelReminderBtn = document.getElementById('cancelReminder');
+            const reminderForm = document.getElementById('reminderForm');
+            const reminderDate = document.getElementById('reminderDate');
+            const reminderDescription = document.getElementById('reminderDescription');
+
+            // Imposta la data di default a oggi
+            const today = new Date();
+            const formattedDate = formatDateForInput(today);
+            reminderDate.value = formattedDate;
+
+            // Funzione per aprire il modal del promemoria
+            function openReminderModal() {
+                reminderModal.style.display = 'block';
+            }
+
+            // Funzione per chiudere il modal del promemoria
+            function closeReminderModal() {
+                reminderModal.style.display = 'none';
+                // Reset del form
+                reminderForm.reset();
+                reminderDate.value = formattedDate;
+            }
+
+            // Event listeners per aprire/chiudere il modal del promemoria
+            newReminderBtn.addEventListener('click', openReminderModal);
+            closeReminderModalBtn.addEventListener('click', closeReminderModal);
+            cancelReminderBtn.addEventListener('click', closeReminderModal);
+
+            // Chiudi il modal se l'utente clicca fuori da esso
+            window.addEventListener('click', (event) => {
+                if (event.target === reminderModal) {
+                    closeReminderModal();
                 }
-            };
-            
-            calendar.addEvent(newEvent);
-            
-            // Notifica l'utente
-            alert('Promemoria aggiunto con successo!');
-            
-            // Chiudi il modal
-            closeReminderModal();
-        })
-        .catch(error => {
-            console.error('Errore nel salvare il promemoria:', error);
-            alert('Si è verificato un errore nel salvare il promemoria. Riprova più tardi.');
-        });
-    });
+            });
 
-    // Configurazione del modal per la gestione eventi
-    const eventModal = document.getElementById('eventModal');
-    const closeEventModalBtn = document.getElementById('closeEventModal');
-    const deleteEventBtn = document.getElementById('deleteEventBtn');
-    const editEventBtn = document.getElementById('editEventBtn');
-    const cancelEditBtn = document.getElementById('cancelEdit');
-    const editEventForm = document.getElementById('editEventForm');
-    const eventViewMode = document.getElementById('eventViewMode');
-    const eventEditMode = document.getElementById('eventEditMode');
+            // Gestione del submit del form per nuovo promemoria
+            reminderForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-    // Funzione per chiudere il modal degli eventi
-    function closeEventModal() {
-        eventModal.style.display = 'none';
-    }
+                // Recupera i valori dal form
+                const date = reminderDate.value;
+                const description = reminderDescription.value;
 
-    // Event listener per chiudere il modal degli eventi
-    closeEventModalBtn.addEventListener('click', closeEventModal);
+                // Colore casuale per il promemoria (selezionato da una palette)
+                const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    // Chiudi il modal se l'utente clicca fuori da esso
-    window.addEventListener('click', (event) => {
-        if (event.target === eventModal) {
-            closeEventModal();
-        }
-    });
-
-    // Event listener per passare alla modalità di modifica
-    editEventBtn.addEventListener('click', function() {
-        eventViewMode.style.display = 'none';
-        eventEditMode.style.display = 'block';
-    });
-
-    // Event listener per tornare alla modalità di visualizzazione
-    cancelEditBtn.addEventListener('click', function() {
-        eventViewMode.style.display = 'block';
-        eventEditMode.style.display = 'none';
-    });
-
-    // Event listener per eliminare un evento
-    deleteEventBtn.addEventListener('click', function() {
-        if (confirm('Sei sicuro di voler eliminare questo evento?')) {
-            if (currentEvent) {
-                // Solo gli eventi salvati nel server hanno un ID
-                const eventId = currentEvent.id;
-                
-                if (!eventId) {
-                    alert('Impossibile eliminare questo evento.');
-                    return;
-                }
-                
-                // Elimina l'evento dal server
-                fetch(`/api/calendar-events/${eventId}`, {
-                    method: 'DELETE',
+                // Prima salva l'evento nel server
+                fetch('/api/calendar-events', {
+                    method: 'POST',
                     headers: {
-                        'Authorization': localStorage.getItem('jwtToken') ? 
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('jwtToken') ?
                             `Bearer ${localStorage.getItem('jwtToken')}` : ''
                     },
-                    credentials: 'include'
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title: description,
+                        start: date,
+                        color: randomColor,
+                        type: 'reminder'
+                    })
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Errore nell\'eliminare l\'evento');
-                    }
-                    return response.json();
-                })
-                .then(() => {
-                    // Rimuovi l'evento dal calendario
-                    currentEvent.remove();
-                    // Chiudi il modal
-                    closeEventModal();
-                    // Notifica l'utente
-                    alert('Evento eliminato con successo!');
-                })
-                .catch(error => {
-                    console.error('Errore nell\'eliminare l\'evento:', error);
-                    alert('Si è verificato un errore nell\'eliminare l\'evento. Riprova più tardi.');
-                });
-            }
-        }
-    });
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Errore nel salvare l\'evento');
+                        }
+                        return response.json();
+                    })
+                    .then(savedEvent => {
+                        // Dopo aver salvato, aggiungi l'evento al calendario con l'ID ricevuto dal server
+                        const newEvent = {
+                            id: savedEvent.id,
+                            title: description,
+                            start: date,
+                            color: randomColor,
+                            extendedProps: {
+                                type: 'reminder'
+                            }
+                        };
 
-    // Event listener per salvare le modifiche a un evento
-    editEventForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (currentEvent) {
-            // Ottieni i nuovi valori
-            const newDate = document.getElementById('editEventDate').value;
-            const newDescription = document.getElementById('editEventDescription').value;
-            
-            const eventId = currentEvent.id;
-            
-            if (!eventId) {
-                alert('Impossibile modificare questo evento.');
-                return;
+                        calendar.addEvent(newEvent);
+
+                        // Notifica l'utente
+                        alert('Promemoria aggiunto con successo!');
+
+                        // Chiudi il modal
+                        closeReminderModal();
+                    })
+                    .catch(error => {
+                        console.error('Errore nel salvare il promemoria:', error);
+                        alert('Si è verificato un errore nel salvare il promemoria. Riprova più tardi.');
+                    });
+            });
+
+            // Configurazione del modal per la gestione eventi
+            const eventModal = document.getElementById('eventModal');
+            const closeEventModalBtn = document.getElementById('closeEventModal');
+            const deleteEventBtn = document.getElementById('deleteEventBtn');
+            const editEventBtn = document.getElementById('editEventBtn');
+            const cancelEditBtn = document.getElementById('cancelEdit');
+            const editEventForm = document.getElementById('editEventForm');
+            const eventViewMode = document.getElementById('eventViewMode');
+            const eventEditMode = document.getElementById('eventEditMode');
+
+            // Funzione per chiudere il modal degli eventi
+            function closeEventModal() {
+                eventModal.style.display = 'none';
             }
-            
-            // Aggiorna l'evento nel server
-            fetch(`/api/calendar-events/${eventId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('jwtToken') ? 
-                        `Bearer ${localStorage.getItem('jwtToken')}` : ''
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    title: newDescription,
-                    start: newDate
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Errore nell\'aggiornare l\'evento');
+
+            // Event listener per chiudere il modal degli eventi
+            closeEventModalBtn.addEventListener('click', closeEventModal);
+
+            // Chiudi il modal se l'utente clicca fuori da esso
+            window.addEventListener('click', (event) => {
+                if (event.target === eventModal) {
+                    closeEventModal();
                 }
-                return response.json();
-            })
-            .then(updatedEvent => {
-                // Aggiorna l'evento nel calendario
-                currentEvent.setProp('title', newDescription);
-                currentEvent.setStart(new Date(newDate));
-                
-                // Torna alla modalità visualizzazione
+            });
+
+            // Event listener per passare alla modalità di modifica
+            editEventBtn.addEventListener('click', function () {
+                eventViewMode.style.display = 'none';
+                eventEditMode.style.display = 'block';
+            });
+
+            // Event listener per tornare alla modalità di visualizzazione
+            cancelEditBtn.addEventListener('click', function () {
                 eventViewMode.style.display = 'block';
                 eventEditMode.style.display = 'none';
-                
-                // Aggiorna i dettagli nel modal
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-                document.getElementById('eventDateTime').innerText = new Date(newDate).toLocaleDateString('it-IT', options);
-                document.getElementById('eventDescription').innerText = newDescription;
-                
-                // Notifica l'utente
-                alert('Evento aggiornato con successo!');
-            })
-            .catch(error => {
-                console.error('Errore nell\'aggiornare l\'evento:', error);
-                alert('Si è verificato un errore nell\'aggiornare l\'evento. Riprova più tardi.');
             });
-        }
-    });
 
-    // Configurazione della chat
-    setupChat();
+            // Event listener per eliminare un evento
+            deleteEventBtn.addEventListener('click', function () {
+                if (confirm('Sei sicuro di voler eliminare questo evento?')) {
+                    if (currentEvent) {
+                        // Solo gli eventi salvati nel server hanno un ID
+                        const eventId = currentEvent.id;
 
-    // Inizializzazione del WebSocket e contatore visitatori
-    setupVisitorCounter();
-});
+                        if (!eventId) {
+                            alert('Impossibile eliminare questo evento.');
+                            return;
+                        }
+
+                        // Elimina l'evento dal server
+                        fetch(`/api/calendar-events/${eventId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': localStorage.getItem('jwtToken') ?
+                                    `Bearer ${localStorage.getItem('jwtToken')}` : ''
+                            },
+                            credentials: 'include'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Errore nell\'eliminare l\'evento');
+                                }
+                                return response.json();
+                            })
+                            .then(() => {
+                                // Rimuovi l'evento dal calendario
+                                currentEvent.remove();
+                                // Chiudi il modal
+                                closeEventModal();
+                                // Notifica l'utente
+                                alert('Evento eliminato con successo!');
+                            })
+                            .catch(error => {
+                                console.error('Errore nell\'eliminare l\'evento:', error);
+                                alert('Si è verificato un errore nell\'eliminare l\'evento. Riprova più tardi.');
+                            });
+                    }
+                }
+            });
+
+            // Event listener per salvare le modifiche a un evento
+            editEventForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                if (currentEvent) {
+                    // Ottieni i nuovi valori
+                    const newDate = document.getElementById('editEventDate').value;
+                    const newDescription = document.getElementById('editEventDescription').value;
+
+                    const eventId = currentEvent.id;
+
+                    if (!eventId) {
+                        alert('Impossibile modificare questo evento.');
+                        return;
+                    }
+
+                    // Aggiorna l'evento nel server
+                    fetch(`/api/calendar-events/${eventId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('jwtToken') ?
+                                `Bearer ${localStorage.getItem('jwtToken')}` : ''
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            title: newDescription,
+                            start: newDate
+                        })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Errore nell\'aggiornare l\'evento');
+                            }
+                            return response.json();
+                        })
+                        .then(updatedEvent => {
+                            // Aggiorna l'evento nel calendario
+                            currentEvent.setProp('title', newDescription);
+                            currentEvent.setStart(new Date(newDate));
+
+                            // Torna alla modalità visualizzazione
+                            eventViewMode.style.display = 'block';
+                            eventEditMode.style.display = 'none';
+
+                            // Aggiorna i dettagli nel modal
+                            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                            document.getElementById('eventDateTime').innerText = new Date(newDate).toLocaleDateString('it-IT', options);
+                            document.getElementById('eventDescription').innerText = newDescription;
+
+                            // Notifica l'utente
+                            alert('Evento aggiornato con successo!');
+                        })
+                        .catch(error => {
+                            console.error('Errore nell\'aggiornare l\'evento:', error);
+                            alert('Si è verificato un errore nell\'aggiornare l\'evento. Riprova più tardi.');
+                        });
+                }
+            });
+
+            // Configurazione della chat
+            setupChat();
+
+            // Inizializzazione del WebSocket e contatore visitatori
+            setupVisitorCounter();
+        });
 
         function logout() {
             fetch('/logout', {
