@@ -493,62 +493,94 @@
             </div>
         </div>
     </div>
-
     <script>
-        // Al caricamento della pagina, controlla se l'utente è già autenticato
-        document.addEventListener('DOMContentLoaded', function () {
-            checkAuthStatus();
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== PROTEZIONE ANTI-LOOP ==========
+            // Controlla quando è stata effettuata l'ultima verifica dell'autenticazione
+            const lastAuthCheck = localStorage.getItem('lastAuthCheck');
+            const now = Date.now();
+            
+            // Se è stata effettuata una verifica negli ultimi 2 secondi, evita di farne un'altra
+            if (lastAuthCheck && (now - parseInt(lastAuthCheck)) < 2000) {
+                console.log('Verifica auth troppo recente, interrompo ciclo potenziale');
+                return; // Uscita immediata per interrompere potenziali cicli
+            }
+            
+            // Imposta il timestamp dell'ultima verifica
+            localStorage.setItem('lastAuthCheck', now.toString());
+            
+            // ========== VERIFICA LOGOUT RECENTE ==========
+            // Verifica se l'utente ha effettuato il logout recentemente (entro 5 secondi)
+            const logoutTime = localStorage.getItem('logoutTime');
+            if (logoutTime && (now - parseInt(logoutTime)) < 5000) {
+                console.log('Logout recente, saltando verifica auth');
+                return; // Non controllare l'autenticazione dopo un logout recente
+            }
+            
+            // ========== VERIFICA AUTENTICAZIONE ==========
+            // Solo se non ci sono condizioni di uscita anticipata, verifica l'autenticazione
+            checkAuth();
         });
-
-        // Funzione per verificare lo stato di autenticazione
-        function checkAuthStatus() {
-            // Verifica se c'è un token nel localStorage
-            const token = localStorage.getItem('jwtToken');
-    let headers = {};
     
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    fetch('/api/check-auth', { headers })
-        .then(response => response.json())
-        .then(data => {
-            if (data.isAuthenticated) {
-                // Se l'utente è autenticato, reindirizza alla pagina appropriata
-                const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
-                window.location.href = redirectPage;
-            } else {
-                // Solo in caso di token non valido
-                if (token) {
+        // Funzione per verificare l'autenticazione in modo sicuro
+        function checkAuth() {
+            console.log('Esecuzione verifica auth controllata');
+            const token = localStorage.getItem('jwtToken');
+            
+            // Se non c'è token, non serve verificare
+            if (!token) {
+                console.log('Nessun token da verificare');
+                return;
+            }
+            
+            // Ottieni gli headers con il token se presente
+            const headers = { 'Authorization': `Bearer ${token}` };
+            
+            // Esegui la verifica con controllo errori completo
+            fetch('/api/check-auth', { 
+                headers: headers,
+                cache: 'no-store',
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok && response.status !== 401) {
+                    throw new Error(`Errore ${response.status} nella verifica auth`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.isAuthenticated) {
+                    // Utente autenticato, reindirizza alla pagina appropriata
+                    const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
+                    console.log(`Utente autenticato, reindirizzamento a ${redirectPage}`);
+                    window.location.href = redirectPage;
+                } else {
+                    // Token non valido, lo rimuoviamo ma rimaniamo sulla pagina
+                    console.log('Token non valido o scaduto, rimozione');
                     localStorage.removeItem('jwtToken');
                     localStorage.removeItem('user');
                 }
-                // Non reindirizzare, rimani nella pagina di login
-            }
-        })
-        .catch(error => {
-            console.error('Errore durante la verifica dell\'autenticazione:', error);
-            // Non reindirizzare in caso di errore, rimani nella pagina di login
-        });
+            })
+            .catch(error => {
+                console.error('Errore durante verifica auth:', error);
+                // Non fare nulla in caso di errore, lascia l'utente nella pagina di login
+            });
         }
-
+    
         // Funzione per cambiare tab tra Login e Registrazione
         function openTab(tabName) {
-            // Aggiorna classi dei pulsanti
             document.getElementById('login-tab').classList.toggle('active', tabName === 'login');
             document.getElementById('register-tab').classList.toggle('active', tabName === 'register');
-
-            // Aggiorna classi dei contenuti
             document.getElementById('login').classList.toggle('active', tabName === 'login');
             document.getElementById('register').classList.toggle('active', tabName === 'register');
-
-            // Pulisci eventuali messaggi di errore quando cambi tab
+            
+            // Pulizia messaggi
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('registerError').style.display = 'none';
             document.getElementById('registerSuccess').style.display = 'none';
         }
-
-        // Funzione per registrare un nuovo utente
+    
+        // Registrazione nuovo utente
         function registerUser() {
             const nome = document.getElementById('registerNome').value;
             const cognome = document.getElementById('registerCognome').value;
@@ -556,229 +588,178 @@
             const eta = parseInt(document.getElementById('registerEta').value, 10);
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-
-            // Mostra l'indicatore di caricamento e nascondi eventuali messaggi
+    
+            // UI feedback
             document.getElementById('registerLoader').style.display = 'block';
             document.getElementById('registerError').style.display = 'none';
             document.getElementById('registerSuccess').style.display = 'none';
-
+    
+            // API call
             fetch('/utentii', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, cognome, sesso, eta, email, password })
             })
-                .then(response => response.json())
-                .then(data => {
-                    // Nascondi l'indicatore di caricamento
-                    document.getElementById('registerLoader').style.display = 'none';
-
-                    if (data.message) {
-                        // Mostra il messaggio di successo
-                        document.getElementById('registerSuccess').textContent = 'Registrazione avvenuta con successo!';
-                        document.getElementById('registerSuccess').style.display = 'block';
-
-                        // Resetta il form
-                        document.getElementById('registerForm').reset();
-
-                        // Passa al tab di login dopo un breve ritardo
-                        setTimeout(() => {
-                            openTab('login');
-                        }, 2000);
-                    } else {
-                        // Mostra il messaggio di errore
-                        document.getElementById('registerError').textContent = 'Errore: ' + (data.error || 'Si è verificato un errore durante la registrazione.');
-                        document.getElementById('registerError').style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    // Nascondi l'indicatore di caricamento e mostra l'errore
-                    document.getElementById('registerLoader').style.display = 'none';
-                    document.getElementById('registerError').textContent = 'Si è verificato un errore durante la connessione al server.';
+            .then(response => response.json())
+            .then(data => {
+                // UI update
+                document.getElementById('registerLoader').style.display = 'none';
+    
+                if (data.message) {
+                    // Success
+                    document.getElementById('registerSuccess').textContent = 'Registrazione avvenuta con successo!';
+                    document.getElementById('registerSuccess').style.display = 'block';
+                    document.getElementById('registerForm').reset();
+                    setTimeout(() => openTab('login'), 2000);
+                } else {
+                    // Error
+                    document.getElementById('registerError').textContent = 'Errore: ' + (data.error || 'Si è verificato un errore durante la registrazione.');
                     document.getElementById('registerError').style.display = 'block';
-                    console.error('Errore:', error);
-                });
+                }
+            })
+            .catch(error => {
+                // Connection error
+                document.getElementById('registerLoader').style.display = 'none';
+                document.getElementById('registerError').textContent = 'Si è verificato un errore durante la connessione al server.';
+                document.getElementById('registerError').style.display = 'block';
+                console.error('Errore:', error);
+            });
         }
-
-        // Funzione per effettuare il login dell'utente - AGGIORNATA per utilizzare JWT
+    
+        // Login utente
         function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-
-            // Mostra l'indicatore di caricamento e nascondi eventuali messaggi di errore
+    
+            // UI feedback
             document.getElementById('loginLoader').style.display = 'block';
             document.getElementById('loginError').style.display = 'none';
-
+    
+            // API call
             fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
-                .then(response => response.json())
-                .then(data => {
-                    // Nascondi l'indicatore di caricamento
-                    document.getElementById('loginLoader').style.display = 'none';
-
-                    if (data.success) {
-                        // Salva il token JWT nel localStorage
-                        if (data.token) {
-                            localStorage.setItem('jwtToken', data.token);
-
-                            // Salva anche le informazioni dell'utente estratte dal token
-                            const userData = {
-                                email: email,
-                                // Aggiungiamo qui altri dati che possiamo ottenere dal token o dalla risposta
-                                ruolo: data.role || 'user'
-                            };
-                            localStorage.setItem('user', JSON.stringify(userData));
-                        }
-
-                        console.log('Login riuscito, reindirizzamento a:', data.redirectPage);
-                        // Per una migliore esperienza utente, mostriamo un feedback prima del redirect
-                        document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
-                        setTimeout(() => {
-                            window.location.href = data.redirectPage; // Reindirizza in base al ruolo
-                        }, 1000);
-                    } else {
-                        // Mostra l'errore nel div dedicato
-                        document.getElementById('loginError').textContent = data.message || 'Si è verificato un errore durante il login.';
-                        document.getElementById('loginError').style.display = 'block';
+            .then(response => response.json())
+            .then(data => {
+                // UI update
+                document.getElementById('loginLoader').style.display = 'none';
+    
+                if (data.success) {
+                    // Save JWT token
+                    if (data.token) {
+                        localStorage.setItem('jwtToken', data.token);
+                        localStorage.setItem('user', JSON.stringify({
+                            email: email,
+                            ruolo: data.role || 'user'
+                        }));
                     }
-                })
-                .catch(error => {
-                    // Nascondi l'indicatore di caricamento e mostra l'errore
-                    document.getElementById('loginLoader').style.display = 'none';
-                    document.getElementById('loginError').textContent = 'Si è verificato un errore durante la connessione al server.';
+    
+                    // Visual feedback before redirect
+                    document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = data.redirectPage;
+                    }, 1000);
+                } else {
+                    // Error display
+                    document.getElementById('loginError').textContent = data.message || 'Si è verificato un errore durante il login.';
                     document.getElementById('loginError').style.display = 'block';
-                    console.error('Errore durante il login:', error);
-                });
+                }
+            })
+            .catch(error => {
+                // Connection error
+                document.getElementById('loginLoader').style.display = 'none';
+                document.getElementById('loginError').textContent = 'Si è verificato un errore durante la connessione al server.';
+                document.getElementById('loginError').style.display = 'block';
+                console.error('Errore durante il login:', error);
+            });
         }
-
-        // Funzione per recuperare e visualizzare la lista degli utenti
+    
+        // Visualizza lista utenti con filtri
         function fetchUsers(filter = '') {
-            // Determina la query string in base al filtro
             let query = '/utentii';
             if (filter === 'under20') {
                 query += '?eta=max20';
             } else if (filter === 'over20') {
                 query += '?eta=min21';
             }
-
-            // Aggiungi un indicatore di caricamento nella lista
+    
             const userList = document.getElementById('userList');
             userList.innerHTML = '<div class="loader" style="display:block;"></div>';
-
-            // Ottieni il token JWT dal localStorage
+    
             const token = localStorage.getItem('jwtToken');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
+    
             fetch(query, { headers })
-                .then(response => response.json())
-                .then(data => {
-                    userList.innerHTML = '';
-                    if (data.users && data.users.length > 0) {
-                        data.users.forEach(user => {
-                            const userItem = document.createElement('p');
-                            userItem.innerHTML = `<i class="fas fa-user-circle"></i> <strong>${user.nome} ${user.cognome}</strong> - ${user.sesso} - ${user.eta} anni - ${user.email}`;
-                            userList.appendChild(userItem);
-                        });
-                    } else {
-                        userList.innerHTML = '<p>Nessun utente trovato</p>';
-                    }
-                })
-                .catch(error => {
-                    userList.innerHTML = '<p style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Si è verificato un errore nel caricamento della lista utenti.</p>';
-                    console.error('Errore durante il recupero degli utenti:', error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                userList.innerHTML = '';
+                if (data.users && data.users.length > 0) {
+                    data.users.forEach(user => {
+                        const userItem = document.createElement('p');
+                        userItem.innerHTML = `<i class="fas fa-user-circle"></i> <strong>${user.nome} ${user.cognome}</strong> - ${user.sesso} - ${user.eta} anni - ${user.email}`;
+                        userList.appendChild(userItem);
+                    });
+                } else {
+                    userList.innerHTML = '<p>Nessun utente trovato</p>';
+                }
+            })
+            .catch(error => {
+                userList.innerHTML = '<p style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Si è verificato un errore nel caricamento della lista utenti.</p>';
+                console.error('Errore durante il recupero degli utenti:', error);
+            });
         }
-
-        // Event Listeners per invio form di registrazione e login
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
+    
+        // Logout con protezione anti-loop
+        function logout() {
+            // Imposta il timestamp del logout per prevenire verifiche immediate
+            localStorage.setItem('logoutTime', Date.now().toString());
+            
+            // Rimuovi dati di autenticazione
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('user');
+    
+            // Chiamata API
+            fetch('/logout', { 
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(() => {
+                // Redirect con feedback
+                document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-sign-out-alt" style="color:#3b82f6;font-size:48px;display:block;margin-bottom:20px;"></i>Logout effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            })
+            .catch(error => {
+                console.error('Errore durante il logout:', error);
+                window.location.href = '/';
+            });
+        }
+    
+        // Event Listeners
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             registerUser();
         });
-
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
+    
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             loginUser();
         });
-
-        // Questa funzione può essere chiamata quando l'utente fa clic sul pulsante logout
-        function logout() {
-            // Rimuovi i dati dal localStorage
+    
+        // Funzione di emergenza per reset stato (aggiungila per debug)
+        window.resetAuthState = function() {
+            localStorage.removeItem('lastAuthCheck');
+            localStorage.removeItem('logoutTime');
             localStorage.removeItem('jwtToken');
             localStorage.removeItem('user');
-
-            // Chiama l'endpoint di logout del server
-            fetch('/logout', { method: 'POST' })
-                .then(() => {
-                    // Reindirizza alla homepage
-                    window.location.href = '/';
-                })
-                .catch(error => {
-                    console.error('Errore durante il logout:', error);
-                    // Reindirizza comunque alla homepage
-                    window.location.href = '/';
-                });
-        }
-
-        // Sostituisci il codice JavaScript esistente nella tua pagina index.html con questo:
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Verifica se stiamo tornando da un reindirizzamento (usiamo session storage per tracciarlo)
-    const hasCheckedAuth = sessionStorage.getItem('authCheckDone');
-    if (!hasCheckedAuth) {
-        checkAuthStatus();
-        // Impostiamo un flag per evitare controlli ripetuti nella stessa sessione
-        sessionStorage.setItem('authCheckDone', 'true');
-    }
-    
-    // Reset del flag quando l'utente cambia tab o interagisce con i form
-    document.querySelectorAll('.tab-button, form').forEach(el => {
-        el.addEventListener('click', () => {
-            sessionStorage.removeItem('authCheckDone');
-        });
-    });
-});
-
-function checkAuthStatus() {
-    console.log('Controllo stato autenticazione...');
-    const token = localStorage.getItem('jwtToken');
-    let headers = {};
-    
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    fetch('/api/check-auth', { 
-        headers,
-        // Aggiungiamo un timestamp per evitare caching
-        cache: 'no-store'
-    })
-    .then(response => {
-        if (!response.ok && response.status !== 401) {
-            throw new Error('Errore di rete');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.isAuthenticated) {
-            // Reindirizzamento se autenticato
-            const redirectPage = data.role === 'admin' ? '/admin' : '/paziente';
-            window.location.href = redirectPage;
-        } else if (token) {
-            // Rimuovi token non valido
-            localStorage.removeItem('jwtToken');
-            localStorage.removeItem('user');
-        }
-        // Se non autenticato, non fare nulla e lascia l'utente nella pagina di login
-    })
-    .catch(error => {
-        console.error('Errore nella verifica di autenticazione:', error);
-        // In caso di errore di rete, non ricaricare la pagina
-    });
-}
-
-// Le altre funzioni (openTab, registerUser, loginUser, fetchUsers, logout) restano invariate
+            alert('Stato di autenticazione resettato. Ricarica la pagina.');
+        };
     </script>
 </body>
 

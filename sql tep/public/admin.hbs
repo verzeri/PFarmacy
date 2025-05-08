@@ -422,6 +422,136 @@
             }
         }
 
+        /* Stile contenitore per i bottoni di azione */
+        .action-button {
+            position: relative;
+            margin: 0 8px;
+        }
+
+        /* Base comune per tutti i bottoni di chat */
+        .action-button a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        /* Stile specifico per il link nella navbar */
+        .action-button .navbar-link {
+            color: #3b82f6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .action-button .navbar-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+
+        /* Stile per il bottone primario */
+        .action-button .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+        }
+
+        .action-button .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        .action-button .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Stile personalizzato per l'icona */
+        .action-button i.fas.fa-comments {
+            position: relative;
+            font-size: 1.1em;
+            animation: pulse 2s infinite;
+        }
+
+        /* Badge di notifica */
+        .action-button .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px white;
+        }
+
+        /* Animazione pulse per l'icona */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            10% {
+                transform: scale(1.1);
+            }
+
+            20% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Versione migliorata dei bottoni con bordo animato */
+        .action-button .btn-primary.animated {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .action-button .btn-primary.animated:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            z-index: -2;
+        }
+
+        .action-button .btn-primary.animated:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s;
+            border-radius: 8px;
+            z-index: -1;
+        }
+
+        .action-button .btn-primary.animated:hover:before {
+            width: 100%;
+        }
+
         /* Animation utilities */
         .fadeIn {
             animation: fadeIn 0.5s ease-in-out;
@@ -447,8 +577,9 @@
             <div class="admin-info">
                 <span id="adminName">{{ admin.nome }}</span>
                 <div class="action-button">
-                    <a href="/chat" class="btn btn-primary">
+                    <a href="/chat" class="btn btn-primary animated">
                         <i class="fas fa-comments"></i> Chat con pazienti
+                        <span class="notification-badge">3</span>
                     </a>
                 </div>
                 <button id="logoutBtn" class="logout-btn">

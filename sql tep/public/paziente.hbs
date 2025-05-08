@@ -950,6 +950,136 @@
             transform: translateY(-2px);
         }
 
+        /* Stile contenitore per i bottoni di azione */
+        .action-button {
+            position: relative;
+            margin: 0 8px;
+        }
+
+        /* Base comune per tutti i bottoni di chat */
+        .action-button a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        /* Stile specifico per il link nella navbar */
+        .action-button .navbar-link {
+            color: #3b82f6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .action-button .navbar-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #2563eb;
+        }
+
+        /* Stile per il bottone primario */
+        .action-button .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+        }
+
+        .action-button .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        .action-button .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Stile personalizzato per l'icona */
+        .action-button i.fas.fa-comments {
+            position: relative;
+            font-size: 1.1em;
+            animation: pulse 2s infinite;
+        }
+
+        /* Badge di notifica */
+        .action-button .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px white;
+        }
+
+        /* Animazione pulse per l'icona */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            10% {
+                transform: scale(1.1);
+            }
+
+            20% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Versione migliorata dei bottoni con bordo animato */
+        .action-button .btn-primary.animated {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .action-button .btn-primary.animated:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            z-index: -2;
+        }
+
+        .action-button .btn-primary.animated:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s;
+            border-radius: 8px;
+            z-index: -1;
+        }
+
+        .action-button .btn-primary.animated:hover:before {
+            width: 100%;
+        }
+
         /* Visitor counter styling */
         .visitor-counter {
             position: fixed;
@@ -1703,9 +1833,6 @@
 </head>
 
 <body>
-    <a href="/chat" class="navbar-link">
-        <i class="fas fa-comments"></i> Chat
-    </a>
     <header class="main-header">
         <div class="container">
             <div class="logo">
@@ -1718,8 +1845,9 @@
                     <div class="profile-status">Area Paziente</div>
                 </div>
                 <div class="action-button">
-                    <a href="/chat" class="btn btn-primary">
-                        <i class="fas fa-comments"></i> Chat con assistenza
+                    <a href="/chat" class="navbar-link">
+                        <i class="fas fa-comments"></i> Chat
+                        <span class="notification-badge">2</span>
                     </a>
                 </div>
                 <button class="logout-btn" id="logoutBtn" onclick="logout()">
@@ -1790,6 +1918,7 @@
                 <i class="fas fa-plus"></i> Nuovo Promemoria
             </button>
         </div>
+
         <!-- Modal per nuovo promemoria -->
         <div id="reminderModal"
             style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
@@ -1821,6 +1950,7 @@
                 </form>
             </div>
         </div>
+
         <!-- Modal per visualizzare/modificare/eliminare un evento -->
         <div id="eventModal"
             style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
@@ -1899,34 +2029,23 @@
         </div>
     </div>
 
-    <div class="chat-float-btn">
-        <i class="fas fa-comment-alt"></i>
-    </div>
 
-    <div id="chatWindow">
-        <div id="chatHeader">
-            <div class="chat-recipient">
-                <div class="user-avatar">F</div>
-                <h3>Farmacista</h3>
-            </div>
-            <button id="closeChat">&times;</button>
-        </div>
-        <div id="chatBody">
-            <div class="message system">
-                Benvenuto nella chat di PFarmacy! Come possiamo aiutarti oggi?
-            </div>
-        </div>
-        <div id="chatFooter">
-            <input type="text" id="chatInput" placeholder="Scrivi un messaggio...">
-            <button id="sendMessage"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
 
     <script>
         // Inizializzazione di FullCalendar
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
-            let currentEvent = null;
+            var currentEvent = null;
+
+            // Inizializza il calendario (se non esiste)
+            if (!calendarEl) {
+                console.error('Elemento calendario non trovato!');
+                const calendarContainer = document.querySelector('.calendar-container');
+                if (calendarContainer) {
+                    calendarContainer.innerHTML = '<div id="calendar"></div>';
+                    calendarEl = document.getElementById('calendar');
+                }
+            }
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -1972,19 +2091,19 @@
                             const defaultEvents = [
                                 {
                                     title: 'Ritiro farmaci',
-                                    start: '2025-03-25',
+                                    start: '2025-05-25',
                                     color: '#52B788',
                                     extendedProps: { type: 'default' }
                                 },
                                 {
                                     title: 'Consulto farmacista',
-                                    start: '2025-03-28T15:30:00',
+                                    start: '2025-05-28T15:30:00',
                                     color: '#3366FF',
                                     extendedProps: { type: 'default' }
                                 },
                                 {
                                     title: 'Controllo pressione',
-                                    start: '2025-04-05T10:00:00',
+                                    start: '2025-06-05T10:00:00',
                                     color: '#F59E0B',
                                     extendedProps: { type: 'default' }
                                 }
@@ -1998,17 +2117,17 @@
                             const defaultEvents = [
                                 {
                                     title: 'Ritiro farmaci',
-                                    start: '2025-03-25',
+                                    start: '2025-05-25',
                                     color: '#52B788'
                                 },
                                 {
                                     title: 'Consulto farmacista',
-                                    start: '2025-03-28T15:30:00',
+                                    start: '2025-05-28T15:30:00',
                                     color: '#3366FF'
                                 },
                                 {
                                     title: 'Controllo pressione',
-                                    start: '2025-04-05T10:00:00',
+                                    start: '2025-06-05T10:00:00',
                                     color: '#F59E0B'
                                 }
                             ];
@@ -2052,6 +2171,7 @@
                 }
             });
 
+            // Renderizza il calendario
             calendar.render();
 
             // Funzione per formattare la data nel formato richiesto dall'input datetime-local
@@ -2112,17 +2232,37 @@
                 const date = reminderDate.value;
                 const description = reminderDescription.value;
 
-                // Colore casuale per il promemoria (selezionato da una palette)
+                // Verifica che i dati siano validi prima di inviarli
+                if (!date || !description) {
+                    alert('Per favore compila tutti i campi');
+                    return;
+                }
+
+                // Colore casuale per il promemoria
                 const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-                // Prima salva l'evento nel server
+                // Ottieni il token JWT
+                const jwtToken = localStorage.getItem('jwtToken');
+
+                // Verifica se il token è presente
+                if (!jwtToken) {
+                    console.warn('Token JWT mancante');
+                    // Prova comunque a inviare la richiesta con solo i cookie
+                }
+
+                // Mostra un indicatore di caricamento
+                const saveButton = reminderForm.querySelector('button[type="submit"]');
+                const originalText = saveButton.innerHTML;
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+
+                // Invia la richiesta al server
                 fetch('/api/calendar-events', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('jwtToken') ?
-                            `Bearer ${localStorage.getItem('jwtToken')}` : ''
+                        'Authorization': jwtToken ? `Bearer ${jwtToken}` : ''
                     },
                     credentials: 'include',
                     body: JSON.stringify({
@@ -2133,14 +2273,51 @@
                     })
                 })
                     .then(response => {
+                        // Ripristina il pulsante
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalText;
+
                         if (!response.ok) {
-                            throw new Error('Errore nel salvare l\'evento');
+                            // Se c'è un fallback disponibile per il salvataggio locale, usalo
+                            if (window.confirm('Non è stato possibile salvare il promemoria sul server. Vuoi salvarlo localmente?')) {
+                                const localEvent = {
+                                    id: 'local_' + Date.now(),
+                                    title: description,
+                                    start: date,
+                                    color: randomColor,
+                                    extendedProps: {
+                                        type: 'local_reminder'
+                                    }
+                                };
+
+                                // Salva nel localStorage
+                                const localEvents = JSON.parse(localStorage.getItem('localCalendarEvents') || '[]');
+                                localEvents.push(localEvent);
+                                localStorage.setItem('localCalendarEvents', JSON.stringify(localEvents));
+
+                                // Aggiungi al calendario
+                                calendar.addEvent(localEvent);
+
+                                // Chiudi e avvisa
+                                closeReminderModal();
+                                alert('Promemoria salvato localmente.');
+                                return Promise.reject('Salvato localmente');
+                            }
+
+                            // Controlla i vari tipi di errore
+                            if (response.status === 401) {
+                                throw new Error('Sessione scaduta. Effettua nuovamente il login.');
+                            } else if (response.status === 400) {
+                                throw new Error('Dati non validi. Verifica le informazioni inserite.');
+                            } else {
+                                throw new Error(`Errore ${response.status}: ${response.statusText}`);
+                            }
                         }
                         return response.json();
                     })
                     .then(savedEvent => {
-                        // Dopo aver salvato, aggiungi l'evento al calendario con l'ID ricevuto dal server
-                        const newEvent = {
+                        // Aggiungi l'evento al calendario locale
+                        calendar.addEvent({
                             id: savedEvent.id,
                             title: description,
                             start: date,
@@ -2148,9 +2325,7 @@
                             extendedProps: {
                                 type: 'reminder'
                             }
-                        };
-
-                        calendar.addEvent(newEvent);
+                        });
 
                         // Notifica l'utente
                         alert('Promemoria aggiunto con successo!');
@@ -2159,8 +2334,11 @@
                         closeReminderModal();
                     })
                     .catch(error => {
+                        if (error === 'Salvato localmente') return;
                         console.error('Errore nel salvare il promemoria:', error);
-                        alert('Si è verificato un errore nel salvare il promemoria. Riprova più tardi.');
+
+                        // Mostra un messaggio di errore più specifico
+                        alert(`Si è verificato un errore: ${error.message || 'Controlla la connessione di rete'}`);
                     });
             });
 
@@ -2213,6 +2391,20 @@
                             return;
                         }
 
+                        // Se è un evento locale
+                        if (eventId.toString().startsWith('local_')) {
+                            // Elimina dal localStorage
+                            const localEvents = JSON.parse(localStorage.getItem('localCalendarEvents') || '[]');
+                            const filteredEvents = localEvents.filter(event => event.id !== eventId);
+                            localStorage.setItem('localCalendarEvents', JSON.stringify(filteredEvents));
+
+                            // Rimuovi dal calendario
+                            currentEvent.remove();
+                            closeEventModal();
+                            alert('Evento eliminato con successo!');
+                            return;
+                        }
+
                         // Elimina l'evento dal server
                         fetch(`/api/calendar-events/${eventId}`, {
                             method: 'DELETE',
@@ -2260,6 +2452,37 @@
                         return;
                     }
 
+                    // Se è un evento locale
+                    if (eventId.toString().startsWith('local_')) {
+                        // Aggiorna nel localStorage
+                        const localEvents = JSON.parse(localStorage.getItem('localCalendarEvents') || '[]');
+                        const updatedEvents = localEvents.map(event => {
+                            if (event.id === eventId) {
+                                return {
+                                    ...event,
+                                    title: newDescription,
+                                    start: newDate
+                                };
+                            }
+                            return event;
+                        });
+                        localStorage.setItem('localCalendarEvents', JSON.stringify(updatedEvents));
+
+                        // Aggiorna nel calendario
+                        currentEvent.setProp('title', newDescription);
+                        currentEvent.setStart(new Date(newDate));
+
+                        // Aggiorna il modal
+                        eventViewMode.style.display = 'block';
+                        eventEditMode.style.display = 'none';
+                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                        document.getElementById('eventDateTime').innerText = new Date(newDate).toLocaleDateString('it-IT', options);
+                        document.getElementById('eventDescription').innerText = newDescription;
+
+                        alert('Evento aggiornato localmente con successo!');
+                        return;
+                    }
+
                     // Aggiorna l'evento nel server
                     fetch(`/api/calendar-events/${eventId}`, {
                         method: 'PUT',
@@ -2304,6 +2527,18 @@
                 }
             });
 
+            // Al caricamento, recupera gli eventi locali se presenti
+            const localEvents = JSON.parse(localStorage.getItem('localCalendarEvents') || '[]');
+            localEvents.forEach(event => {
+                calendar.addEvent({
+                    id: event.id,
+                    title: event.title,
+                    start: event.start,
+                    color: event.color,
+                    extendedProps: event.extendedProps || { type: 'local_reminder' }
+                });
+            });
+
             // Configurazione della chat
             setupChat();
 
@@ -2317,6 +2552,7 @@
                 credentials: 'include'
             })
                 .then(() => {
+                    localStorage.removeItem('jwtToken'); // Rimuovi anche il token JWT
                     window.location.href = '/';  // Redirect alla homepage dopo il logout
                 })
                 .catch(error => {
@@ -2334,7 +2570,11 @@
             const chatInput = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendMessage');
             const chatBody = document.getElementById('chatBody');
-            const chatBadge = document.getElementById('chatBadge');
+            const chatBadge = document.createElement('div'); // Creiamo dinamicamente il badge
+            chatBadge.id = 'chatBadge';
+            chatBadge.style.display = 'none';
+            chatBadge.className = 'chat-badge';
+            chatFloatBtn.appendChild(chatBadge);
 
             // Messaggi predefiniti del farmacista
             const pharmacistResponses = [
@@ -2352,6 +2592,7 @@
 
             // Gestione apertura e chiusura della finestra di chat
             function openChat() {
+                if (!chatWindow) return;
                 chatWindow.style.display = 'flex';
                 chatOpen = true;
                 // Reset del badge
@@ -2359,22 +2600,28 @@
                 chatBadge.style.display = 'none';
                 chatBadge.textContent = '0';
                 // Focus sull'input
-                setTimeout(() => chatInput.focus(), 100);
+                setTimeout(() => chatInput && chatInput.focus(), 100);
             }
 
-            chatIcon.addEventListener('click', openChat);
-            chatFloatBtn.addEventListener('click', openChat);
+            if (chatIcon) chatIcon.addEventListener('click', openChat);
+            if (chatFloatBtn) chatFloatBtn.addEventListener('click', openChat);
 
-            closeChat.addEventListener('click', () => {
-                chatWindow.style.display = 'none';
-                chatOpen = false;
-            });
+            if (closeChat) {
+                closeChat.addEventListener('click', () => {
+                    chatWindow.style.display = 'none';
+                    chatOpen = false;
+                });
+            }
 
             // Collega anche il footer card dei messaggi all'apertura chat
-            document.querySelector('.dashboard-card:nth-child(3) .dashboard-card-footer').addEventListener('click', openChat);
+            const messageCardFooter = document.querySelector('.dashboard-card:nth-child(3) .dashboard-card-footer');
+            if (messageCardFooter) {
+                messageCardFooter.addEventListener('click', openChat);
+            }
 
             // Funzione per inviare un messaggio
             function sendMessage() {
+                if (!chatInput) return;
                 const text = chatInput.value.trim();
                 if (text) {
                     // Aggiunta del messaggio del paziente
@@ -2383,6 +2630,8 @@
 
                     // Simulazione risposta del farmacista
                     setTimeout(() => {
+                        if (!chatBody) return;
+
                         // Mostra "sta scrivendo..."
                         const typingIndicator = document.createElement('div');
                         typingIndicator.className = 'message received';
@@ -2412,15 +2661,19 @@
             }
 
             // Binding del pulsante di invio e della pressione Enter
-            sendButton.addEventListener('click', sendMessage);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
+            if (sendButton) sendButton.addEventListener('click', sendMessage);
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
 
             // Funzione per aggiungere messaggi alla chat
             function addMessage(text, type) {
+                if (!chatBody) return;
+
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
 
@@ -2484,6 +2737,7 @@
         // Funzione per setup del contatore visitatori con WebSocket
         function setupVisitorCounter() {
             const visitorCountElement = document.getElementById('visitorCount');
+            if (!visitorCountElement) return;
 
             // Imposta un valore iniziale stabile
             visitorCountElement.textContent = "1";
@@ -2508,7 +2762,7 @@
                 socket.send(JSON.stringify({
                     type: 'register',
                     page: 'paziente',
-                    user: 'Miftarve',
+                    user: 'verzeri',
                     timestamp: new Date().toISOString()
                 }));
             });
@@ -2562,7 +2816,7 @@
                     socket.send(JSON.stringify({
                         type: 'unregister',
                         page: 'paziente',
-                        user: 'Miftarve'
+                        user: 'verzeri'
                     }));
                 }
             });
