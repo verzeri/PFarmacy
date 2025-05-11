@@ -1626,7 +1626,55 @@ const swaggerDocument = {
         "bearerFormat": "JWT",
         "description": "Autenticazione basata su JWT"
       }
+    },
+    // Aggiungi questa parte all'oggetto swaggerDocument.paths
+"/api/jwt-test": {
+  "get": {
+    "summary": "Test del funzionamento JWT",
+    "tags": ["Autenticazione"],
+    "description": "Verifica che l'autenticazione JWT funzioni correttamente",
+    "responses": {
+      "200": {
+        "description": "Risultato del test JWT",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "Indica se il JWT funziona"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Messaggio esplicativo sul funzionamento del JWT"
+                },
+                "user": {
+                  "type": "object",
+                  "description": "Dettagli dell'utente se autenticato",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "ruolo": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  }
+}
   }
 };
 
@@ -2381,8 +2429,285 @@ app.get('/api/debug/calendar-events', (req, res) => {
   });
 });
 
+// Endpoint JWT compatibile con il sistema di autenticazione esistente
+app.get('/api/jwt-test', (req, res) => {
+  // IMPORTANTE: Questa funzione verifica il JWT utilizzando
+  // lo stesso metodo del middleware verifyToken esistente
+  
+  // 1. Non lasciamo che faccia il redirect come il middleware normale
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  const cookieToken = req.cookies?.jwt;
+  const finalToken = token || cookieToken;
+
+  if (!finalToken) {
+    return res.json({
+      success: false,
+      message: "JWT non funziona: nessun token fornito"
+    });
+  }
+
+  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.json({
+        success: false,
+        message: "JWT non funziona: " + err.message
+      });
+    }
+
+    if (decoded.instanceId !== SERVER_INSTANCE_ID) {
+      return res.json({
+        success: false,
+        message: "JWT non funziona: il server è stato riavviato dall'emissione del token"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "JWT funziona correttamente!",
+      user: decoded
+    });
+  });
+});
+
+// Modifica il middleware verifyToken per questo endpoint specifico
+app.get('/api/auth-test', (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  const cookieToken = req.cookies?.jwt;
+  const finalToken = token || cookieToken;
+
+  if (!finalToken) {
+    return res.json({
+      status: "Non autenticato",
+      message: "Nessun token JWT trovato",
+      authenticated: false
+    });
+  }
+
+  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.json({
+        status: "Non autenticato",
+        message: "Token JWT non valido: " + err.message,
+        authenticated: false
+      });
+    }
+
+    if (decoded.instanceId !== SERVER_INSTANCE_ID) {
+      return res.json({
+        status: "Non autenticato",
+        message: "Server riavviato dall'emissione del token",
+        authenticated: false
+      });
+    }
+
+    req.user = decoded;
+    return res.json({
+      status: "Autenticato",
+      message: "JWT funziona correttamente!",
+      authenticated: true,
+      user: {
+        id: decoded.id,
+        nome: decoded.nome,
+        email: decoded.email,
+        ruolo: decoded.ruolo
+      }
+    });
+  });
+});
+
+// Pagina HTML per visualizzare lo stato del JWT
+app.get('/jwt-status', (req, res) => {
+  // Qui non usiamo verifyToken per evitare redirect
+  // ma implementiamo direttamente la verifica
+  
+  // Raccogliamo informazioni di debug
+  const cookiesReceived = req.cookies ? Object.keys(req.cookies) : [];
+  const authHeader = req.headers['authorization'];
+  const hasAuthHeader = Boolean(authHeader);
+  
+  // Determiniamo il token come fa verifyToken
+  const token = authHeader && authHeader.split(' ')[1];
+  const cookieToken = req.cookies?.jwt;
+  const finalToken = token || cookieToken;
+  
+  // Se non c'è token, mostra pagina di errore
+  if (!finalToken) {
+    return res.send(`
+      <html>
+        <head>
+          <title>JWT Status</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .error { color: red; padding: 20px; border: 1px solid red; background: #ffeeee; }
+            .debug { background: #f8f8f8; padding: 15px; border: 1px solid #ddd; margin: 20px 0; }
+            code { background: #f4f4f4; padding: 2px 5px; }
+          </style>
+        </head>
+        <body>
+          <h1>Stato Autenticazione JWT</h1>
+          <div class="error">
+            <h2>JWT NON FUNZIONA</h2>
+            <p>Nessun token JWT trovato</p>
+          </div>
+          
+          <div class="debug">
+            <h3>Informazioni di Debug:</h3>
+            <p><strong>Cookie ricevuti:</strong> ${cookiesReceived.length ? cookiesReceived.join(', ') : 'nessuno'}</p>
+            <p><strong>Header Authorization:</strong> ${hasAuthHeader ? 'presente' : 'assente'}</p>
+            <p><strong>Cookie 'jwt':</strong> ${cookieToken ? 'presente' : 'assente'}</p>
+            <p>Questo messaggio indica che il browser non ha inviato un cookie JWT valido al server.</p>
+            <p>Possibili cause:</p>
+            <ul>
+              <li>Non hai effettuato il login</li>
+              <li>Il cookie è stato eliminato</li>
+              <li>Il browser sta bloccando i cookie</li>
+              <li>C'è un problema con il dominio o il percorso del cookie</li>
+            </ul>
+          </div>
+          
+          <p><a href="/login">Prova ad effettuare nuovamente il login</a></p>
+        </body>
+      </html>
+    `);
+  }
+
+  // Verifica il token
+  jwt.verify(finalToken, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.send(`
+        <html>
+          <head>
+            <title>JWT Status</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+              .error { color: red; padding: 20px; border: 1px solid red; background: #ffeeee; }
+              pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+            </style>
+          </head>
+          <body>
+            <h1>Stato Autenticazione JWT</h1>
+            <div class="error">
+              <h2>JWT NON FUNZIONA</h2>
+              <p>Token JWT non valido: ${err.message}</p>
+            </div>
+            <p>Il token è presente ma non è valido. Potrebbe essere scaduto o manipolato.</p>
+            <p><a href="/login">Prova ad effettuare nuovamente il login</a></p>
+          </body>
+        </html>
+      `);
+    }
+
+    if (decoded.instanceId !== SERVER_INSTANCE_ID) {
+      return res.send(`
+        <html>
+          <head>
+            <title>JWT Status</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+              .warning { color: orange; padding: 20px; border: 1px solid orange; background: #fff8ee; }
+            </style>
+          </head>
+          <body>
+            <h1>Stato Autenticazione JWT</h1>
+            <div class="warning">
+              <h2>JWT NON FUNZIONA</h2>
+              <p>Il server è stato riavviato dopo l'emissione del token.</p>
+            </div>
+            <p>Il token è valido ma appartiene a una sessione server precedente.</p>
+            <p><a href="/login">Effettua nuovamente il login</a></p>
+          </body>
+        </html>
+      `);
+    }
+
+    // Se arriviamo qui, il token è valido
+    return res.send(`
+      <html>
+        <head>
+          <title>JWT Status</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .success { color: green; padding: 20px; border: 1px solid green; background: #eeffee; }
+            table { border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>Stato Autenticazione JWT</h1>
+          <div class="success">
+            <h2>JWT FUNZIONA CORRETTAMENTE!</h2>
+          </div>
+          
+          <h3>Informazioni Utente:</h3>
+          <table>
+            <tr>
+              <th>ID</th>
+              <td>${decoded.id}</td>
+            </tr>
+            <tr>
+              <th>Nome</th>
+              <td>${decoded.nome}</td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td>${decoded.email}</td>
+            </tr>
+            <tr>
+              <th>Ruolo</th>
+              <td>${decoded.ruolo}</td>
+            </tr>
+          </table>
+          
+          <h3>Dettagli Token:</h3>
+          <table>
+            <tr>
+              <th>Istanza Server</th>
+              <td>${decoded.instanceId}</td>
+            </tr>
+            <tr>
+              <th>Fonte Token</th>
+              <td>${token ? 'Authorization Header' : 'Cookie'}</td>
+            </tr>
+          </table>
+          
+          <p><a href="/">Torna alla home</a></p>
+        </body>
+      </html>
+    `);
+  });
+});
+
+// Implementazione principale: endpoint protetto tramite middleware
+app.get('/api/jwt-test', verifyToken, (req, res) => {
+  // Se siamo qui, il middleware verifyToken ha funzionato correttamente
+  // e req.user è disponibile
+  res.json({
+    success: true,
+    message: "JWT funziona correttamente!",
+    user: req.user
+  });
+});
+
+// Endpoint alternativo che usa il middleware di verifica esattamente come le altre rotte
+app.get('/api/jwt-test-protected', verifyToken, (req, res) => {
+  // Se siamo qui, il verifyToken middleware ha permesso l'accesso
+  res.json({
+    success: true,
+    message: "JWT funziona correttamente! (Protetto da middleware)",
+    user: {
+      id: req.user.id,
+      email: req.user.email,
+      nome: req.user.nome,
+      ruolo: req.user.ruolo
+    }
+  });
+});
 // Avvio del server (modificato per usare http.server con socket.io)
 server.listen(port, () => {
   console.log(`Server in esecuzione su http://localhost:${port}`);
   console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
+  console.log(`Test JWT disponibile su http://localhost:${port}/jwt-status`);
 });
