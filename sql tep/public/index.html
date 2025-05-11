@@ -348,6 +348,18 @@
         #userList p:last-child {
             border-bottom: none;
         }
+        
+        /* Auth message styles */
+        #authMessage {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            display: none;
+        }
 
         @media (max-width: 900px) {
             .main-content {
@@ -395,6 +407,8 @@
                         <i class="fas fa-user-plus"></i> Registrazione
                     </button>
                 </div>
+                
+                <!-- Auth message will be inserted here by JS -->
 
                 <!-- Google Login Button -->
                 <a href="/auth/google" class="google-login-button">
@@ -495,6 +509,31 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if we have a token that might be from a previous server instance
+            const token = localStorage.getItem('jwtToken');
+            
+            if (token) {
+                // Fetch server status to see if it's a new instance
+                fetch('/api/server-status')
+                    .then(response => response.json())
+                    .then(data => {
+                        // We can check if the instanceId from the server matches any stored instanceId
+                        const storedInstanceId = localStorage.getItem('serverInstanceId');
+                        
+                        if (storedInstanceId && storedInstanceId !== data.instanceId) {
+                            // Server has been restarted, show message and clear authentication
+                            localStorage.removeItem('jwtToken');
+                            localStorage.removeItem('user');
+                        }
+                        
+                        // Store the current server instance ID
+                        localStorage.setItem('serverInstanceId', data.instanceId);
+                    })
+                    .catch(err => {
+                        console.error('Could not check server status:', err);
+                    });
+            }
+            
             // ========== PROTEZIONE ANTI-LOOP ==========
             // Controlla quando è stata effettuata l'ultima verifica dell'autenticazione
             const lastAuthCheck = localStorage.getItem('lastAuthCheck');
@@ -502,7 +541,6 @@
             
             // Se è stata effettuata una verifica negli ultimi 2 secondi, evita di farne un'altra
             if (lastAuthCheck && (now - parseInt(lastAuthCheck)) < 2000) {
-                console.log('Verifica auth troppo recente, interrompo ciclo potenziale');
                 return; // Uscita immediata per interrompere potenziali cicli
             }
             
@@ -513,7 +551,6 @@
             // Verifica se l'utente ha effettuato il logout recentemente (entro 5 secondi)
             const logoutTime = localStorage.getItem('logoutTime');
             if (logoutTime && (now - parseInt(logoutTime)) < 5000) {
-                console.log('Logout recente, saltando verifica auth');
                 return; // Non controllare l'autenticazione dopo un logout recente
             }
             
@@ -524,12 +561,10 @@
     
         // Funzione per verificare l'autenticazione in modo sicuro
         function checkAuth() {
-            console.log('Esecuzione verifica auth controllata');
             const token = localStorage.getItem('jwtToken');
             
             // Se non c'è token, non serve verificare
             if (!token) {
-                console.log('Nessun token da verificare');
                 return;
             }
             
@@ -555,8 +590,11 @@
                     console.log(`Utente autenticato, reindirizzamento a ${redirectPage}`);
                     window.location.href = redirectPage;
                 } else {
-                    // Token non valido, lo rimuoviamo ma rimaniamo sulla pagina
-                    console.log('Token non valido o scaduto, rimozione');
+                    // Se il server è stato riavviato, mostra un messaggio apposito
+                    if (data.serverRestarted) {
+                        showLoginMessage('Il server è stato riavviato. Per favore, effettua nuovamente il login.', 'info');
+                    }
+                    
                     localStorage.removeItem('jwtToken');
                     localStorage.removeItem('user');
                 }
@@ -566,7 +604,43 @@
                 // Non fare nulla in caso di errore, lascia l'utente nella pagina di login
             });
         }
-    
+
+        // Add a utility function to show login messages
+        function showLoginMessage(message, type = 'error') {
+            // Create or get message element
+            let messageEl = document.getElementById('authMessage');
+            if (!messageEl) {
+                messageEl = document.createElement('div');
+                messageEl.id = 'authMessage';
+                
+                // Insert before the Google login button
+                const formsContainer = document.querySelector('.forms-container');
+                const googleBtn = document.querySelector('.google-login-button');
+                formsContainer.insertBefore(messageEl, googleBtn);
+            }
+            
+            // Set appropriate styles based on message type
+            if (type === 'error') {
+                messageEl.style.backgroundColor = '#fee2e2';
+                messageEl.style.color = '#ef4444';
+                messageEl.style.border = '1px solid #fecaca';
+                messageEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            } else if (type === 'info') {
+                messageEl.style.backgroundColor = '#dbeafe';
+                messageEl.style.color = '#3b82f6';
+                messageEl.style.border = '1px solid #bfdbfe';
+                messageEl.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            }
+            
+            // Display the message
+            messageEl.style.display = 'flex';
+            
+            // Set a timeout to hide the message
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 8000);
+        }
+
         // Funzione per cambiare tab tra Login e Registrazione
         function openTab(tabName) {
             document.getElementById('login-tab').classList.toggle('active', tabName === 'login');
@@ -647,22 +721,37 @@
                 document.getElementById('loginLoader').style.display = 'none';
     
                 if (data.success) {
-                    // Save JWT token
-                    if (data.token) {
-                        localStorage.setItem('jwtToken', data.token);
-                        localStorage.setItem('user', JSON.stringify({
-                            email: email,
-                            ruolo: data.role || 'user'
-                        }));
-                    }
-    
-                    // Visual feedback before redirect
-                    document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
-                    
-                    // Redirect after delay
-                    setTimeout(() => {
-                        window.location.href = data.redirectPage;
-                    }, 1000);
+                    // Get server instance ID
+                    fetch('/api/server-status')
+                        .then(res => res.json())
+                        .then(serverData => {
+                            // Store server instance ID
+                            localStorage.setItem('serverInstanceId', serverData.instanceId);
+                            
+                            // Save JWT token
+                            if (data.token) {
+                                localStorage.setItem('jwtToken', data.token);
+                                localStorage.setItem('user', JSON.stringify({
+                                    email: email,
+                                    ruolo: data.role || 'user'
+                                }));
+                            }
+        
+                            // Visual feedback before redirect
+                            document.body.innerHTML = '<div style="text-align:center;margin-top:100px;"><h2><i class="fas fa-check-circle" style="color:#22c55e;font-size:48px;display:block;margin-bottom:20px;"></i>Login effettuato con successo!</h2><p>Reindirizzamento in corso...</p></div>';
+                            
+                            // Redirect after delay
+                            setTimeout(() => {
+                                window.location.href = data.redirectPage;
+                            }, 1000);
+                        })
+                        .catch(() => {
+                            // If we can't get server status, continue with login anyway
+                            if (data.token) {
+                                localStorage.setItem('jwtToken', data.token);
+                            }
+                            window.location.href = data.redirectPage;
+                        });
                 } else {
                     // Error display
                     document.getElementById('loginError').textContent = data.message || 'Si è verificato un errore durante il login.';
@@ -721,6 +810,7 @@
             // Rimuovi dati di autenticazione
             localStorage.removeItem('jwtToken');
             localStorage.removeItem('user');
+            localStorage.removeItem('serverInstanceId');
     
             // Chiamata API
             fetch('/logout', { 
@@ -758,6 +848,7 @@
             localStorage.removeItem('logoutTime');
             localStorage.removeItem('jwtToken');
             localStorage.removeItem('user');
+            localStorage.removeItem('serverInstanceId');
             alert('Stato di autenticazione resettato. Ricarica la pagina.');
         };
     </script>

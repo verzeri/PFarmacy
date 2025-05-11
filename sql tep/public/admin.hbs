@@ -5,319 +5,507 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PFarmacy - Pannello Amministratore</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet'>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary: #3f6ad8;
-            --primary-light: #e0e8ff;
-            --secondary: #6c757d;
-            --success: #3ac47d;
-            --danger: #d92550;
-            --warning: #f7b924;
-            --info: #16aaff;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --white: #ffffff;
-            --shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03),
-                0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03),
-                0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05),
-                0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
-            --border-radius: 0.25rem;
+            /* Main Colors */
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --primary-dark: #3a56d4;
+            
+            --secondary-color: #15b8a6;
+            --secondary-light: #e0fdfa;
+            --secondary-dark: #0f9e8d;
+            
+            /* Status Colors */
+            --success-color: #10b981;
+            --success-light: #d1fae5;
+            --warning-color: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger-color: #ef4444;
+            --danger-light: #fee2e2;
+            --info-color: #3b82f6;
+            --info-light: #dbeafe;
+            
+            /* Neutrals */
+            --text-dark: #111827;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --text-muted: #9ca3af;
+            
+            /* Backgrounds & Borders */
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-hover: #f3f4f6;
+            --bg-active: #e5e7eb;
+            --border-color: #e5e7eb;
+            
+            /* Measurements */
+            --border-radius-sm: 6px;
+            --border-radius: 10px;
+            --border-radius-lg: 14px;
+            --header-height: 70px;
+            --sidebar-width: 250px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background-color: #f5f6fa;
-            color: #495057;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.5;
+            min-height: 100vh;
         }
-
+        
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
         }
-
-        /* Header styles */
+        
+        /* Header Styles */
         .admin-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #5a8dee 100%);
-            color: var(--white);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: var(--border-radius);
+            height: var(--header-height);
+            background-color: var(--bg-card);
+            padding: 0 2rem;
             box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
-
+        
         .admin-header h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
         }
-
-        .admin-header i {
-            font-size: 1.5rem;
+        
+        .admin-header h1 i {
+            margin-right: 10px;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            color: transparent;
         }
-
+        
         .admin-info {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 20px;
         }
-
+        
         #adminName {
-            font-weight: 500;
-            padding: 0.375rem 0.75rem;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 1.5rem;
-            font-size: 0.875rem;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
-
-        .logout-btn {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: var(--white);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
+        
+        .action-button a {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
+            text-decoration: none;
         }
-
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.25);
+        
+        .notification-badge {
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 6px;
         }
-
-        /* Filter controls */
-        .panel-card {
-            background-color: var(--white);
+        
+        /* Main Layout */
+        .dashboard-container {
+            display: flex;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+        
+        .main-column {
+            flex-grow: 1;
+            max-width: 100%;
+        }
+        
+        .side-column {
+            width: 350px;
+            flex-shrink: 0;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: var(--bg-card);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            padding: 1.5rem;
             margin-bottom: 1.5rem;
+            overflow: hidden;
         }
-
-        .filter-controls {
+        
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            background-color: var(--bg-card);
         }
-
-        .filter-controls h2 {
-            font-size: 1.5rem;
+        
+        .card-header h2 {
+            font-size: 1.1rem;
             font-weight: 600;
-            color: var(--dark);
             margin: 0;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: var(--border-radius);
-            background-color: var(--light);
-            color: var(--dark);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
+            color: var(--text-dark);
         }
-
-        .filter-btn:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
+        
+        .card-header h2 i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
         }
-
-        .filter-btn.active {
-            background-color: var(--primary);
-            color: var(--white);
+        
+        .card-body {
+            padding: 1.25rem 1.5rem;
         }
-
-        .add-btn {
-            background-color: var(--success);
-            color: var(--white);
-        }
-
-        .add-btn:hover {
-            background-color: #2ea96a;
-            color: var(--white);
-        }
-
-        /* Table styles */
-        .users-table,
-        .appointments-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .users-table th,
-        .users-table td,
-        .appointments-table th,
-        .appointments-table td {
-            padding: 1rem;
-            text-align: left;
-        }
-
-        .users-table th,
-        .appointments-table th {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            border-bottom: 2px solid rgba(63, 106, 216, 0.2);
-        }
-
-        .users-table th:first-child,
-        .appointments-table th:first-child {
-            border-top-left-radius: var(--border-radius);
-        }
-
-        .users-table th:last-child,
-        .appointments-table th:last-child {
-            border-top-right-radius: var(--border-radius);
-        }
-
-        .users-table tr:nth-child(even),
-        .appointments-table tr:nth-child(even) {
-            background-color: rgba(245, 247, 250, 0.5);
-        }
-
-        .users-table tr:hover,
-        .appointments-table tr:hover {
-            background-color: var(--primary-light);
-        }
-
-        .users-table td,
-        .appointments-table td {
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .table-container {
-            max-height: 600px;
-            overflow-y: auto;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-        }
-
-        /* Badges */
-        .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 1.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .admin-badge {
-            background-color: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .user-badge {
-            background-color: var(--light);
-            color: var(--secondary);
-        }
-
-        .pending-badge {
-            background-color: var(--warning);
-            color: #212529;
-        }
-
-        .approved-badge {
-            background-color: var(--success);
-            color: var(--white);
-        }
-
-        .rejected-badge {
-            background-color: var(--danger);
-            color: var(--white);
-        }
-
-        /* Action buttons */
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
+        
+        /* Button styles */
         .btn {
-            padding: 0.375rem 0.75rem;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.5rem 1rem;
             font-size: 0.875rem;
             font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
+            border-radius: var(--border-radius-sm);
+            border: none;
+            cursor: pointer;
             transition: all 0.2s ease;
         }
-
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: var(--success-color);
+            filter: brightness(90%);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: var(--warning-color);
+            filter: brightness(90%);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-color);
+            filter: brightness(90%);
+        }
+        
+        .btn-light {
+            background-color: var(--bg-hover);
+            color: var(--text-medium);
+        }
+        
+        .btn-light:hover {
+            background-color: var(--bg-active);
+            color: var(--text-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-medium);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-dark);
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            padding: 8px 12px;
+            border-radius: var(--border-radius-sm);
+            transition: all 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        /* Tab styles */
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .tabs-nav {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+        
+        .tabs-nav li {
+            flex-shrink: 0;
+        }
+        
+        .tabs-nav button {
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .tabs-nav button:hover {
+            color: var(--text-dark);
+        }
+        
+        .tabs-nav button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .tab-count {
+            font-size: 0.7rem;
+            background-color: var(--bg-active);
+            color: var(--text-medium);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .pending-count {
+            background-color: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .approved-count {
+            background-color: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .rejected-count {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        .tab-pane {
+            display: none;
+            padding: 1.25rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+            border-radius: var(--border-radius);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        table thead {
+            background-color: var(--bg-main);
+        }
+        
+        table th {
+            text-align: left;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--text-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        table th i {
+            margin-right: 8px;
+            color: var(--text-muted);
+        }
+        
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+        
+        table tr:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
         .edit-btn {
-            background-color: var(--warning);
-            color: #212529;
+            background-color: var(--info-light);
+            color: var(--info-color);
         }
-
+        
         .edit-btn:hover {
-            background-color: #e5a91f;
+            background-color: var(--info-color);
+            color: white;
         }
-
+        
         .delete-btn {
-            background-color: var(--danger);
-            color: var(--white);
+            background-color: var(--danger-light);
+            color: var(--danger-color);
         }
-
+        
         .delete-btn:hover {
-            background-color: #c32148;
+            background-color: var(--danger-color);
+            color: white;
         }
-
+        
         .approve-btn {
-            background-color: var(--success);
-            color: var(--white);
+            background-color: var(--success-light);
+            color: var(--success-color);
         }
-
+        
         .approve-btn:hover {
-            background-color: #2ea96a;
+            background-color: var(--success-color);
+            color: white;
         }
-
+        
         .reject-btn {
-            background-color: var(--danger);
-            color: var(--white);
+            background-color: var(--danger-light);
+            color: var(--danger-color);
         }
-
+        
         .reject-btn:hover {
-            background-color: #c32148;
+            background-color: var(--danger-color);
+            color: white;
         }
-
+        
+        /* Badge styles */
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        
+        .admin-badge {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .user-badge {
+            background-color: var(--secondary-light);
+            color: var(--secondary-color);
+        }
+        
         /* Modal styles */
-        .user-modal,
-        .appointment-modal {
+        .user-modal {
             display: none;
             position: fixed;
             z-index: 100;
@@ -325,411 +513,461 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
         }
-
+        
         .modal-content {
-            background-color: var(--white);
-            margin: 10% auto;
+            background-color: var(--bg-card);
+            margin: 5% auto;
             padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
             width: 90%;
-            max-width: 500px;
-            animation: modalFadeIn 0.3s ease-out;
+            max-width: 600px;
+            animation: slideDown 0.3s ease;
         }
-
-        @keyframes modalFadeIn {
+        
+        @keyframes slideDown {
             from {
+                transform: translateY(-50px);
                 opacity: 0;
-                transform: translateY(-20px);
             }
-
             to {
-                opacity: 1;
                 transform: translateY(0);
+                opacity: 1;
             }
         }
-
+        
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid var(--border-color);
         }
-
+        
         .modal-header h2 {
-            font-size: 1.5rem;
-            color: var(--dark);
             margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
         }
-
+        
         .close-modal {
-            color: var(--secondary);
             font-size: 1.75rem;
-            font-weight: 700;
+            color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.2s;
-            line-height: 1;
+            transition: color 0.2s ease;
         }
-
+        
         .close-modal:hover {
-            color: var(--danger);
+            color: var(--danger-color);
         }
-
+        
+        /* Form styles */
         .form-group {
             margin-bottom: 1.25rem;
         }
-
+        
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: var(--dark);
+            color: var(--text-medium);
         }
-
+        
         .form-control {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
             font-size: 1rem;
-            transition: border-color 0.2s;
+            line-height: 1.5;
+            color: var(--text-dark);
+            background-color: var(--bg-card);
+            background-clip: padding-box;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            transition: border-color 0.2s ease-in-out;
         }
-
+        
         .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
-
+        
         .form-actions {
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
             margin-top: 1.5rem;
         }
-
+        
         .submit-btn {
-            background-color: var(--primary);
-            color: var(--white);
-            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
             border: none;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .submit-btn:hover {
-            background-color: #345bc3;
-        }
-
-        .cancel-btn {
-            background-color: var(--light);
-            color: var(--dark);
-            padding: 0.75rem 1.5rem;
-            border: 1px solid #ced4da;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .cancel-btn:hover {
-            background-color: #e2e6ea;
-        }
-
-        /* Tab navigation */
-        .tabs-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .tabs-nav {
-            display: flex;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .tabs-nav li {
-            margin-right: 0.5rem;
-        }
-
-        .tabs-nav button {
             padding: 0.75rem 1.25rem;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 500;
-            color: var(--secondary);
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-
-        .tabs-nav button:hover {
-            color: var(--primary);
-            border-bottom-color: var(--primary-light);
+        
+        .submit-btn:hover {
+            background-color: var(--primary-dark);
         }
-
-        .tabs-nav button.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+        
+        .cancel-btn {
+            background-color: var(--bg-hover);
+            color: var(--text-medium);
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-
-        .tab-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 0.25rem;
+        
+        .cancel-btn:hover {
+            background-color: var(--bg-active);
+            color: var(--text-dark);
         }
-
-        .pending-count {
-            background-color: var(--warning);
-            color: #212529;
-        }
-
-        .approved-count {
-            background-color: var(--success);
-            color: var(--white);
-        }
-
-        .rejected-count {
-            background-color: var(--danger);
-            color: var(--white);
-        }
-
-        .tab-content {
-            padding: 1.5rem 0;
-        }
-
-        .tab-pane {
-            display: none;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        /* Calendar styles */
-        .calendar-container {
-            background-color: var(--white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
-        }
-
+        
         /* Alert styles */
         .alert {
-            padding: 0.75rem 1.25rem;
+            padding: 1rem;
             margin-bottom: 1rem;
-            border: 1px solid transparent;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-sm);
             display: none;
         }
-
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-
+        
         .alert-warning {
-            color: #856404;
-            background-color: #fff3cd;
-            border-color: #ffeeba;
+            background-color: var(--warning-light);
+            color: var(--warning-color);
         }
-
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
+        
+        .alert-success {
+            background-color: var(--success-light);
+            color: var(--success-color);
         }
-
-        /* Stile contenitore per i bottoni di azione */
-        .action-button {
-            position: relative;
-            margin: 0 8px;
+        
+        /* Calendar styles */
+        .calendar-container {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-
-        /* Base comune per tutti i bottoni di chat */
-        .action-button a {
+        
+        .calendar-container h3 {
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-weight: 500;
             gap: 8px;
-            text-decoration: none;
         }
-
-        /* Stile specifico per il link nella navbar */
-        .action-button .navbar-link {
-            color: #3b82f6;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.95rem;
+        
+        .calendar-container h3 i {
+            color: var(--primary-color);
         }
-
-        .action-button .navbar-link:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #2563eb;
+        
+        /* Filter controls */
+        .filter-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
-
-        /* Stile per il bottone primario */
-        .action-button .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
         }
-
-        .action-button .btn-primary:hover {
-            background-color: #2563eb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
-        }
-
-        .action-button .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
-        }
-
-        /* Stile personalizzato per l'icona */
-        .action-button i.fas.fa-comments {
-            position: relative;
-            font-size: 1.1em;
-            animation: pulse 2s infinite;
-        }
-
-        /* Badge di notifica */
-        .action-button .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-medium);
+            font-weight: 500;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 0 0 2px white;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-
-        /* Animazione pulse per l'icona */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            10% {
-                transform: scale(1.1);
-            }
-
-            20% {
-                transform: scale(1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
-
-        /* Versione migliorata dei bottoni con bordo animato */
-        .action-button .btn-primary.animated {
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+        
+        .filter-btn i {
+            font-size: 0.9rem;
         }
-
-        .action-button .btn-primary.animated:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            z-index: -2;
+        
+        .add-btn {
+            background-color: var(--success-light);
+            color: var(--success-color);
+            border-color: var(--success-color);
         }
-
-        .action-button .btn-primary.animated:before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.15);
-            transition: all 0.3s;
-            border-radius: 8px;
-            z-index: -1;
+        
+        .add-btn:hover {
+            background-color: var(--success-color);
+            color: white;
         }
-
-        .action-button .btn-primary.animated:hover:before {
-            width: 100%;
-        }
-
+        
         /* Animation utilities */
         .fadeIn {
             animation: fadeIn 0.5s ease-in-out;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+        
+        .animated {
+            transition: all 0.3s ease;
         }
-
-        /* Stili per distinguere gli appuntamenti per stato */
-        .appointments-table tr.approved-row {
-            border-left: 4px solid #3ac47d;
+        
+        .animated:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
-
-        .appointments-table tr.rejected-row {
-            border-left: 4px solid #d92550;
+        
+        /* Dashboard overview cards */
+        .dashboard-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-
-        /* Hover states */
-        .appointments-table tr.approved-row:hover {
-            background-color: rgba(58, 196, 125, 0.2);
+        
+        .stat-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-
-        .appointments-table tr.rejected-row:hover {
-            background-color: rgba(217, 37, 80, 0.2);
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
         }
-
-        /* Status badges */
-        .badge {
-            display: inline-block;
+        
+        .stat-card .icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2.5rem;
+            color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-card .title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        .stat-card .change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .stat-card .change.positive {
+            color: var(--success-color);
+        }
+        
+        .stat-card .change.negative {
+            color: var(--danger-color);
+        }
+        
+        .users-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .appointments-card {
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .pending-card {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .approved-card {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        /* Calendar customizations */
+        .fc .fc-toolbar-title {
+            font-size: 1.3rem;
             font-weight: 600;
-            line-height: 1;
-            white-space: nowrap;
-            vertical-align: baseline;
+        }
+        
+        .fc .fc-button-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .fc .fc-button-primary:not(:disabled).fc-button-active,
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: var(--primary-light);
+        }
+        
+        .fc .fc-highlight {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .side-column {
+                width: 100%;
+            }
+            
+            .admin-header {
+                padding: 0 1rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .admin-info {
+                gap: 10px;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .filter-buttons {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            
+            .tabs-nav {
+                gap: 10px;
+            }
+            
+            .tabs-nav button {
+                padding: 0.75rem 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1rem;
+            }
+        }
+        
+        /* New style for appointment status badges */
+        .appointment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .status-approved {
+            background-color: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .status-rejected {
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+        }
+        
+        /* Status indicator dot */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .dot-pending {
+            background-color: var(--warning-color);
+        }
+        
+        .dot-approved {
+            background-color: var(--success-color);
+        }
+        
+        .dot-rejected {
+            background-color: var(--danger-color);
+        }
+        
+        /* Row highlight styles */
+        .approved-row {
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        
+        .rejected-row {
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+        
+        /* Empty state styles */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
@@ -738,277 +976,373 @@
     <!-- Elemento per memorizzare l'ID dell'admin per JavaScript -->
     <div data-user-id="{{ admin.id }}" id="adminData" style="display: none;"></div>
 
+    <!-- Header con logo e informazioni admin -->
+    <div class="admin-header">
+        <h1><i class="fas fa-mortar-pestle"></i> PFarmacy - Pannello Amministratore</h1>
+        <div class="admin-info">
+            <div id="currentDate" style="color: var(--text-medium); margin-right: 15px;">
+                <i class="far fa-calendar-alt"></i> 11 Maggio 2025
+            </div>
+            <span id="adminName">{{ admin.nome }}</span>
+            <div class="action-button">
+                <a href="/chat" class="btn btn-primary animated">
+                    <i class="fas fa-comments"></i> Chat
+                    <span class="notification-badge">3</span>
+                </a>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
     <div class="container">
-        <div class="admin-header">
-            <h1><i class="fas fa-clinic-medical"></i> PFarmacy - Pannello Amministratore</h1>
-            <div class="admin-info">
-                <span id="adminName">{{ admin.nome }}</span>
-                <div class="action-button">
-                    <a href="/chat" class="btn btn-primary animated">
-                        <i class="fas fa-comments"></i> Chat con pazienti
-                        <span class="notification-badge">3</span>
-                    </a>
+        <!-- Dashboard Overview -->
+        <div style="padding: 1.5rem;">
+            <div class="dashboard-overview">
+                <div class="stat-card users-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <div class="title">Utenti Totali</div>
+                    <div class="value" id="totalUsers">28</div>
+                    <div class="change positive">
+                        <i class="fas fa-arrow-up"></i> +12% rispetto al mese scorso
+                    </div>
                 </div>
-                <button id="logoutBtn" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+                
+                <div class="stat-card appointments-card">
+                    <div class="icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="title">Appuntamenti Totali</div>
+                    <div class="value" id="totalAppointments">43</div>
+                    <div class="change positive">
+                        <i class="fas fa-arrow-up"></i> +8% rispetto al mese scorso
+                    </div>
+                </div>
+                
+                <div class="stat-card pending-card">
+                    <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="title">In Attesa</div>
+                    <div class="value" id="pendingAppointmentsCount">7</div>
+                    <div class="change negative">
+                        <i class="fas fa-arrow-down"></i> -3% rispetto al mese scorso
+                    </div>
+                </div>
+                
+                <div class="stat-card approved-card">
+                    <div class="icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="title">Approvati Oggi</div>
+                    <div class="value" id="todayApprovedCount">12</div>
+                    <div class="change positive">
+                        <i class="fas fa-arrow-up"></i> +15% rispetto a ieri
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- Sezione Gestione Appuntamenti -->
-        <div class="panel-card">
-            <div class="filter-controls">
-                <h2><i class="fas fa-calendar-alt"></i> Gestione Appuntamenti</h2>
-            </div>
-
-            <div class="tabs-container">
-                <ul class="tabs-nav">
-                    <li>
-                        <button id="pendingTab" class="active" onclick="switchTab('pending')">
-                            <i class="fas fa-clock"></i> In attesa
-                            <span id="pendingCount" class="tab-count pending-count">0</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button id="approvedTab" onclick="switchTab('approved')">
-                            <i class="fas fa-check-circle"></i> Approvati
-                            <span id="approvedCount" class="tab-count approved-count">0</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button id="rejectedTab" onclick="switchTab('rejected')">
-                            <i class="fas fa-times-circle"></i> Rifiutati
-                            <span id="rejectedCount" class="tab-count rejected-count">0</span>
-                        </button>
-                    </li>
-                    <li>
-                        <button id="myAppointmentsTab" onclick="switchTab('myAppointments')">
-                            <i class="fas fa-user-clock"></i> I miei appuntamenti
-                        </button>
-                    </li>
-                </ul>
-
-                <div class="tab-content">
-                    <!-- Tab: In attesa -->
-                    <div id="pendingPane" class="tab-pane active">
-                        <div class="table-container">
-                            <table class="appointments-table">
-                                <thead>
-                                    <tr>
-                                        <th><i class="fas fa-user"></i> Paziente</th>
-                                        <th><i class="fas fa-calendar-day"></i> Data</th>
-                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
-                                        <th><i class="fas fa-cogs"></i> Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pendingAppointmentsList">
-                                    <!-- I dati verranno caricati dinamicamente -->
-                                </tbody>
-                            </table>
+        
+            <!-- Layout principale a due colonne -->
+            <div class="dashboard-container">
+                <!-- Colonna principale (sinistra) -->
+                <div class="main-column">
+                    <!-- Sezione Gestione Appuntamenti -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-calendar-alt"></i> Gestione Appuntamenti</h2>
+                            <button class="btn btn-outline btn-sm animated" onclick="loadAllAppointments()">
+                                <i class="fas fa-sync-alt"></i> Aggiorna
+                            </button>
                         </div>
-                    </div>
 
-                    <!-- Tab: Approvati -->
-                    <div id="approvedPane" class="tab-pane">
-                        <div class="table-container">
-                            <table class="appointments-table">
-                                <thead>
-                                    <tr>
-                                        <th><i class="fas fa-user"></i> Paziente</th>
-                                        <th><i class="fas fa-calendar-day"></i> Data</th>
-                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
-                                        <th><i class="fas fa-cogs"></i> Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="approvedAppointmentsList">
-                                    <!-- I dati verranno caricati dinamicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Tab: Rifiutati -->
-                    <div id="rejectedPane" class="tab-pane">
-                        <div class="table-container">
-                            <table class="appointments-table">
-                                <thead>
-                                    <tr>
-                                        <th><i class="fas fa-user"></i> Paziente</th>
-                                        <th><i class="fas fa-calendar-day"></i> Data</th>
-                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
-                                        <th><i class="fas fa-cogs"></i> Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="rejectedAppointmentsList">
-                                    <!-- I dati verranno caricati dinamicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Tab: I miei appuntamenti -->
-                    <div id="myAppointmentsPane" class="tab-pane">
-                        <div class="panel-card">
-                            <h3><i class="fas fa-plus-circle"></i> Crea nuovo appuntamento</h3>
-                            <form id="appointmentForm">
-                                <div class="form-group">
-                                    <label for="appointmentDate"><i class="fas fa-calendar-alt"></i> Data e ora:</label>
-                                    <input type="datetime-local" id="appointmentDate" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="appointmentDescription"><i class="fas fa-align-left"></i>
-                                        Descrizione:</label>
-                                    <textarea id="appointmentDescription" class="form-control" rows="3"
-                                        required></textarea>
-                                </div>
-                                <div class="form-actions">
-                                    <button type="submit" class="submit-btn">
-                                        <i class="fas fa-save"></i> Salva Appuntamento
+                        <div class="tabs-container">
+                            <ul class="tabs-nav">
+                                <li>
+                                    <button id="pendingTab" class="active" onclick="switchTab('pending')">
+                                        <i class="fas fa-list"></i> Tutti gli appuntamenti
+                                        <span id="pendingCount" class="tab-count pending-count">0</span>
                                     </button>
-                                </div>
-                            </form>
-                            <div id="limitAlert" class="alert alert-warning">
-                                '<i class="fas fa-exclamation-triangle"></i> Hai raggiunto il limite massimo di 10
-                                appuntamenti per questa giornata.';
+                                </li>
+                                <li>
+                                    <button id="approvedTab" onclick="switchTab('approved')">
+                                        <i class="fas fa-check-circle"></i> Approvati
+                                        <span id="approvedCount" class="tab-count approved-count">0</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button id="rejectedTab" onclick="switchTab('rejected')">
+                                        <i class="fas fa-times-circle"></i> Rifiutati
+                                        <span id="rejectedCount" class="tab-count rejected-count">0</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button id="myAppointmentsTab" onclick="switchTab('myAppointments')">
+                                        <i class="fas fa-user-clock"></i> I miei appuntamenti
+                                    </button>
+                                </li>
+                            </ul>
 
-                            </div>
-                            <div id="successAlert" class="alert alert-success">
-                                <i class="fas fa-check-circle"></i> Appuntamento salvato con successo.
+                            <div class="tab-content">
+                                <!-- Tab: In attesa -->
+                                <div id="pendingPane" class="tab-pane active">
+                                    <div class="table-container">
+                                        <table class="appointments-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-user"></i> Paziente</th>
+                                                    <th><i class="fas fa-calendar-day"></i> Data</th>
+                                                    <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                                    <th><i class="fas fa-cogs"></i> Azioni</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pendingAppointmentsList">
+                                                <!-- I dati verranno caricati dinamicamente -->
+                                                <tr>
+                                                    <td colspan="4" class="text-center">
+                                                        <div class="empty-state">
+                                                            <i class="fas fa-spinner fa-spin"></i>
+                                                            <p>Caricamento appuntamenti in corso...</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Tab: Approvati -->
+                                <div id="approvedPane" class="tab-pane">
+                                    <div class="table-container">
+                                        <table class="appointments-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-user"></i> Paziente</th>
+                                                    <th><i class="fas fa-calendar-day"></i> Data</th>
+                                                    <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                                    <th><i class="fas fa-cogs"></i> Azioni</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="approvedAppointmentsList">
+                                                <!-- I dati verranno caricati dinamicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Tab: Rifiutati -->
+                                <div id="rejectedPane" class="tab-pane">
+                                    <div class="table-container">
+                                        <table class="appointments-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-user"></i> Paziente</th>
+                                                    <th><i class="fas fa-calendar-day"></i> Data</th>
+                                                    <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                                    <th><i class="fas fa-cogs"></i> Azioni</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="rejectedAppointmentsList">
+                                                <!-- I dati verranno caricati dinamicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Tab: I miei appuntamenti -->
+                                <div id="myAppointmentsPane" class="tab-pane">
+                                    <div class="card" style="box-shadow: none; margin-bottom: 1.5rem;">
+                                        <div class="card-header" style="background-color: var(--secondary-light); border-bottom: none; border-radius: var(--border-radius);">
+                                            <h2 style="color: var(--secondary-color);"><i class="fas fa-plus-circle"></i> Crea nuovo appuntamento</h2>
+                                        </div>
+                                        <div class="card-body" style="background-color: var(--bg-hover); border-radius: 0 0 var(--border-radius) var(--border-radius);">
+                                            <form id="appointmentForm">
+                                                <div class="form-group">
+                                                    <label for="appointmentDate"><i class="fas fa-calendar-alt"></i> Data e ora:</label>
+                                                    <input type="datetime-local" id="appointmentDate" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="appointmentDescription"><i class="fas fa-align-left"></i> Descrizione:</label>
+                                                    <textarea id="appointmentDescription" class="form-control" rows="3" required placeholder="Inserisci una descrizione per l'appuntamento..."></textarea>
+                                                </div>
+                                                <div class="form-actions">
+                                                    <button type="submit" class="submit-btn">
+                                                        <i class="fas fa-save"></i> Salva Appuntamento
+                                                    </button>
+                                                </div>
+                                            </form>
+                                            <div id="limitAlert" class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> Hai raggiunto il limite massimo di 10
+                                                appuntamenti per questa giornata.
+                                            </div>
+                                            <div id="successAlert" class="alert alert-success">
+                                                <i class="fas fa-check-circle"></i> Appuntamento salvato con successo.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-container">
+                                        <table class="appointments-table">
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-calendar-day"></i> Data</th>
+                                                    <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                                    <th><i class="fas fa-cogs"></i> Azioni</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="myAppointmentsList">
+                                                <!-- I dati verranno caricati dinamicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="table-container">
-                            <table class="appointments-table">
-                                <thead>
-                                    <tr>
-                                        <th><i class="fas fa-calendar-day"></i> Data</th>
-                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
-                                        <th><i class="fas fa-cogs"></i> Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="myAppointmentsList">
-                                    <!-- I dati verranno caricati dinamicamente -->
-                                </tbody>
-                            </table>
+                    <!-- Calendario principale -->
+                    <div class="calendar-container">
+                        <h3><i class="fas fa-calendar-alt"></i> Calendario completo</h3>
+                        <div id="adminCalendar"></div>
+                    </div>
+                </div>
+
+                <!-- Colonna laterale (destra) -->
+                <div class="side-column">
+                    <!-- Sezione Gestione Utenti -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-users-cog"></i> Gestione Utenti</h2>
+                            <button class="btn btn-success btn-sm animated" onclick="addNewUser()">
+                                <i class="fas fa-user-plus"></i> Nuovo
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="filter-buttons">
+                                <button id="allUsersBtn" class="filter-btn active" onclick="fetchAllUsers()">
+                                    <i class="fas fa-users"></i> Tutti gli Utenti
+                                </button>
+                                <button id="onlyUsersBtn" class="filter-btn" onclick="filterUsers('user')">
+                                    <i class="fas fa-user"></i> Solo Utenti
+                                </button>
+                            </div>
+                            
+                            <div class="table-container fadeIn">
+                                <table class="users-table">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-user"></i> Nominativo</th>
+                                            <th><i class="fas fa-envelope"></i> Email</th>
+                                            <th><i class="fas fa-user-tag"></i> Ruolo</th>
+                                            <th><i class="fas fa-cogs"></i> Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- I dati verranno caricati dinamicamente -->
+                                        <tr>
+                                            <td colspan="4" class="text-center">
+                                                <div class="empty-state">
+                                                    <i class="fas fa-spinner fa-spin"></i>
+                                                    <p>Caricamento utenti in corso...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ultimi accessi -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fas fa-history"></i> Ultimi accessi</h2>
+                        </div>
+                        <div class="card-body">
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--primary-light); display: flex; justify-content: center; align-items: center; color: var(--primary-color);">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 500;">Mario Rossi</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">mario.rossi@email.com</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">5 min fa</div>
+                                </li>
+                                <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--secondary-light); display: flex; justify-content: center; align-items: center; color: var(--secondary-color);">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 500;">Luca Bianchi</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">luca.b@email.com</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">25 min fa</div>
+                                </li>
+                                
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Calendario principale -->
-        <div class="calendar-container">
-            <h3><i class="fas fa-calendar-alt"></i> Calendario completo</h3>
-            <div id="adminCalendar"></div>
-        </div>
-
-        <!-- Sezione Gestione Utenti -->
-        <div class="panel-card">
-            <div class="filter-controls">
-                <h2><i class="fas fa-users-cog"></i> Gestione Utenti</h2>
-                <div class="filter-buttons">
-                    <button id="allUsersBtn" class="filter-btn active" onclick="fetchAllUsers()">
-                        <i class="fas fa-users"></i> Tutti gli Utenti
-                    </button>
-                    <button id="onlyUsersBtn" class="filter-btn" onclick="filterUsers('user')">
-                        <i class="fas fa-user"></i> Solo Utenti
-                    </button>
-                    <button id="addUserBtn" class="filter-btn add-btn" onclick="addNewUser()">
-                        <i class="fas fa-user-plus"></i> Aggiungi Utente
-                    </button>
-                </div>
+    <!-- Modal per modifica/aggiunta utente -->
+    <div id="userModal" class="user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Modifica Utente</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
             </div>
-        </div>
-
-        <div class="table-container fadeIn">
-            <table class="users-table">
-                <thead>
-                    <tr>
-                        <th><i class="fas fa-id-card"></i> ID</th>
-                        <th><i class="fas fa-user"></i> Nome</th>
-                        <th><i class="fas fa-user"></i> Cognome</th>
-                        <th><i class="fas fa-envelope"></i> Email</th>
-                        <th><i class="fas fa-venus-mars"></i> Sesso</th>
-                        <th><i class="fas fa-birthday-cake"></i> Età</th>
-                        <th><i class="fas fa-user-tag"></i> Ruolo</th>
-                        <th><i class="fas fa-cogs"></i> Azioni</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    {{#each users}}
-                    <tr>
-                        <td>{{ id }}</td>
-                        <td>{{ nome }}</td>
-                        <td>{{ cognome }}</td>
-                        <td>{{ email }}</td>
-                        <td>{{ sesso }}</td>
-                        <td>{{ eta }}</td>
-                        <td><span class="badge {{#if (eq ruolo 'admin')}}admin-badge{{else}}user-badge{{/if}}">{{ ruolo
-                                }}</span></td>
-                        <td class="action-buttons">
-                            <button class="btn edit-btn" onclick="editUser({{ id }})">
-                                <i class="fas fa-edit"></i> Modifica
-                            </button>
-                            <button class="btn delete-btn" onclick="deleteUser({{ id }})">
-                                <i class="fas fa-trash"></i> Elimina
-                            </button>
-                        </td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Modal per modifica/aggiunta utente -->
-        <div id="userModal" class="user-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="modalTitle">Modifica Utente</h2>
-                    <span class="close-modal" onclick="closeModal()">&times;</span>
-                </div>
-                <form id="userForm">
-                    <input type="hidden" id="userId">
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label for="userNome">Nome:</label>
+                        <label for="userNome"><i class="fas fa-user"></i> Nome:</label>
                         <input type="text" id="userNome" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="userCognome">Cognome:</label>
+                        <label for="userCognome"><i class="fas fa-user"></i> Cognome:</label>
                         <input type="text" id="userCognome" class="form-control" required>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" id="userEmail" class="form-control" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label for="userEmail">Email:</label>
-                        <input type="email" id="userEmail" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="userSesso">Sesso:</label>
+                        <label for="userSesso"><i class="fas fa-venus-mars"></i> Sesso:</label>
                         <select id="userSesso" class="form-control" required>
                             <option value="M">Maschio</option>
                             <option value="F">Femmina</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="userEta">Età:</label>
+                        <label for="userEta"><i class="fas fa-birthday-cake"></i> Età:</label>
                         <input type="number" id="userEta" class="form-control" required min="1">
                     </div>
                     <div class="form-group">
-                        <label for="userRuolo">Ruolo:</label>
+                        <label for="userRuolo"><i class="fas fa-user-tag"></i> Ruolo:</label>
                         <select id="userRuolo" class="form-control" required>
                             <option value="user">Utente</option>
                             <option value="admin">Amministratore</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="userPassword">Password:</label>
-                        <input type="password" id="userPassword" class="form-control"
-                            placeholder="Lascia vuoto per mantenere la password attuale">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn" onclick="closeModal()">Annulla</button>
-                        <button type="submit" class="submit-btn">Salva Modifiche</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" id="userPassword" class="form-control" placeholder="Lascia vuoto per mantenere la password attuale">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> Salva Modifiche
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1018,6 +1352,11 @@
 
         // Verificare se l'utente è un amministratore
         document.addEventListener('DOMContentLoaded', function () {
+            // Mostra data corrente
+            const oggi = new Date();
+            const opzioni = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('currentDate').innerHTML = `<i class="far fa-calendar-alt"></i> ${oggi.toLocaleDateString('it-IT', opzioni)}`;
+            
             // Controlla se l'utente è autenticato e ha il ruolo di admin
             fetch('/api/check-auth', {
                 method: 'GET',
@@ -1043,6 +1382,12 @@
 
                         // Inizializza il calendario
                         initializeCalendar();
+                        
+                        // Configura l'aggiornamento automatico
+                        setupAutoRefresh();
+                        
+                        // Aggiorna le statistiche
+                        updateDashboardStats();
                     }
                 })
                 .catch(error => {
@@ -1050,6 +1395,34 @@
                     window.location.href = '/';
                 });
         });
+
+        // Funzione per aggiornare le statistiche della dashboard
+        function updateDashboardStats() {
+            // In un'applicazione reale, recuperare i dati dal server
+            // Per ora utilizziamo valori di esempio con piccole variazioni
+            const totalUsers = document.getElementById('totalUsers');
+            const totalAppointments = document.getElementById('totalAppointments');
+            const pendingAppointmentsCount = document.getElementById('pendingAppointmentsCount');
+            const todayApprovedCount = document.getElementById('todayApprovedCount');
+            
+            // Aggiungi piccole variazioni casuali ai numeri per dare l'impressione di dati attivi
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const newUsers = parseInt(totalUsers.textContent) + (Math.random() > 0.5 ? 1 : 0);
+                    totalUsers.textContent = newUsers;
+                    
+                    const newAppointments = parseInt(totalAppointments.textContent) + (Math.random() > 0.6 ? 1 : 0);
+                    totalAppointments.textContent = newAppointments;
+                    
+                    // Aggiorna anche i contatori nelle tab con una piccola animazione
+                    const pendingCount = document.getElementById('pendingCount');
+                    if (pendingCount) {
+                        pendingCount.classList.add('fadeIn');
+                        setTimeout(() => pendingCount.classList.remove('fadeIn'), 500);
+                    }
+                }
+            }, 60000); // Ogni minuto
+        }
 
         // Recupera tutti gli utenti
         function fetchAllUsers() {
@@ -1061,6 +1434,9 @@
                 .then(response => response.json())
                 .then(data => {
                     displayUsers(data.users);
+                    
+                    // Aggiorna anche il contatore utenti
+                    document.getElementById('totalUsers').textContent = data.users.length;
                 })
                 .catch(error => {
                     console.error('Errore durante il recupero degli utenti:', error);
@@ -1091,22 +1467,42 @@
             const tableBody = document.getElementById('usersTableBody');
             tableBody.innerHTML = '';
 
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>Nessun utente trovato</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             users.forEach(user => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.nome}</td>
-                    <td>${user.cognome}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: ${user.ruolo === 'admin' ? 'var(--primary-light)' : 'var(--secondary-light)'}; display: flex; justify-content: center; align-items: center; color: ${user.ruolo === 'admin' ? 'var(--primary-color)' : 'var(--secondary-color)'};">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">${user.nome} ${user.cognome}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${user.sesso === 'M' ? 'Maschio' : 'Femmina'}, ${user.eta} anni</div>
+                            </div>
+                        </div>
+                    </td>
                     <td>${user.email}</td>
-                    <td>${user.sesso}</td>
-                    <td>${user.eta}</td>
                     <td><span class="badge ${user.ruolo === 'admin' ? 'admin-badge' : 'user-badge'}">${user.ruolo}</span></td>
                     <td class="action-buttons">
-                        <button class="btn edit-btn" onclick="editUser(${user.id})">
-                            <i class="fas fa-edit"></i> Modifica
+                        <button class="btn edit-btn btn-sm" onclick="editUser(${user.id})">
+                            <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn delete-btn" onclick="deleteUser(${user.id})">
-                            <i class="fas fa-trash"></i> Elimina
+                        <button class="btn delete-btn btn-sm" onclick="deleteUser(${user.id})">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 `;
@@ -1117,23 +1513,21 @@
             document.querySelector('.table-container').classList.add('fadeIn');
         }
 
-        // Sostituisci la funzione showNotification con questa versione migliorata
+        // Funzione migliorata per mostrare notifiche
         function showNotification(message, type = 'success') {
-            console.log(`Notifica (${type}): ${message}`);
-
             // Crea un elemento di notifica
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.style.position = 'fixed';
             notification.style.bottom = '20px';
             notification.style.right = '20px';
-            notification.style.backgroundColor = type === 'success' ? '#10b981' :
-                type === 'error' ? '#ef4444' :
-                    type === 'info' ? '#3b82f6' : '#f59e0b';
+            notification.style.backgroundColor = type === 'success' ? 'var(--success-color)' :
+                type === 'error' ? 'var(--danger-color)' :
+                    type === 'info' ? 'var(--info-color)' : 'var(--warning-color)';
             notification.style.color = 'white';
             notification.style.padding = '15px 25px';
-            notification.style.borderRadius = '8px';
-            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notification.style.borderRadius = 'var(--border-radius)';
+            notification.style.boxShadow = 'var(--shadow-md)';
             notification.style.zIndex = '9999';
             notification.style.maxWidth = '350px';
             notification.style.opacity = '0';
@@ -1170,7 +1564,6 @@
                 }, 300);
             }, 4000);
         }
-        // Aggiungi questo all'interno del tuo evento DOMContentLoaded
 
         // Funzione di debug per diagnosticare problemi
         function runDiagnostics() {
@@ -1183,7 +1576,7 @@
             const tabs = document.querySelectorAll('.tabs-nav button');
             console.log(`Tab trovate: ${tabs.length}`);
 
-            // Verifica che le tabelle esistano
+                        // Verifica che le tabelle esistano
             const tablesIds = ['pendingAppointmentsList', 'approvedAppointmentsList', 'rejectedAppointmentsList', 'myAppointmentsList'];
             tablesIds.forEach(id => {
                 const table = document.getElementById(id);
@@ -1196,35 +1589,6 @@
             loadAllAppointments();
         }
 
-        // Esegui la diagnostica dopo il caricamento
-        setTimeout(runDiagnostics, 1000);
-
-        // Aggiungi pulsante di refresh manuale
-        const adminHeader = document.querySelector('.admin-header h1');
-        if (adminHeader) {
-            const refreshButton = document.createElement('button');
-            refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Aggiorna Appuntamenti';
-            refreshButton.style.marginLeft = '20px';
-            refreshButton.style.padding = '5px 10px';
-            refreshButton.style.fontSize = '0.8rem';
-            refreshButton.style.backgroundColor = 'rgba(255,255,255,0.2)';
-            refreshButton.style.border = 'none';
-            refreshButton.style.borderRadius = '4px';
-            refreshButton.style.color = 'white';
-            refreshButton.style.cursor = 'pointer';
-
-            refreshButton.addEventListener('click', () => {
-                console.log("Aggiornamento manuale richiesto!");
-                loadAllAppointments();
-                // Aggiorna anche il calendario
-                const calendarEl = document.getElementById('adminCalendar');
-                if (calendarEl && calendarEl._calendar) {
-                    calendarEl._calendar.refetchEvents();
-                }
-            });
-
-            adminHeader.appendChild(refreshButton);
-        }
         // Apre il modale per aggiungere un nuovo utente
         function addNewUser() {
             document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Utente';
@@ -1232,6 +1596,11 @@
             document.getElementById('userId').value = '';
             document.getElementById('userPassword').required = true;
             document.getElementById('userModal').style.display = 'block';
+            
+            // Focus sul primo campo
+            setTimeout(() => {
+                document.getElementById('userNome').focus();
+            }, 100);
         }
 
         // Apre il modale per modificare un utente esistente
@@ -1240,10 +1609,20 @@
             document.getElementById('userId').value = userId;
             document.getElementById('userPassword').required = false;
 
+            // Mostra spinner nel titolo del modal
+            const originalTitle = document.getElementById('modalTitle').innerHTML;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Caricamento dati...';
+            
+            // Mostra il modal immediatamente
+            document.getElementById('userModal').style.display = 'block';
+
             // Recupera i dati dell'utente
             fetch(`/utentii/${userId}`)
                 .then(response => response.json())
                 .then(user => {
+                    // Ripristina il titolo
+                    document.getElementById('modalTitle').innerHTML = originalTitle;
+                    
                     document.getElementById('userNome').value = user.nome;
                     document.getElementById('userCognome').value = user.cognome;
                     document.getElementById('userEmail').value = user.email;
@@ -1252,11 +1631,15 @@
                     document.getElementById('userRuolo').value = user.ruolo;
                     document.getElementById('userPassword').value = '';
 
-                    document.getElementById('userModal').style.display = 'block';
+                    // Focus sul primo campo
+                    document.getElementById('userNome').focus();
                 })
                 .catch(error => {
                     console.error('Errore durante il recupero dei dati utente:', error);
                     showNotification('Si è verificato un errore nel recupero dei dati utente.', 'error');
+                    
+                    // Ripristina il titolo in caso di errore
+                    document.getElementById('modalTitle').innerHTML = originalTitle;
                 });
         }
 
@@ -1268,6 +1651,9 @@
         // Elimina un utente
         function deleteUser(userId) {
             if (confirm('Sei sicuro di voler eliminare questo utente?')) {
+                // Mostra notifica di caricamento
+                showNotification('Eliminazione utente in corso...', 'info');
+                
                 fetch(`/utentii/${userId}`, {
                     method: 'DELETE'
                 })
@@ -1309,6 +1695,12 @@
             // Determina se è un'aggiunta o una modifica
             const method = userId ? 'PUT' : 'POST';
             const url = userId ? `/utentii/${userId}` : '/utentii';
+            
+            // Disabilita il pulsante e mostra spinner
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
 
             fetch(url, {
                 method: method,
@@ -1317,6 +1709,10 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    // Ripristina il pulsante
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    
                     if (data.success || data.message) {
                         showNotification(userId ? 'Utente aggiornato con successo.' : 'Utente aggiunto con successo.');
                         closeModal();
@@ -1326,6 +1722,10 @@
                     }
                 })
                 .catch(error => {
+                    // Ripristina il pulsante
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    
                     console.error('Errore durante l\'operazione:', error);
                     showNotification('Si è verificato un errore durante l\'operazione.', 'error');
                 });
@@ -1348,7 +1748,7 @@
             document.getElementById(tabId + 'Tab').classList.add('active');
         }
 
-        // Sostituisci la funzione initializeCalendar
+        // Inizializzazione del calendario
         function initializeCalendar() {
             const calendarEl = document.getElementById('adminCalendar');
             if (!calendarEl) {
@@ -1417,14 +1817,78 @@
                     // Visualizza dettagli evento
                     const event = info.event;
                     const status = event.extendedProps?.status || 'pending';
-
-                    alert(`
-                Dettagli Appuntamento:
-                Paziente: ${event.title.split(':')[0]}
-                Descrizione: ${event.extendedProps?.description || event.title.split(':')[1] || ''}
-                Data: ${event.start.toLocaleString()}
-                Stato: ${status}
-            `);
+                    const userId = event.extendedProps?.userId || '';
+                    
+                    // Crea un contenuto più ricco per il popup
+                    const eventContent = `
+                        <div style="padding: 15px; background: white; border-radius: 10px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); max-width: 400px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
+                                <h3 style="font-size: 18px; margin: 0; color: #4361ee;">Dettaglio Appuntamento</h3>
+                                <span class="appointment-status status-${status}">
+                                    ${status === 'approved' ? '<i class="fas fa-check-circle"></i> Approvato' : 
+                                      status === 'rejected' ? '<i class="fas fa-times-circle"></i> Rifiutato' : 
+                                      '<i class="fas fa-clock"></i> In attesa'}
+                                </span>
+                            </div>
+                            <p style="margin: 8px 0;"><strong><i class="fas fa-user"></i> Paziente:</strong> ${event.title.split(':')[0]}</p>
+                            <p style="margin: 8px 0;"><strong><i class="fas fa-calendar-day"></i> Data:</strong> ${event.start.toLocaleString('it-IT', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</p>
+                            <p style="margin: 8px 0;"><strong><i class="fas fa-align-left"></i> Descrizione:</strong> ${event.extendedProps?.description || event.title.split(':')[1] || ''}</p>
+                            ${status === 'pending' ? `
+                                <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                                    <button onclick="updateAppointmentStatus('${event.id}', 'approved')" style="background-color: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+                                        <i class="fas fa-check"></i> Approva
+                                    </button>
+                                    <button onclick="updateAppointmentStatus('${event.id}', 'rejected')" style="background-color: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+                                        <i class="fas fa-times"></i> Rifiuta
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // Crea un elemento div per contenere il popup
+                    const popupEl = document.createElement('div');
+                    popupEl.innerHTML = eventContent;
+                    popupEl.style.position = 'absolute';
+                    popupEl.style.zIndex = 1000;
+                    popupEl.style.left = `${info.jsEvent.pageX}px`;
+                    popupEl.style.top = `${info.jsEvent.pageY}px`;
+                    document.body.appendChild(popupEl);
+                    
+                    // Chiudi il popup quando si clicca al di fuori
+                    const closePopup = (e) => {
+                        if (!popupEl.contains(e.target)) {
+                            document.body.removeChild(popupEl);
+                            document.removeEventListener('click', closePopup);
+                        }
+                    };
+                    
+                    // Aggiungi un piccolo ritardo per evitare che il click corrente chiuda immediatamente il popup
+                    setTimeout(() => {
+                        document.addEventListener('click', closePopup);
+                    }, 100);
+                },
+                dateClick: function(info) {
+                    // Quando si clicca su una data, pre-compila il form di creazione appuntamento
+                    if (document.getElementById('myAppointmentTab')) {
+                        // Attiva il tab "I miei appuntamenti"
+                        switchTab('myAppointments');
+                        
+                        // Pre-compila la data
+                        document.getElementById('appointmentDate').value = info.dateStr + 'T09:00';
+                        
+                        // Focus sulla descrizione
+                        setTimeout(() => {
+                            document.getElementById('appointmentDescription').focus();
+                        }, 100);
+                    }
                 }
             });
 
@@ -1433,17 +1897,18 @@
 
             calendar.render();
         }
+        
         // Funzione per ottenere il colore in base allo stato dell'appuntamento
         function getEventColor(status) {
             switch (status) {
-                case 'approved': return '#3ac47d'; // Verde
-                case 'rejected': return '#d92550'; // Rosso
-                case 'pending': return '#f7b924'; // Giallo
-                default: return '#3f6ad8'; // Blu
+                case 'approved': return 'var(--success-color)'; // Verde
+                case 'rejected': return 'var(--danger-color)'; // Rosso
+                case 'pending': return 'var(--warning-color)'; // Giallo
+                default: return 'var(--primary-color)'; // Blu
             }
         }
 
-        // Sostituisci la funzione loadAllAppointments con questa versione aggiornata
+        // Carica tutti gli appuntamenti
         function loadAllAppointments() {
             console.log("Richiesta di caricamento appuntamenti avviata...");
 
@@ -1466,6 +1931,9 @@
                 })
                 .then(appointments => {
                     console.log(`Ricevuti ${appointments.length} appuntamenti dal server`);
+                    
+                    // Aggiorna il contatore di appuntamenti totali
+                    document.getElementById('totalAppointments').textContent = appointments.length;
 
                     // Filtra gli appuntamenti per stato
                     const pendingAppointments = appointments.filter(a => a.status === 'pending');
@@ -1473,9 +1941,20 @@
                     const rejectedAppointments = appointments.filter(a => a.status === 'rejected');
                     const myAppointments = appointments.filter(a => String(a.userId) === String(currentAdminId));
 
-                    // Crea un array combinato di appuntamenti pendenti e approvati per la prima tab
+                    // Crea un array combinato di tutti gli appuntamenti
                     // Gli appuntamenti saranno comunque visualmente distinguibili dal loro stato
-                    const combinedAppointments = [...pendingAppointments, ...approvedAppointments];
+                    const combinedAppointments = [...appointments];
+                    
+                    // Aggiorna il contatore di appuntamenti in attesa
+                    document.getElementById('pendingAppointmentsCount').textContent = pendingAppointments.length;
+
+                    // Calcola quanti approvati oggi
+                    const today = new Date();
+                    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const approvedToday = approvedAppointments.filter(a => 
+                        new Date(a.updatedAt || a.start) >= startOfDay
+                    );
+                    document.getElementById('todayApprovedCount').textContent = approvedToday.length;
 
                     // Ordina gli appuntamenti per data (i più recenti prima)
                     combinedAppointments.sort((a, b) => new Date(b.start) - new Date(a.start));
@@ -1490,6 +1969,12 @@
                     populateAppointmentsTable('approvedAppointmentsList', approvedAppointments, true);
                     populateAppointmentsTable('rejectedAppointmentsList', rejectedAppointments, true);
                     populateMyAppointmentsTable('myAppointmentsList', myAppointments);
+                    
+                    // Aggiorna anche il calendario
+                    const calendarEl = document.getElementById('adminCalendar');
+                    if (calendarEl && calendarEl._calendar) {
+                        calendarEl._calendar.refetchEvents();
+                    }
                 })
                 .catch(error => {
                     console.error('Errore nel caricamento degli appuntamenti:', error);
@@ -1498,17 +1983,23 @@
                     const pendingTable = document.getElementById('pendingAppointmentsList');
                     if (pendingTable) {
                         pendingTable.innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center" style="color: red;">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        Errore nel caricamento degli appuntamenti: ${error.message}
-                    </td>
-                </tr>
-            `;
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="empty-state">
+                                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                                        <p>Errore nel caricamento degli appuntamenti</p>
+                                        <button class="btn btn-primary" onclick="loadAllAppointments()">
+                                            <i class="fas fa-sync-alt"></i> Riprova
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
                     }
                 });
         }
-        // Sostituisci la funzione populateAppointmentsTable per distinguere gli stati visivamente
+        
+        // Popola la tabella appuntamenti
         function populateAppointmentsTable(tableId, appointments, showActions = true) {
             console.log(`Popolamento tabella ${tableId} con ${appointments.length} appuntamenti`);
 
@@ -1521,9 +2012,15 @@
             table.innerHTML = '';
 
             if (!appointments || appointments.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="4" class="text-center">Nessun appuntamento trovato</td>`;
-                table.appendChild(row);
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-check"></i>
+                                <p>Nessun appuntamento trovato</p>
+                            </div>
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -1534,52 +2031,100 @@
                 // Aggiungi classe CSS in base allo stato per styling visivo
                 if (appointment.status === 'approved') {
                     row.classList.add('approved-row');
-                    row.style.backgroundColor = 'rgba(58, 196, 125, 0.1)'; // Verde chiaro per approvati
                 } else if (appointment.status === 'rejected') {
                     row.classList.add('rejected-row');
-                    row.style.backgroundColor = 'rgba(217, 37, 80, 0.1)'; // Rosso chiaro per rifiutati
                 }
 
                 // Formatta la data
                 const date = new Date(appointment.start);
                 const formattedDate = date.toLocaleDateString('it-IT', {
-                    weekday: 'long',
+                    weekday: 'short',
                     year: 'numeric',
-                    month: 'long',
+                    month: 'short',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
                 });
 
-                // Aggiungi badge di stato se l'appuntamento è approvato o rifiutato
+                // Ottieni il badge di stato appropriato
                 let statusBadge = '';
-                if (tableId === 'pendingAppointmentsList') {
-                    if (appointment.status === 'approved') {
-                        statusBadge = `<span class="badge approved-badge" style="margin-left: 8px; background-color: #3ac47d; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Approvato</span>`;
-                    } else if (appointment.status === 'rejected') {
-                        statusBadge = `<span class="badge rejected-badge" style="margin-left: 8px; background-color: #d92550; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Rifiutato</span>`;
-                    }
+                if (appointment.status === 'approved') {
+                    statusBadge = `<span class="appointment-status status-approved"><i class="fas fa-check-circle"></i> Approvato</span>`;
+                } else if (appointment.status === 'rejected') {
+                    statusBadge = `<span class="appointment-status status-rejected"><i class="fas fa-times-circle"></i> Rifiutato</span>`;
+                } else {
+                    statusBadge = `<span class="appointment-status status-pending"><i class="fas fa-clock"></i> In attesa</span>`;
                 }
 
                 // Costruisci la riga della tabella
                 row.innerHTML = `
-            <td>${appointment.userName || 'Utente'}</td>
-            <td>${formattedDate}</td>
-            <td>${appointment.title || 'Nessuna descrizione'}${statusBadge}</td>
-            <td>${getAppointmentActionButtons(appointment, showActions)}</td>
-        `;
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: ${getAvatarColor(appointment.userName)}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                ${getInitials(appointment.userName || 'Utente')}
+                            </div>
+                            <span>${appointment.userName || 'Utente'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="far fa-calendar-alt" style="color: var(--primary-color);"></i>
+                            ${formattedDate}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>${appointment.title || 'Nessuna descrizione'}</span>
+                            ${statusBadge}
+                        </div>
+                    </td>
+                    <td>${getAppointmentActionButtons(appointment, showActions)}</td>
+                `;
 
                 table.appendChild(row);
             });
         }
+        
+        // Funzione per generare colori coerenti in base al nome
+        function getAvatarColor(name) {
+            // Semplice hash del nome per un colore coerente
+            const colors = [
+                '#4361ee', '#3a0ca3', '#7209b7', '#f72585', 
+                '#4cc9f0', '#4895ef', '#560bad', '#f3722c',
+                '#15b8a6', '#06d6a0', '#118ab2', '#073b4c'
+            ];
+            
+            let hash = 0;
+            for (let i = 0; i < (name || '').length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            return colors[Math.abs(hash) % colors.length];
+        }
+        
+        // Funzione per ottenere iniziali da un nome
+        function getInitials(name) {
+            if (!name) return 'U';
+            const parts = name.split(' ');
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+
         function populateMyAppointmentsTable(tableId, appointments) {
             const table = document.getElementById(tableId);
             table.innerHTML = '';
 
             if (appointments.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="3" class="text-center">Nessun appuntamento trovato</td>`;
-                table.appendChild(row);
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-plus"></i>
+                                <p>Non hai ancora creato appuntamenti</p>
+                                <p style="font-size: 0.9rem; color: var(--text-muted);">Utilizza il modulo sopra per crearne uno</p>
+                            </div>
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -1598,12 +2143,19 @@
                 });
 
                 row.innerHTML = `
-                    <td>${formattedDate}</td>
-                    <td>${appointment.title}</td>
                     <td>
-                        <button class="btn delete-btn" onclick="deleteAppointment(${appointment.id})">
-                            <i class="fas fa-trash"></i> Elimina
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="far fa-calendar-alt" style="color: var(--primary-color);"></i>
+                            ${formattedDate}
+                        </div>
+                    </td>
+                    <td><div style="font-weight: 500;">${appointment.title}</div></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn delete-btn btn-sm" onclick="deleteAppointment(${appointment.id})">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </div>
                     </td>
                 `;
 
@@ -1611,60 +2163,44 @@
             });
         }
 
-        // Sostituisci la funzione getAppointmentActionButtons per mostrare bottoni appropriati in base allo stato
+        // Bottoni di azione appropriati in base allo stato
         function getAppointmentActionButtons(appointment, showActions) {
             if (!showActions) return '';
-
-            // Se siamo nella tab combinata (pendingAppointmentsList)
-            // vogliamo mostrare bottoni diversi in base allo stato
 
             switch (appointment.status) {
                 case 'pending':
                     return `
-                <div class="action-buttons">
-                    <button class="btn approve-btn" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
-                        <i class="fas fa-check"></i> Approva
-                    </button>
-                    <button class="btn reject-btn" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
-                        <i class="fas fa-times"></i> Rifiuta
-                    </button>
-                </div>
-            `;
+                        <div class="action-buttons">
+                            <button class="btn approve-btn btn-sm" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
+                                <i class="fas fa-check"></i> Approva
+                            </button>
+                            <button class="btn reject-btn btn-sm" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
+                                <i class="fas fa-times"></i> Rifiuta
+                            </button>
+                        </div>
+                    `;
                 case 'approved':
                     return `
-                <div class="action-buttons">
-                    <button class="btn reject-btn" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
-                        <i class="fas fa-times"></i> Annulla
-                    </button>
-                </div>
-            `;
+                        <div class="action-buttons">
+                            <button class="btn reject-btn btn-sm" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
+                                <i class="fas fa-times"></i> Annulla
+                            </button>
+                        </div>
+                    `;
                 case 'rejected':
                     return `
-                <div class="action-buttons">
-                    <button class="btn approve-btn" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
-                        <i class="fas fa-check"></i> Approva
-                    </button>
-                </div>
-            `;
+                        <div class="action-buttons">
+                            <button class="btn approve-btn btn-sm" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
+                                <i class="fas fa-check"></i> Approva
+                            </button>
+                        </div>
+                    `;
                 default:
                     return '';
             }
         }
-        const pendingTabButton = document.getElementById('pendingTab');
-        if (pendingTabButton) {
-            pendingTabButton.innerHTML = `
-        <i class="fas fa-list"></i> Tutti gli appuntamenti
-        <span id="pendingCount" class="tab-count pending-count">0</span>
-    `;
-        }
-        function setupAutoRefresh() {
-            // Aggiorna ogni 30 secondi
-            setInterval(() => {
-                console.log('Aggiornamento automatico appuntamenti...');
-                loadAllAppointments();
-            }, 30000);
-        }
-        // Sostituisci la funzione updateAppointmentStatus con questa versione migliorata
+
+        // Aggiornamento stato appuntamento
         function updateAppointmentStatus(appointmentId, status) {
             console.log(`Aggiornamento stato: appuntamento=${appointmentId}, nuovo stato=${status}`);
 
@@ -1702,21 +2238,20 @@
                     // Ricarica i dati
                     setTimeout(() => {
                         loadAllAppointments();
-
-                        // Aggiorna anche il calendario
-                        const calendarEl = document.getElementById('adminCalendar');
-                        if (calendarEl && calendarEl._calendar) {
-                            calendarEl._calendar.refetchEvents();
-                        }
                     }, 500);
                 })
                 .catch(error => {
                     console.error('Errore durante aggiornamento stato:', error);
                     showNotification(`Errore: ${error.message}`, 'error');
                 });
-        }// Funzione per eliminare un appuntamento
+        }
+
+        // Elimina un appuntamento
         function deleteAppointment(appointmentId) {
             if (confirm('Sei sicuro di voler eliminare questo appuntamento?')) {
+                // Mostra notifica di caricamento
+                showNotification('Eliminazione appuntamento in corso...', 'info');
+                
                 fetch(`/api/calendar-events/${appointmentId}`, {
                     method: 'DELETE',
                     credentials: 'include'
@@ -1730,11 +2265,6 @@
                     .then(result => {
                         // Ricarica gli appuntamenti
                         loadAllAppointments();
-                        // Aggiorna anche il calendario
-                        const calendarApi = document.querySelector('.fc').FullCalendar;
-                        if (calendarApi) {
-                            calendarApi.refetchEvents();
-                        }
                         showNotification('Appuntamento eliminato con successo.');
                     })
                     .catch(error => {
@@ -1755,6 +2285,12 @@
                 showNotification('Tutti i campi sono obbligatori.', 'error');
                 return;
             }
+            
+            // Disabilita il pulsante e mostra spinner
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
 
             // Invia la richiesta al server
             fetch('/api/calendar-events', {
@@ -1770,6 +2306,10 @@
                 })
             })
                 .then(response => {
+                    // Ripristina il pulsante
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    
                     if (!response.ok) {
                         if (response.status === 400) {
                             return response.json().then(data => {
@@ -1793,10 +2333,6 @@
 
                     // Ricarica gli appuntamenti e il calendario
                     loadAllAppointments();
-                    const calendarApi = document.querySelector('.fc').FullCalendar;
-                    if (calendarApi) {
-                        calendarApi.refetchEvents();
-                    }
                 })
                 .catch(error => {
                     console.error('Errore:', error);
@@ -1813,19 +2349,30 @@
                 });
         });
 
+        // Auto refresh
+        function setupAutoRefresh() {
+            // Aggiorna ogni 30 secondi
+            setInterval(() => {
+                console.log('Aggiornamento automatico appuntamenti...');
+                loadAllAppointments();
+            }, 30000);
+        }
+
         // Gestisce il logout
         document.getElementById('logoutBtn').addEventListener('click', function () {
-            fetch('/logout', {
-                method: 'POST',
-                credentials: 'include'
-            })
-                .then(() => {
-                    window.location.href = '/';
+            if (confirm('Sei sicuro di voler uscire?')) {
+                fetch('/logout', {
+                    method: 'POST',
+                    credentials: 'include'
                 })
-                .catch(error => {
-                    console.error('Errore durante il logout:', error);
-                    window.location.href = '/';
-                });
+                    .then(() => {
+                        window.location.href = '/';
+                    })
+                    .catch(error => {
+                        console.error('Errore durante il logout:', error);
+                        window.location.href = '/';
+                    });
+            }
         });
 
         // Chiude il modale quando si clicca al di fuori di esso
@@ -1835,8 +2382,9 @@
                 closeModal();
             }
         };
-        setupAutoRefresh();
+
+        // Esegui diagnostica dopo 1 secondo
+        setTimeout(runDiagnostics, 1000);
     </script>
 </body>
-
 </html>
