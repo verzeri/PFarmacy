@@ -1,3 +1,57 @@
+const fs = require('fs');
+const path = require('path');
+
+// File per la persistenza dei dati
+const STORAGE_DIR = path.join(__dirname, 'data');
+const EVENTS_FILE = path.join(STORAGE_DIR, 'calendar_events.json');
+
+// Assicura che la directory esista
+if (!fs.existsSync(STORAGE_DIR)) {
+    try {
+        fs.mkdirSync(STORAGE_DIR, { recursive: true });
+        console.log('[DBMock] Directory creata:', STORAGE_DIR);
+    } catch (error) {
+        console.error('[DBMock] Errore nella creazione della directory:', error);
+    }
+}
+
+// Carica gli eventi dal file o inizializza array vuoto
+let _calendarEvents = [];
+let _calendarEventCounter = 1;
+
+try {
+    if (fs.existsSync(EVENTS_FILE)) {
+        const data = fs.readFileSync(EVENTS_FILE, 'utf8');
+        _calendarEvents = JSON.parse(data);
+        console.log(`[DBMock] Caricati ${_calendarEvents.length} eventi dal file di storage`);
+        
+        // Determina il prossimo ID da usare
+        if (_calendarEvents.length > 0) {
+            const maxId = Math.max(..._calendarEvents.map(event => Number(event.id) || 0));
+            _calendarEventCounter = maxId + 1;
+            console.log(`[DBMock] Counter eventi impostato a ${_calendarEventCounter}`);
+        }
+    } else {
+        console.log(`[DBMock] File di storage non trovato, inizializzato array eventi vuoto`);
+        // Crea file con array vuoto
+        fs.writeFileSync(EVENTS_FILE, JSON.stringify([]), 'utf8');
+    }
+} catch (error) {
+    console.error(`[DBMock] Errore nel caricamento dati dal file:`, error);
+}
+
+// Funzione per salvare gli eventi nel file
+function saveEventsToFile() {
+    try {
+        fs.writeFileSync(EVENTS_FILE, JSON.stringify(_calendarEvents, null, 2), 'utf8');
+        console.log(`[DBMock] Salvati ${_calendarEvents.length} eventi nel file`);
+        return true;
+    } catch (error) {
+        console.error(`[DBMock] Errore nel salvataggio eventi:`, error);
+        return false;
+    }
+}
+
 class DBMock {
     constructor() {
         // Inizializza gli utenti
@@ -25,26 +79,27 @@ class DBMock {
         ];
 
         this.userCounter = this.users.length ? this.users[this.users.length - 1].id + 1 : 1;
-
-        // Inizializza strutture dati per la chat
         this.messages = []; // Memorizza tutti i messaggi
         this.onlineUsers = new Map(); // Traccia gli utenti online
-        this.calendarEvents = [];
-        this.calendarEventCounter = 1;
     }
 
     // Gets all calendar events (filtered by user ID if provided)
     getCalendarEvents(userId = null) {
+        console.log(`[DBMock] Recupero eventi calendario per utente ${userId}, totale eventi: ${_calendarEvents.length}`);
+        
         if (userId) {
             userId = String(userId);
-            return this.calendarEvents.filter(event => String(event.userId) === userId);
+            return _calendarEvents.filter(event => String(event.userId) === userId);
         }
-        return this.calendarEvents;
+        return _calendarEvents;
     }
 
     // Get all events for admin view (with user details)
     getCalendarEventsForAdmin() {
-        return this.calendarEvents.map(event => {
+        console.log(`[DBMock] Recupero eventi calendario per admin, totale eventi: ${_calendarEvents.length}`);
+        
+        // Map events with user details
+        return _calendarEvents.map(event => {
             const user = this.getUserById(event.userId);
             return {
                 ...event,
@@ -53,7 +108,6 @@ class DBMock {
         });
     }
 
-
     countUserEventsForDate(userId, date) {
         userId = String(userId);
 
@@ -61,11 +115,11 @@ class DBMock {
         const dateStr = new Date(date).toISOString().split('T')[0];
 
         // Debug log
-        console.log(`Conteggio eventi per utente ${userId} in data ${dateStr}`);
-        console.log(`Eventi totali: ${this.calendarEvents.length}`);
+        console.log(`[DBMock] Conteggio eventi per utente ${userId} in data ${dateStr}`);
+        console.log(`[DBMock] Eventi totali: ${_calendarEvents.length}`);
 
         // Conta gli eventi di questo utente per questa data
-        const eventsCount = this.calendarEvents.filter(event => {
+        const eventsCount = _calendarEvents.filter(event => {
             // Normalizza anche la data dell'evento
             const eventDate = new Date(event.start).toISOString().split('T')[0];
 
@@ -74,13 +128,13 @@ class DBMock {
 
             // Debug per ogni evento
             if (matchesUser) {
-                console.log(`Evento trovato per l'utente: ${event.title} in data ${eventDate}, matches date: ${matchesDate}`);
+                console.log(`[DBMock] Evento trovato: ${event.title}, in data ${eventDate}, match: ${matchesDate}`);
             }
 
             return matchesUser && matchesDate;
         }).length;
 
-        console.log(`Numero di eventi trovati: ${eventsCount}`);
+        console.log(`[DBMock] Numero di eventi trovati: ${eventsCount}`);
         return eventsCount;
     }
 
@@ -100,12 +154,13 @@ class DBMock {
 
         return currentCount < maxEvents;
     }
+
     isDayFull(date) {
         // Normalizza la data a solo YYYY-MM-DD senza ora
         const dateStr = new Date(date).toISOString().split('T')[0];
 
         // Conta tutti gli eventi di admin per questa data
-        const adminEvents = this.calendarEvents.filter(event => {
+        const adminEvents = _calendarEvents.filter(event => {
             const eventDate = new Date(event.start).toISOString().split('T')[0];
             const user = this.getUserById(event.userId);
 
@@ -119,14 +174,11 @@ class DBMock {
         return adminEvents.length >= 10;
     }
 
-
-    // Modifica o aggiungi questi metodi in DBMock.js
-
     // Assicurati che il metodo addCalendarEvent imposti sempre lo status
     addCalendarEvent(eventData) {
         const newEvent = {
             ...eventData,
-            id: this.calendarEventCounter++,
+            id: _calendarEventCounter++,
             // Imposta sempre uno stato predefinito (pending per utenti normali)
             status: eventData.status || 'pending',
             createdAt: new Date().toISOString()
@@ -134,7 +186,14 @@ class DBMock {
 
         console.log(`[DBMock] Nuovo evento creato: ID=${newEvent.id}, UserId=${newEvent.userId}, Status=${newEvent.status}`);
 
-        this.calendarEvents.push(newEvent);
+        // Aggiungi alla variabile globale _calendarEvents
+        _calendarEvents.push(newEvent);
+        
+        // IMPORTANTE: Salva su file
+        saveEventsToFile();
+        
+        console.log(`[DBMock] Evento aggiunto. Totale eventi: ${_calendarEvents.length}`);
+        
         return newEvent;
     }
 
@@ -143,12 +202,16 @@ class DBMock {
         eventId = Number(eventId);
         console.log(`[DBMock] Tentativo di aggiornare evento ${eventId} a stato ${status}`);
 
-        const index = this.calendarEvents.findIndex(event => Number(event.id) === eventId);
+        const index = _calendarEvents.findIndex(event => Number(event.id) === eventId);
 
         if (index !== -1) {
-            this.calendarEvents[index].status = status;
+            _calendarEvents[index].status = status;
             console.log(`[DBMock] Evento ${eventId} aggiornato a stato ${status}`);
-            return this.calendarEvents[index];
+            
+            // IMPORTANTE: Salva su file
+            saveEventsToFile();
+            
+            return _calendarEvents[index];
         }
 
         console.log(`[DBMock] Evento ${eventId} non trovato!`);
@@ -158,79 +221,43 @@ class DBMock {
     // Metodo di debug per stampare tutti gli eventi
     logAllEvents() {
         console.log("[DBMock] --- TUTTI GLI EVENTI ---");
-        this.calendarEvents.forEach((event, index) => {
+        _calendarEvents.forEach((event, index) => {
             const user = this.getUserById(event.userId);
             const userName = user ? `${user.nome} ${user.cognome}` : 'Sconosciuto';
             console.log(`[${index}] ID=${event.id}, Utente=${userName} (${event.userId}), Stato=${event.status}, Data=${event.start}`);
         });
         console.log("[DBMock] --- FINE EVENTI ---");
     }
-    
 
     // Get calendar events by status
     getCalendarEventsByStatus(status) {
-        return this.calendarEvents.filter(event => event.status === status);
-    }
-
-    // Existing updateCalendarEvent method
-    updateCalendarEvent(eventId, eventData) {
-        eventId = String(eventId);
-        const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
-
-        if (index !== -1) {
-            const updatedEvent = {
-                ...this.calendarEvents[index],
-                ...eventData,
-                updatedAt: new Date().toISOString()
-            };
-
-            this.calendarEvents[index] = updatedEvent;
-            return updatedEvent;
-        }
-
-        return null;
-    }
-
-    // Metodo per ottenere tutti gli eventi del calendario per un utente
-    getCalendarEvents(userId) {
-        userId = String(userId);
-        console.log(`Recupero eventi calendario per utente ${userId}`);
-        return this.calendarEvents.filter(event => String(event.userId) === userId);
-    }
-
-    // Metodo per aggiungere un evento al calendario
-    addCalendarEvent(eventData) {
-        const newEvent = {
-            ...eventData,
-            id: this.calendarEventCounter++,
-            createdAt: new Date().toISOString()
-        };
-
-        console.log(`Aggiunto nuovo evento calendario: ${JSON.stringify(newEvent)}`);
-        this.calendarEvents.push(newEvent);
-        return newEvent;
+        return _calendarEvents.filter(event => event.status === status);
     }
 
     // Metodo per ottenere un evento del calendario per ID
     getCalendarEventById(eventId) {
         eventId = String(eventId);
-        return this.calendarEvents.find(event => String(event.id) === eventId);
+        return _calendarEvents.find(event => String(event.id) === eventId);
     }
 
     // Metodo per aggiornare un evento del calendario
     updateCalendarEvent(eventId, eventData) {
         eventId = String(eventId);
-        const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
+        const index = _calendarEvents.findIndex(event => String(event.id) === eventId);
 
         if (index !== -1) {
             const updatedEvent = {
-                ...this.calendarEvents[index],
+                ..._calendarEvents[index],
                 ...eventData,
                 updatedAt: new Date().toISOString()
             };
 
-            this.calendarEvents[index] = updatedEvent;
-            console.log(`Aggiornato evento calendario ${eventId}`);
+            _calendarEvents[index] = updatedEvent;
+            
+            // IMPORTANTE: Salva su file
+            saveEventsToFile();
+            
+            console.log(`[DBMock] Aggiornato evento calendario ${eventId}`);
             return updatedEvent;
         }
 
@@ -240,12 +267,19 @@ class DBMock {
     // Metodo per eliminare un evento del calendario
     deleteCalendarEvent(eventId) {
         eventId = String(eventId);
-        const initialLength = this.calendarEvents.length;
-        this.calendarEvents = this.calendarEvents.filter(event => String(event.id) !== eventId);
+        const initialLength = _calendarEvents.length;
+        const filteredEvents = _calendarEvents.filter(event => String(event.id) !== eventId);
 
-        const success = this.calendarEvents.length < initialLength;
+        const success = filteredEvents.length < initialLength;
         if (success) {
-            console.log(`Eliminato evento calendario ${eventId}`);
+            // Svuota l'array originale e ricarica tutti gli eventi filtrati
+            _calendarEvents.length = 0;
+            filteredEvents.forEach(event => _calendarEvents.push(event));
+
+            // IMPORTANTE: Salva su file
+            saveEventsToFile();
+            
+            console.log(`[DBMock] Eliminato evento calendario ${eventId}`);
         }
         return success;
     }
@@ -268,7 +302,7 @@ class DBMock {
         return null;
     }
 
-    // Crea un nuovo utente
+    // Altri metodi per utenti, chat, ecc. rimangono invariati
     createUser({ nome, cognome, email, password, sesso, eta }) {
         const newUser = {
             id: this.userCounter++,
@@ -284,12 +318,10 @@ class DBMock {
         return newUser;
     }
 
-    // Ottieni un utente per email
     getUserByEmail(email) {
         return this.users.find(user => user.email === email);
     }
 
-    // Verifica le credenziali dell'utente
     verifyCredentials(email, password) {
         const user = this.getUserByEmail(email);
         if (!user) {
@@ -309,7 +341,6 @@ class DBMock {
         return { success: false, message: 'Email o password errati' };
     }
 
-    // Aggiorna un utente esistente
     updateUser(id, updates) {
         const userIndex = this.users.findIndex(user => user.id === id);
         if (userIndex === -1) {
@@ -327,7 +358,6 @@ class DBMock {
         return { ...this.users[userIndex], password: undefined };
     }
 
-    // Elimina un utente
     deleteUser(id) {
         const userIndex = this.users.findIndex(user => user.id === id);
         if (userIndex === -1) {
@@ -338,8 +368,6 @@ class DBMock {
     }
 
     // === FUNZIONALITÀ DI CHAT ===
-
-    // Aggiungi un nuovo messaggio
     addMessage(senderId, recipientId, content) {
         // Assicura che gli ID siano stringhe per confronti coerenti
         senderId = String(senderId);
@@ -353,79 +381,37 @@ class DBMock {
             timestamp: new Date().toISOString()
         };
 
-        console.log(`Salvataggio messaggio: ${senderId} -> ${recipientId}: "${content}"`);
+        console.log(`[DBMock] Salvataggio messaggio: ${senderId} -> ${recipientId}: "${content}"`);
         this.messages.push(message);
         return message;
     }
 
-    // Aggiungi questa funzione alla classe DBMock
-    getCalendarEvents(userId) {
-        console.log(`Recupero eventi calendario per utente ${userId}`);
-
-        // Eventi base che verranno restituiti per tutti gli utenti
-        const baseEvents = [
-            {
-                id: 1,
-                title: 'Visita Medica',
-                start: '2024-12-14T10:00:00',
-                end: '2024-12-14T11:00:00',
-                description: 'Visita di controllo generale'
-            },
-            {
-                id: 2,
-                title: 'Check-up Fisico',
-                start: '2024-12-15T09:00:00',
-                end: '2024-12-15T10:00:00',
-                description: 'Visita di controllo cardiaco'
-            }
-        ];
-
-        // Eventi personalizzati basati sull'ID utente (opzionale)
-        // Esempio: se l'ID finisce con un numero specifico, aggiungi un evento personalizzato
-        const lastDigit = String(userId).slice(-1);
-        if (lastDigit === '4') {
-            baseEvents.push({
-                id: 3,
-                title: 'Consulenza Specialistica',
-                start: '2024-12-17T14:00:00',
-                end: '2024-12-17T15:00:00',
-                description: 'Consulenza con cardiologo'
-            });
-        }
-
-        return baseEvents;
-    }
-    // Ottieni messaggi tra due utenti
     getMessagesBetweenUsers(userId1, userId2) {
-        // Assicura che gli ID siano stringhe per confronti coerenti
         userId1 = String(userId1);
         userId2 = String(userId2);
 
-        console.log(`Recupero messaggi tra ${userId1} e ${userId2}`);
+        console.log(`[DBMock] Recupero messaggi tra ${userId1} e ${userId2}`);
 
         const messages = this.messages.filter(message =>
             (message.senderId === userId1 && message.recipientId === userId2) ||
             (message.senderId === userId2 && message.recipientId === userId1)
         ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-        console.log(`Trovati ${messages.length} messaggi`);
+        console.log(`[DBMock] Trovati ${messages.length} messaggi`);
         return messages;
     }
 
-    // Imposta lo stato online di un utente
     setUserOnlineStatus(userId, isOnline) {
         userId = String(userId);
-        console.log(`Impostazione stato utente ${userId}: ${isOnline ? 'online' : 'offline'}`);
+        console.log(`[DBMock] Impostazione stato utente ${userId}: ${isOnline ? 'online' : 'offline'}`);
         this.onlineUsers.set(userId, isOnline);
     }
 
-    // Ottieni lo stato online di un utente
     getUserOnlineStatus(userId) {
         userId = String(userId);
         return this.onlineUsers.get(userId) || false;
     }
 
-    // Ottieni tutti gli utenti online
     getOnlineUsers() {
         const result = [];
         this.onlineUsers.forEach((isOnline, userId) => {
@@ -436,7 +422,6 @@ class DBMock {
         return result;
     }
 
-    // Ottieni lo stato di tutti gli utenti
     getAllUsersStatus() {
         const result = [];
         this.onlineUsers.forEach((isOnline, userId) => {
@@ -445,12 +430,9 @@ class DBMock {
         return result;
     }
 
-    // Ottieni utenti disponibili per la chat in base al ruolo
-    // Ottieni utenti disponibili per la chat in base al ruolo
     getChatUsers(userRole, userId) {
-        console.log(`Ottenendo utenti chat per ${userRole} con ID ${userId}`);
+        console.log(`[DBMock] Ottenendo utenti chat per ${userRole} con ID ${userId}`);
 
-        // Versione semplificata che non dipende da getUserOnlineStatus
         if (userRole === 'admin') {
             // Admin vede tutti gli utenti normali
             const users = this.users
@@ -461,7 +443,7 @@ class DBMock {
                     cognome: user.cognome || '',
                     connected: false
                 }));
-            console.log(`Trovati ${users.length} utenti per admin`);
+            console.log(`[DBMock] Trovati ${users.length} utenti per admin`);
             return users;
         } else {
             // Utente normale vede solo gli admin
@@ -473,7 +455,7 @@ class DBMock {
                     cognome: user.cognome || '',
                     connected: false
                 }));
-            console.log(`Trovati ${admins.length} admin per utente`);
+            console.log(`[DBMock] Trovati ${admins.length} admin per utente`);
             return admins;
         }
     }

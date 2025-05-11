@@ -1825,27 +1825,16 @@ app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
 // Endpoint per ottenere tutti gli appuntamenti per l'admin
 app.get('/api/admin/calendar-events', verifyToken, ensureAdmin, (req, res) => {
     try {
-        // Ottieni tutti gli eventi calendario
-        const allEvents = db.calendarEvents || [];
+        // Log debug
+        console.log('[Admin API] Richiesta eventi calendario admin');
         
-        // Arricchisci gli eventi con informazioni utente
-        const enrichedEvents = allEvents.map(event => {
-            // Trova l'utente corrispondente
-            const user = db.getUserById(event.userId);
-            
-            return {
-                ...event,
-                // Aggiungi nome utente per visualizzazione
-                userName: user ? `${user.nome} ${user.cognome || ''}` : 'Utente sconosciuto',
-                // Assicurati che ci sia sempre uno stato
-                status: event.status || 'pending'
-            };
-        });
+        // Ottieni tutti gli eventi calendario con informazioni utente
+        const enrichedEvents = db.getCalendarEventsForAdmin();
         
         console.log(`[Admin API] Inviando ${enrichedEvents.length} eventi al client admin`);
         res.json(enrichedEvents);
     } catch (error) {
-        console.error('Errore nel recupero degli eventi calendario:', error);
+        console.error('[Admin API] Errore nel recupero degli eventi calendario:', error);
         res.status(500).json({ error: 'Errore nel recupero degli eventi' });
     }
 });
@@ -1863,7 +1852,8 @@ app.put('/api/admin/calendar-events/:id/status', verifyToken, ensureAdmin, (req,
         // Debug
         console.log(`[Admin API] Aggiornamento evento ${eventId} a stato: ${status}`);
         
-        const updatedEvent = db.updateEventStatus(eventId, status);
+        // Assicurati che eventId sia un numero
+        const updatedEvent = db.updateEventStatus(Number(eventId), status);
         
         if (updatedEvent) {
             res.json(updatedEvent);
@@ -1875,7 +1865,21 @@ app.put('/api/admin/calendar-events/:id/status', verifyToken, ensureAdmin, (req,
         res.status(500).json({ error: 'Errore nell\'aggiornare lo stato' });
     }
 });
+// Aggiungi questo endpoint in server.js
+app.get('/api/debug/calendar-events', (req, res) => {
+  // Log tutti gli eventi
+  console.log('Tutti gli eventi in memoria:');
+  db.logAllEvents();
 
+  // Restituisci statistiche
+  res.json({
+    success: true,
+    totalEvents: db.getCalendarEvents().length,
+    pendingEvents: db.getCalendarEventsByStatus('pending').length,
+    approvedEvents: db.getCalendarEventsByStatus('approved').length,
+    rejectedEvents: db.getCalendarEventsByStatus('rejected').length
+  });
+});
 // Modifica l'API POST esistente per gli eventi calendario
 app.post('/api/calendar-events', verifyToken, (req, res) => {
   try {

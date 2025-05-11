@@ -1834,6 +1834,7 @@
 
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1852,19 +1853,22 @@
             display: inline-flex;
             align-items: center;
         }
+
         .bg-warning {
             background-color: #f59e0b;
             color: #ffffff;
         }
+
         .bg-success {
             background-color: #10b981;
             color: #ffffff;
         }
+
         .bg-danger {
             background-color: #ef4444;
             color: #ffffff;
         }
-        
+
         /* Alert styles */
         .alert {
             padding: 12px 16px;
@@ -1872,17 +1876,19 @@
             margin: 16px 0;
             display: none;
         }
+
         .alert-success {
             background-color: #d1fae5;
             border: 1px solid #10b981;
             color: #065f46;
         }
+
         .alert-warning {
             background-color: #fef3c7;
             border: 1px solid #f59e0b;
             color: #92400e;
         }
-        
+
         /* Layout contenitore calendario ed elenco promemorie */
         .calendar-container {
             background-color: white;
@@ -1893,17 +1899,17 @@
             display: flex;
             gap: 20px;
         }
-        
+
         .calendar-wrapper {
             flex: 1;
         }
-        
+
         .reminders-list {
             width: 300px;
             border-left: 1px solid #e5e7eb;
             padding-left: 20px;
         }
-        
+
         /* Stile per l'elenco promemorie */
         .reminder-item {
             margin-bottom: 15px;
@@ -1914,35 +1920,35 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: all 0.2s ease;
         }
-        
+
         .reminder-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .reminder-item.pending {
             border-left-color: #f59e0b;
         }
-        
+
         .reminder-item.approved {
             border-left-color: #10b981;
         }
-        
+
         .reminder-item.rejected {
             border-left-color: #ef4444;
         }
-        
+
         .reminder-date {
             font-size: 12px;
             color: #6b7280;
             margin-bottom: 6px;
         }
-        
+
         .reminder-title {
             font-weight: 500;
             margin-bottom: 8px;
         }
-        
+
         .reminder-status {
             font-size: 12px;
             font-weight: 600;
@@ -1950,22 +1956,22 @@
             border-radius: 12px;
             display: inline-block;
         }
-        
+
         .reminder-status.pending {
             background-color: #fff7ed;
             color: #f59e0b;
         }
-        
+
         .reminder-status.approved {
             background-color: #f0fdf4;
             color: #10b981;
         }
-        
+
         .reminder-status.rejected {
             background-color: #fef2f2;
             color: #ef4444;
         }
-        
+
         .reminders-title {
             display: flex;
             justify-content: space-between;
@@ -1974,13 +1980,13 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         .reminders-title h3 {
             margin: 0;
             font-size: 18px;
             font-weight: 600;
         }
-        
+
         .refresh-reminders {
             background: none;
             border: none;
@@ -1988,26 +1994,35 @@
             cursor: pointer;
             transition: transform 0.2s ease;
         }
-        
+
         .refresh-reminders:hover {
             color: #1f2937;
             transform: rotate(30deg);
         }
-        
+
         .empty-reminders {
             text-align: center;
             padding: 30px 0;
             color: #6b7280;
         }
-        
+
         /* Visitor counter animation */
         .visitor-pulse {
             animation: pulse 1s;
         }
+
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Appointment cards in dashboard */
@@ -2016,33 +2031,426 @@
             padding-left: 12px;
             margin-bottom: 8px;
         }
+
         .appointment-pending {
             border-color: #f59e0b;
         }
+
         .appointment-approved {
             border-color: #10b981;
         }
+
         .appointment-rejected {
             border-color: #ef4444;
         }
-        
+
         /* Spinner di caricamento */
         .spinner {
             animation: spin 1s linear infinite;
             display: inline-block;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Responsive per mobile */
         @media (max-width: 768px) {
             .calendar-container {
                 flex-direction: column;
             }
-            
+
+            .reminders-list {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e5e7eb;
+                padding-left: 0;
+                padding-top: 20px;
+                margin-top: 20px;
+            }
+        }
+
+        /* Status badges */
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .bg-warning {
+            background-color: #f59e0b;
+            color: #ffffff;
+        }
+
+        .bg-success {
+            background-color: #10b981;
+            color: #ffffff;
+        }
+
+        .bg-danger {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Alert styles */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+
+        /* Layout promemorie */
+        .calendar-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .calendar-wrapper {
+            flex: 1;
+        }
+
+        .reminders-list {
+            width: 300px;
+            border-left: 1px solid #e5e7eb;
+            padding-left: 20px;
+        }
+
+        /* Stile per l'elenco promemorie */
+        .reminder-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .reminder-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .reminder-item.pending {
+            border-left-color: #f59e0b;
+        }
+
+        .reminder-item.approved {
+            border-left-color: #10b981;
+        }
+
+        .reminder-item.rejected {
+            border-left-color: #ef4444;
+        }
+
+        .reminder-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .reminder-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .reminder-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .reminder-status.pending {
+            background-color: #fff7ed;
+            color: #f59e0b;
+        }
+
+        .reminder-status.approved {
+            background-color: #f0fdf4;
+            color: #10b981;
+        }
+
+        .reminder-status.rejected {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .reminders-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .reminders-title h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .refresh-reminders {
+            background: none;
+            border: none;
+            color: #4b5563;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-reminders:hover {
+            color: #1f2937;
+            transform: rotate(30deg);
+        }
+
+        .refresh-reminders.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        .empty-reminders {
+            text-align: center;
+            padding: 30px 0;
+            color: #6b7280;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-container {
+                flex-direction: column;
+            }
+
+            .reminders-list {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid #e5e7eb;
+                padding-left: 0;
+                padding-top: 20px;
+                margin-top: 20px;
+            }
+        }
+
+        /* Status badges */
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .bg-warning {
+            background-color: #f59e0b;
+            color: #ffffff;
+        }
+
+        .bg-success {
+            background-color: #10b981;
+            color: #ffffff;
+        }
+
+        .bg-danger {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Alert styles */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+
+        /* Layout calendario e promemorie */
+        .calendar-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 20px;
+        }
+
+        .calendar-wrapper {
+            flex: 1;
+        }
+
+        .reminders-list {
+            width: 300px;
+            border-left: 1px solid var(--border-color);
+            padding-left: 20px;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner,
+        .refresh-reminders.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Stile per l'elenco promemorie */
+        .reminder-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .reminder-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .reminder-item.pending {
+            border-left-color: #f59e0b;
+        }
+
+        .reminder-item.approved {
+            border-left-color: #10b981;
+        }
+
+        .reminder-item.rejected {
+            border-left-color: #ef4444;
+        }
+
+        .reminder-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .reminder-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .reminder-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .reminder-status.pending {
+            background-color: #fff7ed;
+            color: #f59e0b;
+        }
+
+        .reminder-status.approved {
+            background-color: #f0fdf4;
+            color: #10b981;
+        }
+
+        .reminder-status.rejected {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .reminders-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .reminders-title h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .refresh-reminders {
+            background: none;
+            border: none;
+            color: #4b5563;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-reminders:hover {
+            color: #1f2937;
+            transform: rotate(30deg);
+        }
+
+        .empty-reminders {
+            text-align: center;
+            padding: 30px 0;
+            color: #6b7280;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-container {
+                flex-direction: column;
+            }
+
             .reminders-list {
                 width: 100%;
                 border-left: none;
@@ -2141,12 +2549,12 @@
                 <i class="fas fa-plus"></i> Nuovo Promemoria
             </button>
         </div>
-        
+
         <!-- Alerts for appointment actions -->
         <div id="successAlert" class="alert alert-success">
             <i class="fas fa-check-circle"></i> Promemoria aggiunto con successo! In attesa di approvazione.
         </div>
-        
+
         <div id="limitAlert" class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i> Hai raggiunto il limite massimo di un promemoria al giorno.
         </div>
@@ -2159,7 +2567,8 @@
                 style="background-color: white; margin: 15% auto; padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow-lg); width: 50%; max-width: 500px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0; color: var(--primary-color);">Nuovo Promemoria</h2>
-                    <span id="closeReminderModal" style="cursor: pointer; font-size: 1.5rem;" onclick="closeReminderModal()">&times;</span>
+                    <span id="closeReminderModal" style="cursor: pointer; font-size: 1.5rem;"
+                        onclick="closeReminderModal()">&times;</span>
                 </div>
                 <form id="reminderForm" onsubmit="event.stopPropagation();">
                     <div style="margin-bottom: 15px;">
@@ -2266,7 +2675,6 @@
             </div>
         </div>
 
-        <!-- Layout per calendario e lista promemorie -->
         <div class="calendar-container">
             <div class="calendar-wrapper">
                 <div id="calendar"></div>
@@ -2274,12 +2682,12 @@
             <div class="reminders-list">
                 <div class="reminders-title">
                     <h3>I tuoi promemoria</h3>
-                    <button class="refresh-reminders" onclick="loadReminders()">
+                    <button class="refresh-reminders" id="refreshRemindersBtn">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
                 <div id="reminders-container">
-                    <!-- Le promemorie verranno caricate qui dinamicamente -->
+                    <!-- I promemoria verranno caricati qui dinamicamente -->
                     <div class="empty-reminders">
                         <i class="fas fa-calendar-day" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
                         <p>Nessun promemoria trovato</p>
@@ -2289,773 +2697,653 @@
         </div>
     </div>
 
-    <script>
-        // Variabili globali
-        let userReminders = [];
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configurazione globale
+        const DEBUG = true;
+        let loadingData = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
         
-        // Inizializzazione di FullCalendar
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var currentEvent = null;
-
-            // Inizializza il calendario
-            if (!calendarEl) {
-                console.error('Elemento calendario non trovato!');
-                const calendarContainer = document.querySelector('.calendar-wrapper');
-                if (calendarContainer) {
-                    calendarContainer.innerHTML = '<div id="calendar"></div>';
-                    calendarEl = document.getElementById('calendar');
-                }
-            }
-
-            // Funzione per ottenere il colore dell'evento in base allo stato
-            function getEventColor(status) {
-                switch (status) {
-                    case 'approved': return '#10b981'; // Verde
-                    case 'rejected': return '#ef4444'; // Rosso
-                    case 'pending': return '#f59e0b'; // Arancione
-                    default: return '#3366FF'; // Blu
-                }
-            }
-
-            // Funzione per ottenere il testo dello stato dell'evento
-            function getStatusText(status) {
-                switch (status) {
-                    case 'approved':
-                        return '<span class="badge bg-success">Approvato</span>';
-                    case 'rejected':
-                        return '<span class="badge bg-danger">Rifiutato</span>';
-                    case 'pending':
-                        return '<span class="badge bg-warning">In attesa di approvazione</span>';
-                    default:
-                        return '';
-                }
-            }
+        // Funzioni di utilità
+        function debugLog(...args) {
+            if (DEBUG) console.log('[Calendario]', ...args);
+        }
+        
+        // Fetch con retry automatico per migliorare l'affidabilità
+        function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, delay = 1000) {
+            // Assicurati che ci sia sempre un timestamp per prevenire cache
+            const sep = url.includes('?') ? '&' : '?';
+            const urlWithCache = `${url}${sep}_=${Date.now()}`;
             
-            // Funzione per il caricamento dei promemoria per la lista laterale
-            function loadReminders() {
-                const reminderContainer = document.getElementById('reminders-container');
-                if (!reminderContainer) return;
-                
-                // Mostra indicatore di caricamento
-                reminderContainer.innerHTML = `
-                    <div style="text-align: center; padding: 20px;">
-                        <i class="fas fa-spinner spinner" style="font-size: 24px; color: #6b7280;"></i>
-                        <p style="margin-top: 10px;">Caricamento promemoria...</p>
-                    </div>
-                `;
-                
-                // Carica i promemoria dal server
-                fetch('/api/calendar-events', {
-                    method: 'GET',
-                    credentials: 'include'
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Errore nel caricamento dei promemoria');
-                    return response.json();
-                })
-                .then(events => {
-                    console.log('Promemoria caricati:', events);
-                    
-                    // Salva i promemoria nella variabile globale
-                    userReminders = events;
-                    
-                    // Se non ci sono promemoria, mostra un messaggio
-                    if (!events || events.length === 0) {
-                        reminderContainer.innerHTML = `
-                            <div class="empty-reminders">
-                                <i class="fas fa-calendar-day" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
-                                <p>Nessun promemoria trovato</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    // Ordina gli eventi per data (più recenti prima)
-                    events.sort((a, b) => new Date(b.start) - new Date(a.start));
-                    
-                    // Popola il contenitore
-                    reminderContainer.innerHTML = '';
-                    events.forEach(reminder => {
-                        const date = new Date(reminder.start);
-                        const formattedDate = date.toLocaleDateString('it-IT', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                        
-                        const statusClass = reminder.status || 'pending';
-                        const statusText = reminder.status === 'approved' ? 'Approvato' :
-                                          reminder.status === 'rejected' ? 'Rifiutato' : 'In attesa';
-                        
-                        const reminderItem = document.createElement('div');
-                        reminderItem.className = `reminder-item ${statusClass}`;
-                        reminderItem.innerHTML = `
-                            <div class="reminder-date">${formattedDate}</div>
-                            <div class="reminder-title">${reminder.title}</div>
-                            <div class="reminder-status ${statusClass}">${statusText}</div>
-                        `;
-                        
-                        // Aggiungi event listener per visualizzare dettagli
-                        reminderItem.addEventListener('click', () => {
-                            // Cerca l'evento nel calendario
-                            const calendarEvent = calendar.getEventById(reminder.id);
-                            if (calendarEvent) {
-                                // Simula click sull'evento del calendario
-                                calendar.emit('eventClick', {
-                                    event: calendarEvent,
-                                    jsEvent: { preventDefault: () => {} }
-                                });
-                            } else {
-                                // Fallback se l'evento non è nel calendario
-                                showEventDetails(reminder);
-                            }
-                        });
-                        
-                        reminderContainer.appendChild(reminderItem);
-                    });
-                })
-                .catch(error => {
-                    console.error('Errore nel caricamento dei promemoria:', error);
-                    reminderContainer.innerHTML = `
-                        <div class="empty-reminders">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px; color: #ef4444;"></i>
-                            <p>Errore nel caricamento dei promemoria</p>
-                        </div>
-                    `;
-                });
-            }
+            // Verifica e arricchisci gli headers
+            const headers = {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+                ...(options.headers || {})
+            };
             
-            // Funzione per mostrare i dettagli di un evento
-            function showEventDetails(event) {
-                // Popola il modal con i dati dell'evento
-                document.getElementById('eventModalTitle').innerText = 'Dettagli Promemoria';
-                
-                // Formatta la data
-                const eventDate = new Date(event.start);
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-                document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
-                
-                // Imposta la descrizione
-                document.getElementById('eventDescription').innerText = event.title;
-                
-                // Imposta lo stato
-                document.getElementById('eventStatus').innerHTML = getStatusText(event.status || 'pending');
-                
-                // Imposta valori per l'eventuale modifica
-                document.getElementById('editEventDate').value = formatDateForInput(eventDate);
-                document.getElementById('editEventDescription').value = event.title;
-                
-                // Gestisci visibilità bottoni in base allo stato
-                const isRejected = event.status === 'rejected';
-                document.getElementById('deleteEventBtn').style.display = isRejected ? 'none' : 'flex';
-                document.getElementById('editEventBtn').style.display = isRejected ? 'none' : 'flex';
-                
-                // Mostra il modal
-                document.getElementById('eventViewMode').style.display = 'block';
-                document.getElementById('eventEditMode').style.display = 'none';
-                document.getElementById('eventModal').style.display = 'block';
-            }
-
-            // Inizializzazione calendario
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'it',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                buttonText: {
-                    today: 'Oggi',
-                    month: 'Mese',
-                    week: 'Settimana',
-                    day: 'Giorno'
-                },
-                // Carica gli eventi dal server
-                events: function (info, successCallback, failureCallback) {
-                    fetch('/api/calendar-events', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include' // Per includere i cookie nella richiesta
+            return new Promise((resolve, reject) => {
+                function attempt(attemptsLeft) {
+                    debugLog(`Richiesta ${urlWithCache}, tentativi rimasti: ${attemptsLeft}`);
+                    
+                    fetch(urlWithCache, {
+                        ...options,
+                        headers,
+                        credentials: 'include'
                     })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Errore nel recupero degli eventi');
-                            }
-                            return response.json();
-                        })
-                        .then(events => {
-                            // Formatta gli eventi con colori in base allo stato
-                            const formattedEvents = events.map(event => ({
-                                id: event.id,
-                                title: event.title,
-                                start: new Date(event.start),
-                                color: getEventColor(event.status),
-                                extendedProps: {
-                                    status: event.status,
-                                    type: 'user_reminder'
-                                }
-                            }));
-
-                            // Aggiungi eventi predefiniti
-                            const defaultEvents = [
-                                {
-                                    title: 'Ritiro farmaci',
-                                    start: '2025-05-25',
-                                    color: '#52B788',
-                                    extendedProps: { type: 'default' }
-                                },
-                                {
-                                    title: 'Consulto farmacista',
-                                    start: '2025-05-28T15:30:00',
-                                    color: '#3366FF',
-                                    extendedProps: { type: 'default' }
-                                },
-                                {
-                                    title: 'Controllo pressione',
-                                    start: '2025-06-05T10:00:00',
-                                    color: '#F59E0B',
-                                    extendedProps: { type: 'default' }
-                                }
-                            ];
-
-                            // Aggiorna card del prossimo appuntamento
-                            updateNextAppointmentCard(formattedEvents);
-                            
-                            // Aggiorna anche l'elenco promemorie
-                            loadReminders();
-
-                            successCallback([...formattedEvents, ...defaultEvents]);
-                        })
-                        .catch(error => {
-                            console.error('Errore nel recupero degli eventi:', error);
-                            // Eventi predefiniti come fallback
-                            const defaultEvents = [
-                                {
-                                    title: 'Ritiro farmaci',
-                                    start: '2025-05-25',
-                                    color: '#52B788',
-                                    extendedProps: { type: 'default' }
-                                },
-                                {
-                                    title: 'Consulto farmacista',
-                                    start: '2025-05-28T15:30:00',
-                                    color: '#3366FF',
-                                    extendedProps: { type: 'default' }
-                                },
-                                {
-                                    title: 'Controllo pressione',
-                                    start: '2025-06-05T10:00:00',
-                                    color: '#F59E0B',
-                                    extendedProps: { type: 'default' }
-                                }
-                            ];
-                            successCallback(defaultEvents);
-                        });
-                },
-
-                // Gestione del click su un evento
-                eventClick: function (info) {
-                    // Salva il riferimento all'evento corrente
-                    currentEvent = info.event;
-
-                    // Ottieni lo stato dell'evento
-                    const status = info.event.extendedProps?.status || 'default';
-
-                    // Popola il modal con i dati dell'evento
-                    document.getElementById('eventModalTitle').innerText = 'Dettagli Evento';
-
-                    // Formatta la data e l'ora in formato leggibile
-                    const eventDate = info.event.start;
-                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-                    document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
-
-                    // Imposta la descrizione
-                    document.getElementById('eventDescription').innerText = info.event.title;
-
-                    // Imposta lo stato dell'evento
-                    document.getElementById('eventStatus').innerHTML = getStatusText(status);
-
-                    // Imposta anche i valori nei campi di modifica
-                    document.getElementById('editEventDate').value = formatDateForInput(eventDate);
-                    document.getElementById('editEventDescription').value = info.event.title;
-
-                    // Se è un evento predefinito o rifiutato, disabilita l'eliminazione e la modifica
-                    const isDefaultEvent = info.event.extendedProps && info.event.extendedProps.type === 'default';
-                    const isRejected = status === 'rejected';
-                    document.getElementById('deleteEventBtn').style.display = (isDefaultEvent || isRejected) ? 'none' : 'flex';
-                    document.getElementById('editEventBtn').style.display = (isDefaultEvent || isRejected) ? 'none' : 'flex';
-
-                    // Mostra il modal in modalità visualizzazione
-                    document.getElementById('eventViewMode').style.display = 'block';
-                    document.getElementById('eventEditMode').style.display = 'none';
-                    document.getElementById('eventModal').style.display = 'block';
-                },
-
-                // Gestione del click su una data
-                dateClick: function (info) {
-                    // Pre-popola il campo data con la data selezionata
-                    document.getElementById('reminderDate').value = info.dateStr + 'T12:00'; // Imposta mezzogiorno come ora predefinita
-                    openReminderModalSafe();
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Errore HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(resolve)
+                    .catch(error => {
+                        debugLog(`Errore: ${error.message}`);
+                        if (attemptsLeft <= 1) {
+                            reject(error);
+                            return;
+                        }
+                        
+                        debugLog(`Nuovo tentativo tra ${delay}ms...`);
+                        setTimeout(() => attempt(attemptsLeft - 1), delay);
+                    });
                 }
+                
+                attempt(retries);
             });
+        }
 
-            // Renderizza il calendario
-            calendar.render();
-            
-            // Carica i promemoria iniziali
-            setTimeout(loadReminders, 500);
-
-            // Funzione per aggiornare la card del prossimo appuntamento
-            function updateNextAppointmentCard(events) {
-                // Filtra solo gli eventi approvati o gli eventi predefiniti
-                const relevantEvents = events.filter(event =>
-                    event.extendedProps.status === 'approved' ||
-                    event.extendedProps.type === 'default'
-                );
-
-                // Ordina gli eventi per data
-                relevantEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
-
-                // Trova il prossimo evento rispetto a oggi
-                const today = new Date();
-                const nextEvent = relevantEvents.find(event => new Date(event.start) > today);
-
-                if (nextEvent) {
-                    const eventDate = new Date(nextEvent.start);
-
-                    // Formatta la data
-                    const options = { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
-                    const formattedDate = eventDate.toLocaleDateString('it-IT', options);
-
-                    // Calcola i giorni rimanenti
-                    const diffTime = Math.abs(eventDate - today);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    // Aggiorna la card
-                    document.getElementById('nextAppointment').textContent = `La tua prossima visita è programmata per il ${formattedDate}`;
-                    document.getElementById('appointmentDaysLeft').textContent = diffDays === 0 ? 'Oggi' :
-                        diffDays === 1 ? 'Domani' :
-                            `Tra ${diffDays} giorni`;
-                }
-            }
-
-            // Funzione per formattare la data nel formato richiesto dall'input datetime-local
-            function formatDateForInput(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
-            }
-
-            // Configurazione del modal per nuovo promemoria
-            const reminderModal = document.getElementById('reminderModal');
-            const newReminderBtn = document.getElementById('newReminderBtn');
-            const closeReminderModalBtn = document.getElementById('closeReminderModal');
-            const cancelReminderBtn = document.getElementById('cancelReminder');
-            const reminderForm = document.getElementById('reminderForm');
-            const reminderDate = document.getElementById('reminderDate');
-            const reminderDescription = document.getElementById('reminderDescription');
-
-            // Imposta la data di default a oggi
-            const today = new Date();
-            const formattedDate = formatDateForInput(today);
-            reminderDate.value = formattedDate;
-
-            // Funzione per aprire il modal del promemoria in sicurezza
-            function openReminderModalSafe() {
-                console.log("Apertura modal promemoria");
-                const modal = document.getElementById('reminderModal');
-                if (!modal) {
-                    console.error('Modal non trovato!');
+        // Inizializzazione del calendario
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'it',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                today: 'Oggi',
+                month: 'Mese',
+                week: 'Settimana',
+                day: 'Giorno'
+            },
+            events: function (info, successCallback, failureCallback) {
+                if (loadingData) {
+                    debugLog("Caricamento già in corso, accodamento richiesta...");
+                    setTimeout(() => calendar.refetchEvents(), 500);
                     return;
                 }
-                
-                // Mostra il modal
-                modal.style.display = 'block';
-                
-                // Focus sul campo descrizione (dopo breve delay per sicurezza)
-                setTimeout(() => {
-                    const descField = document.getElementById('reminderDescription');
-                    if (descField) descField.focus();
-                }, 100);
+
+                loadingData = true;
+                debugLog("Caricamento eventi calendario...");
+
+                // Usa fetchWithRetry invece di fetch standard per maggiore affidabilità
+                fetchWithRetry('/api/calendar-events')
+                    .then(events => {
+                        debugLog(`Ricevuti ${events.length} eventi dal server`);
+
+                        // Formatta gli eventi per il calendario
+                        const formattedEvents = events.map(event => ({
+                            id: event.id,
+                            title: event.title,
+                            start: event.start,
+                            color: getEventColor(event.status),
+                            extendedProps: {
+                                status: event.status || 'pending',
+                                type: 'user_reminder'
+                            }
+                        }));
+
+                        // Eventi predefiniti per demo
+                        const defaultEvents = [
+                            {
+                                title: 'Ritiro farmaci',
+                                start: '2025-05-25',
+                                color: '#52B788',
+                                extendedProps: { type: 'default' }
+                            },
+                            {
+                                title: 'Consulto farmacista',
+                                start: '2025-05-28T15:30:00',
+                                color: '#3366FF',
+                                extendedProps: { type: 'default' }
+                            }
+                        ];
+
+                        // Combina e restituisci gli eventi
+                        successCallback([...formattedEvents, ...defaultEvents]);
+
+                        // Aggiorna anche il pannello laterale
+                        updateReminderPanel(events);
+                        
+                        // Reset contatore retry su successo
+                        retryCount = 0;
+                    })
+                    .catch(error => {
+                        console.error('Errore recupero eventi:', error);
+                        
+                        // Incrementa contatore retry
+                        retryCount++;
+                        
+                        // Se abbiamo superato MAX_RETRIES, mostra errore all'utente
+                        if (retryCount > MAX_RETRIES) {
+                            showErrorMessage('Problema di connessione al server. I promemoria potrebbero non essere aggiornati.');
+                        }
+                        
+                        // Eventi default come fallback
+                        const defaultEvents = [
+                            {
+                                title: 'Ritiro farmaci',
+                                start: '2025-05-25',
+                                color: '#52B788',
+                                extendedProps: { type: 'default' }
+                            },
+                            {
+                                title: 'Consulto farmacista',
+                                start: '2025-05-28T15:30:00',
+                                color: '#3366FF',
+                                extendedProps: { type: 'default' }
+                            }
+                        ];
+                        
+                        // Prova a recuperare eventi locali dal calendario
+                        const existingEvents = calendar.getEvents()
+                            .filter(e => e.extendedProps?.type === 'user_reminder')
+                            .map(e => ({
+                                id: e.id,
+                                title: e.title,
+                                start: e.start,
+                                color: e.backgroundColor,
+                                extendedProps: e.extendedProps
+                            }));
+                            
+                        // Usa eventi esistenti + default se disponibili
+                        if (existingEvents.length > 0) {
+                            debugLog(`Usando ${existingEvents.length} eventi esistenti come fallback`);
+                            successCallback([...existingEvents, ...defaultEvents]);
+                        } else {
+                            successCallback(defaultEvents);
+                        }
+                        
+                        failureCallback(error);
+                    })
+                    .finally(() => {
+                        loadingData = false;
+                    });
+            },
+            dateClick: function (info) {
+                // Pre-popola il campo data con la data selezionata
+                document.getElementById('reminderDate').value = info.dateStr + 'T12:00';
+                document.getElementById('reminderModal').style.display = 'block';
+            },
+            eventClick: function (info) {
+                // Mostra dettagli evento
+                showEventDetails(info.event);
+            }
+        });
+
+        calendar.render();
+        // Esponi calendario globalmente
+        window.calendar = calendar;
+
+        // Gestione colori eventi
+        function getEventColor(status) {
+            switch (status) {
+                case 'approved': return '#10b981'; // Verde
+                case 'rejected': return '#ef4444'; // Rosso
+                case 'pending': return '#f59e0b';  // Arancione
+                default: return '#3366FF';         // Blu default
+            }
+        }
+
+        // Mostra messaggi all'utente
+        function showSuccessMessage(message) {
+            const alert = document.getElementById('successAlert');
+            if (!alert) return;
+            
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showErrorMessage(message) {
+            const alert = document.getElementById('limitAlert');
+            if (!alert) return;
+            
+            alert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Pannello laterale dei promemoria
+        function updateReminderPanel(events) {
+            const container = document.getElementById('reminders-container');
+            if (!container) return;
+
+            if (!events || events.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-reminders">
+                        <i class="fas fa-calendar-day" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>Nessun promemoria trovato</p>
+                    </div>
+                `;
+                return;
             }
 
-            // Funzione per chiudere il modal del promemoria
-            function closeReminderModal() {
-                reminderModal.style.display = 'none';
-                // Reset del form
-                reminderForm.reset();
-                reminderDate.value = formattedDate;
-            }
-            
-            // Esponi la funzione globalmente
-            window.closeReminderModal = closeReminderModal;
+            // Ordina eventi (più recenti prima)
+            const sortedEvents = [...events].sort((a, b) => new Date(b.start) - new Date(a.start));
+            container.innerHTML = '';
 
-            // Event listeners per aprire/chiudere il modal del promemoria
-            newReminderBtn.addEventListener('click', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                openReminderModalSafe();
+            sortedEvents.forEach(event => {
+                const date = new Date(event.start);
+                const formattedDate = date.toLocaleDateString('it-IT', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const statusClass = event.status || 'pending';
+                const statusText = event.status === 'approved' ? 'Approvato' :
+                    event.status === 'rejected' ? 'Rifiutato' : 'In attesa';
+
+                const reminderItem = document.createElement('div');
+                reminderItem.className = `reminder-item ${statusClass}`;
+                reminderItem.dataset.id = event.id;
+                reminderItem.innerHTML = `
+                    <div class="reminder-date">${formattedDate}</div>
+                    <div class="reminder-title">${event.title}</div>
+                    <div class="reminder-status ${statusClass}">${statusText}</div>
+                `;
+
+                reminderItem.addEventListener('click', () => showEventDetails(event));
+                container.appendChild(reminderItem);
             });
-            
-            closeReminderModalBtn.addEventListener('click', closeReminderModal);
-            cancelReminderBtn.addEventListener('click', closeReminderModal);
+        }
 
-            // Gestione del form di promemoria
-            reminderForm.addEventListener('click', function(event) {
-                event.stopPropagation(); // Previene la propagazione del click
-            });
-
-            // Gestione del submit per creare un nuovo promemoria
+        // Gestione del form promemoria
+        const reminderForm = document.getElementById('reminderForm');
+        if (reminderForm) {
             reminderForm.addEventListener('submit', function (e) {
                 e.preventDefault();
 
-                // Recupera i valori dal form
-                const date = reminderDate.value;
-                const description = reminderDescription.value;
+                // Ottieni dati dal form
+                const date = document.getElementById('reminderDate').value;
+                const description = document.getElementById('reminderDescription').value;
 
-                // Verifica che i dati siano validi
                 if (!date || !description) {
                     alert('Per favore compila tutti i campi');
                     return;
                 }
 
-                // Mostra indicatore di caricamento
-                const saveButton = reminderForm.querySelector('button[type="submit"]');
-                const originalText = saveButton.innerHTML;
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+                debugLog('Invio promemoria:', { date, description });
 
-                // Invia la richiesta al server
-                fetch('/api/calendar-events', {
+                // Mostra stato di caricamento sul bottone
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+
+                // Usa fetchWithRetry per maggiore affidabilità
+                fetchWithRetry('/api/calendar-events', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
                         title: description,
                         start: date,
-                        status: 'pending'
+                        status: 'pending' // Stato iniziale: in attesa
                     })
                 })
-                .then(response => {
-                    // Ripristina il pulsante
-                    saveButton.disabled = false;
-                    saveButton.innerHTML = originalText;
+                .then(newEvent => {
+                    debugLog('Promemoria salvato con successo:', newEvent);
 
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.error || 'Errore nel salvare il promemoria');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(savedEvent => {
-                    console.log('Promemoria salvato:', savedEvent);
-                    
-                    // Chiudi il modal
-                    closeReminderModal();
-
-                    // Aggiungi l'evento al calendario e applica il colore corretto
+                    // IMPORTANTE: Aggiungi immediatamente l'evento al calendario
                     calendar.addEvent({
-                        id: savedEvent.id,
-                        title: description,
-                        start: date,
-                        color: getEventColor('pending'), // Arancione per promemorie in attesa
+                        id: newEvent.id,
+                        title: newEvent.title,
+                        start: newEvent.start,
+                        color: getEventColor('pending'),
                         extendedProps: {
                             status: 'pending',
                             type: 'user_reminder'
                         }
                     });
 
-                    // Mostra messaggio di successo
-                    const successAlert = document.getElementById('successAlert');
-                    successAlert.style.display = 'block';
-                    setTimeout(() => {
-                        successAlert.style.display = 'none';
-                    }, 5000);
+                    // Chiudi il modal
+                    document.getElementById('reminderModal').style.display = 'none';
+                    reminderForm.reset();
 
-                    // Aggiorna l'elenco promemorie
-                    loadReminders();
+                    // Mostra messaggio di successo
+                    showSuccessMessage('Promemoria salvato con successo! Sarà disponibile anche dopo il riavvio del server.');
+
+                    // Aggiorna il pannello laterale
+                    forceRefresh();
                 })
                 .catch(error => {
-                    console.error('Errore:', error);
-                    
-                    // Mostra l'avviso appropriato
-                    if (error.message.includes('posti disponibili')) {
-                        document.getElementById('limitAlert').textContent = 'Non ci sono più posti disponibili per questa data. Scegli un altro giorno.';
-                        document.getElementById('limitAlert').style.display = 'block';
-                        setTimeout(() => {
-                            document.getElementById('limitAlert').style.display = 'none';
-                        }, 5000);
-                    } else {
-                        alert(`Si è verificato un errore: ${error.message || 'Controlla la connessione di rete'}`);
-                    }
+                    console.error('Errore nel salvataggio del promemoria:', error);
+                    showErrorMessage(error.message || 'Errore nel salvataggio');
+                })
+                .finally(() => {
+                    // Ripristina il bottone
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                 });
             });
+        }
 
-            // Configurazione del modal per la gestione eventi
-            const eventModal = document.getElementById('eventModal');
-            const closeEventModalBtn = document.getElementById('closeEventModal');
-            const deleteEventBtn = document.getElementById('deleteEventBtn');
-            const editEventBtn = document.getElementById('editEventBtn');
-            const cancelEditBtn = document.getElementById('cancelEdit');
-            const editEventForm = document.getElementById('editEventForm');
-            const eventViewMode = document.getElementById('eventViewMode');
-            const eventEditMode = document.getElementById('eventEditMode');
-
-            // Funzione per chiudere il modal degli eventi
-            function closeEventModal() {
-                eventModal.style.display = 'none';
+        // Funzione di refresh completo
+        function forceRefresh() {
+            if (loadingData) {
+                debugLog("Aggiornamento già in corso, richiesta posticipata...");
+                setTimeout(forceRefresh, 500);
+                return;
             }
-
-            // Event listener per chiudere il modal degli eventi
-            closeEventModalBtn.addEventListener('click', closeEventModal);
-
-            // Chiudi il modal se l'utente clicca fuori da esso
-            window.addEventListener('click', (event) => {
-                if (event.target === eventModal) {
-                    closeEventModal();
-                }
+            
+            loadingData = true;
+            debugLog("Aggiornamento forzato calendario e pannello...");
+            
+            // Aggiorna il calendario
+            calendar.refetchEvents();
+            
+            // Aggiorna pannello laterale
+            fetchWithRetry('/api/calendar-events')
+                .then(events => {
+                    updateReminderPanel(events);
+                    debugLog(`Pannello aggiornato con ${events.length} eventi`);
+                })
+                .catch(error => {
+                    console.error('Errore aggiornamento pannello:', error);
+                })
+                .finally(() => {
+                    loadingData = false;
+                });
+        }
+        
+        // Configurazione refresh manuale
+        const refreshBtn = document.getElementById('refreshRemindersBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function () {
+                this.classList.add('spinning');
+                forceRefresh();
+                setTimeout(() => {
+                    this.classList.remove('spinning');
+                }, 1000);
             });
+        }
 
-            // Event listener per passare alla modalità di modifica
-            editEventBtn.addEventListener('click', function () {
-                eventViewMode.style.display = 'none';
-                eventEditMode.style.display = 'block';
+        // Dettagli evento
+        function showEventDetails(event) {
+            // Configurazione base del modal
+            const modal = document.getElementById('eventModal');
+            if (!modal) return;
+
+            // Imposta i dati dell'evento nel modal
+            document.getElementById('eventModalTitle').innerText = 'Dettagli Promemoria';
+
+            // Ottieni lo status o usa 'pending' come default
+            const status = event.extendedProps?.status || event.status || 'pending';
+
+            // Formatta la data
+            const eventDate = new Date(event.start);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('eventDateTime').innerText = eventDate.toLocaleDateString('it-IT', options);
+
+            // Imposta descrizione e stato
+            document.getElementById('eventDescription').innerText = event.title;
+            document.getElementById('eventStatus').innerHTML = getStatusBadge(status);
+
+            // Imposta valori per modifica
+            document.getElementById('editEventDate').value = formatDateForInput(eventDate);
+            document.getElementById('editEventDescription').value = event.title;
+
+            // Gestisci visibilità pulsanti
+            const isDefaultEvent = event.extendedProps?.type === 'default';
+            const isRejected = status === 'rejected';
+
+            document.getElementById('deleteEventBtn').style.display = (isDefaultEvent || isRejected) ? 'none' : 'flex';
+            document.getElementById('editEventBtn').style.display = (isDefaultEvent || isRejected) ? 'none' : 'flex';
+
+            // Salva riferimento all'evento corrente
+            window.currentEvent = event;
+
+            // Mostra il modal
+            document.getElementById('eventViewMode').style.display = 'block';
+            document.getElementById('eventEditMode').style.display = 'none';
+            modal.style.display = 'block';
+        }
+
+        // Helper per formattare data per input
+        function formatDateForInput(date) {
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0') + 'T' +
+                String(date.getHours()).padStart(2, '0') + ':' +
+                String(date.getMinutes()).padStart(2, '0');
+        }
+
+        // Badge di stato
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'approved':
+                    return '<span class="badge bg-success">Approvato</span>';
+                case 'rejected':
+                    return '<span class="badge bg-danger">Rifiutato</span>';
+                case 'pending':
+                    return '<span class="badge bg-warning">In attesa di approvazione</span>';
+                default:
+                    return '';
+            }
+        }
+
+        // Handlers per modal eventi
+        const closeEventModalBtn = document.getElementById('closeEventModal');
+        if (closeEventModalBtn) {
+            closeEventModalBtn.addEventListener('click', () => {
+                document.getElementById('eventModal').style.display = 'none';
             });
+        }
 
-            // Event listener per tornare alla modalità di visualizzazione
-            cancelEditBtn.addEventListener('click', function () {
-                eventViewMode.style.display = 'block';
-                eventEditMode.style.display = 'none';
+        // Handlers per modal promemoria
+        const closeReminderModalBtn = document.getElementById('closeReminderModal');
+        const cancelReminderBtn = document.getElementById('cancelReminder');
+
+        if (closeReminderModalBtn) {
+            closeReminderModalBtn.addEventListener('click', () => {
+                document.getElementById('reminderModal').style.display = 'none';
             });
+        }
 
-            // Event listener per eliminare un evento
+        if (cancelReminderBtn) {
+            cancelReminderBtn.addEventListener('click', () => {
+                document.getElementById('reminderModal').style.display = 'none';
+            });
+        }
+
+        // Handlers per modifica evento
+        const editEventBtn = document.getElementById('editEventBtn');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+
+        if (editEventBtn) {
+            editEventBtn.addEventListener('click', () => {
+                document.getElementById('eventViewMode').style.display = 'none';
+                document.getElementById('eventEditMode').style.display = 'block';
+            });
+        }
+
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', () => {
+                document.getElementById('eventViewMode').style.display = 'block';
+                document.getElementById('eventEditMode').style.display = 'none';
+            });
+        }
+
+        // Handler eliminazione evento
+        const deleteEventBtn = document.getElementById('deleteEventBtn');
+        if (deleteEventBtn) {
             deleteEventBtn.addEventListener('click', function () {
-                if (confirm('Sei sicuro di voler eliminare questo evento?')) {
-                    if (currentEvent) {
-                        const eventId = currentEvent.id;
+                if (!window.currentEvent || !window.currentEvent.id) {
+                    alert('Impossibile eliminare questo evento');
+                    return;
+                }
 
-                        if (!eventId) {
-                            alert('Impossibile eliminare questo evento.');
-                            return;
-                        }
+                if (confirm('Sei sicuro di voler eliminare questo promemoria?')) {
+                    const eventId = window.currentEvent.id;
 
-                        // Elimina l'evento dal server
-                        fetch(`/api/calendar-events/${eventId}`, {
-                            method: 'DELETE',
-                            credentials: 'include'
-                        })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Errore nell\'eliminare l\'evento');
-                                }
-                                return response.json();
-                            })
-                            .then(() => {
-                                // Rimuovi l'evento dal calendario
-                                currentEvent.remove();
-                                
-                                // Chiudi il modal
-                                closeEventModal();
+                    // Mostra stato loading
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminazione...';
 
-                                // Notifica l'utente
-                                alert('Evento eliminato con successo!');
+                    // Usa fetchWithRetry per maggiore affidabilità
+                    fetchWithRetry(`/api/calendar-events/${eventId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(() => {
+                        debugLog(`Evento ${eventId} eliminato con successo`);
+                        
+                        // Rimuovi l'evento dal calendario
+                        const calEvent = calendar.getEventById(eventId);
+                        if (calEvent) calEvent.remove();
 
-                                // Aggiorna l'elenco promemorie
-                                loadReminders();
-                            })
-                            .catch(error => {
-                                console.error('Errore nell\'eliminare l\'evento:', error);
-                                alert('Si è verificato un errore nell\'eliminare l\'evento. Riprova più tardi.');
-                            });
-                    }
+                        // Chiudi il modal
+                        document.getElementById('eventModal').style.display = 'none';
+
+                        // Aggiornamento completo
+                        forceRefresh();
+                        
+                        showSuccessMessage('Promemoria eliminato con successo');
+                    })
+                    .catch(error => {
+                        console.error('Errore eliminazione:', error);
+                        showErrorMessage('Errore nell\'eliminare il promemoria');
+                    })
+                    .finally(() => {
+                        // Ripristina il pulsante
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-trash"></i> Elimina';
+                    });
                 }
             });
+        }
 
-            // Event listener per salvare le modifiche a un evento
+        // Handler salvataggio modifiche
+        const editEventForm = document.getElementById('editEventForm');
+        if (editEventForm) {
             editEventForm.addEventListener('submit', function (e) {
                 e.preventDefault();
 
-                if (currentEvent) {
-                    // Ottieni i nuovi valori
-                    const newDate = document.getElementById('editEventDate').value;
-                    const newDescription = document.getElementById('editEventDescription').value;
-                    const eventId = currentEvent.id;
+                if (!window.currentEvent || !window.currentEvent.id) {
+                    alert('Impossibile modificare questo evento');
+                    return;
+                }
 
-                    if (!eventId) {
-                        alert('Impossibile modificare questo evento.');
-                        return;
+                // Ottieni dati dal form
+                const newDate = document.getElementById('editEventDate').value;
+                const newDescription = document.getElementById('editEventDescription').value;
+                const eventId = window.currentEvent.id;
+
+                // Mostra stato loading
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+
+                // Usa fetchWithRetry per maggiore affidabilità
+                fetchWithRetry(`/api/calendar-events/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: newDescription,
+                        start: newDate
+                    })
+                })
+                .then(updatedEvent => {
+                    debugLog('Promemoria aggiornato con successo:', updatedEvent);
+                    
+                    // Aggiorna l'evento nel calendario
+                    const calEvent = calendar.getEventById(eventId);
+                    if (calEvent) {
+                        calEvent.setProp('title', newDescription);
+                        calEvent.setStart(newDate);
                     }
 
-                    // Aggiorna l'evento nel server
-                    fetch(`/api/calendar-events/${eventId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            title: newDescription,
-                            start: newDate
-                        })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Errore nell\'aggiornare l\'evento');
-                            }
-                            return response.json();
-                        })
-                        .then((updatedEvent) => {
-                            // Aggiorna l'evento nel calendario
-                            currentEvent.setProp('title', newDescription);
-                            currentEvent.setStart(newDate);
+                    // Chiudi il modal
+                    document.getElementById('eventModal').style.display = 'none';
 
-                            // Chiudi il modal
-                            closeEventModal();
-
-                            // Notifica l'utente
-                            alert('Evento aggiornato con successo!');
-
-                            // Aggiorna l'elenco promemorie
-                            loadReminders();
-                        })
-                        .catch(error => {
-                            console.error('Errore nell\'aggiornare l\'evento:', error);
-                            alert('Si è verificato un errore nell\'aggiornare l\'evento. Riprova più tardi.');
-                        });
-                }
-            });
-            
-            // Esponi la funzione di caricamento promemorie globalmente
-            window.loadReminders = loadReminders;
-
-            // Configurazione della chat
-            setupChat();
-
-            // Inizializzazione del contatore visitatori
-            setupVisitorCounter();
-        });
-
-        // Funzione di logout
-        function logout() {
-            fetch('/logout', {
-                method: 'POST',
-                credentials: 'include'
-            })
-                .then(() => {
-                    localStorage.removeItem('jwtToken'); // Rimuovi anche il token JWT
-                    window.location.href = '/';  // Redirect alla homepage dopo il logout
+                    // Aggiornamento completo
+                    forceRefresh();
+                    
+                    showSuccessMessage('Promemoria aggiornato con successo');
                 })
                 .catch(error => {
-                    console.error('Errore durante il logout:', error);
-                    window.location.href = '/';  // Redirect alla homepage anche in caso di errore
+                    console.error('Errore aggiornamento:', error);
+                    showErrorMessage('Errore nell\'aggiornare il promemoria');
+                })
+                .finally(() => {
+                    // Ripristina il pulsante
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                 });
+            });
         }
 
-        // Funzione di configurazione della chat
-        function setupChat() {
-            const chatIcon = document.getElementById('chatIcon');
-            const chatFloatBtn = document.querySelector('.chat-float-btn');
-            const chatWindow = document.getElementById('chatWindow');
-            const closeChat = document.getElementById('closeChat');
-            const chatInput = document.getElementById('chatInput');
-            const sendButton = document.getElementById('sendMessage');
-            const chatBody = document.getElementById('chatBody');
-            const chatBadge = document.createElement('div'); 
-            
-            if (chatFloatBtn) {
-                chatBadge.id = 'chatBadge';
-                chatBadge.style.display = 'none';
-                chatBadge.className = 'chat-badge';
-                chatFloatBtn.appendChild(chatBadge);
-            }
+        // Carica inizialmente i promemoria nel pannello laterale
+        debugLog('Caricamento iniziale promemoria...');
+        fetchWithRetry('/api/calendar-events')
+            .then(events => {
+                debugLog(`Caricati ${events.length} promemoria iniziali`);
+                updateReminderPanel(events);
+            })
+            .catch(error => {
+                console.error('Errore caricamento iniziale:', error);
+            });
 
-            // Messaggi predefiniti del farmacista
-            const pharmacistResponses = [
-                "In cosa posso esserti d'aiuto oggi?",
-                "Hai bisogno di informazioni sui tuoi farmaci?",
-                "Vuoi fissare un appuntamento per un consulto?",
-                "Ti ricordo che il tuo prossimo controllo è previsto per la prossima settimana.",
-                "I tuoi esami sono pronti, puoi passare a ritirarli quando preferisci.",
-                "Il farmaco che hai richiesto è disponibile da oggi.",
-                "Ti consiglio di assumere il farmaco dopo i pasti principali."
-            ];
+        // Polling automatico ogni 10 secondi per migliore reattività
+        setInterval(() => {
+            debugLog('Aggiornamento automatico...');
+            forceRefresh();
+        }, 10000);
 
-            let unreadMessages = 0;
-            let chatOpen = false;
+        // Esponi funzioni per debug globale
+        window.forceRefresh = forceRefresh;
+        window.fetchWithRetry = fetchWithRetry;
+        window.debugCalendar = {
+            getEvents: () => calendar.getEvents(),
+            showStatus: () => ({
+                loading: loadingData,
+                retries: retryCount,
+                events: calendar.getEvents().length
+            })
+        };
+    });
 
-            // Gestione apertura e chiusura della finestra di chat
-            function openChat() {
-                if (!chatWindow) return;
-                chatWindow.style.display = 'flex';
-                chatOpen = true;
-                unreadMessages = 0;
-                chatBadge.style.display = 'none';
-                chatBadge.textContent = '0';
-                setTimeout(() => chatInput && chatInput.focus(), 100);
-            }
-
-            if (chatIcon) chatIcon.addEventListener('click', openChat);
-            if (chatFloatBtn) chatFloatBtn.addEventListener('click', openChat);
-            if (closeChat) {
-                closeChat.addEventListener('click', () => {
-                    chatWindow.style.display = 'none';
-                    chatOpen = false;
-                });
-            }
-
-            // Link alla pagina di chat dalla dashboard
-            const messageCardFooter = document.querySelector('.dashboard-card:nth-child(3) .dashboard-card-footer');
-            if (messageCardFooter) {
-                messageCardFooter.addEventListener('click', () => {
-                    window.location.href = '/chat';
-                });
-            }
-
-            // Simulazione di un messaggio dopo un po' di tempo
-            setTimeout(() => {
-                if (chatBadge && !chatOpen) {
-                    unreadMessages++;
-                    chatBadge.textContent = unreadMessages;
-                    chatBadge.style.display = 'flex';
-                }
-            }, 20000);
-        }
-
-        // Versione semplificata per il contatore visitatori senza WebSocket
-        function setupVisitorCounter() {
-            const visitorCountElement = document.getElementById('visitorCount');
-            if (!visitorCountElement) return;
-            
-            // Imposta un valore fisso
-            visitorCountElement.textContent = "1";
-            
-            // Simula un aumento casuale del contatore ogni tanto
-            setInterval(() => {
-                const currentCount = parseInt(visitorCountElement.textContent);
-                if (Math.random() > 0.7) {
-                    const newCount = Math.min(currentCount + 1, 5);
-                    visitorCountElement.classList.add('visitor-pulse');
-                    visitorCountElement.textContent = newCount;
-                    
-                    setTimeout(() => {
-                        visitorCountElement.classList.remove('visitor-pulse');
-                    }, 1000);
-                }
-            }, 15000);
-        }
-    </script>
+    // Funzione per il logout
+    function logout() {
+        fetch('/logout', {
+            method: 'POST',
+            credentials: 'include'
+        })
+        .then(() => {
+            window.location.href = '/';
+        })
+        .catch(() => {
+            window.location.href = '/';
+        });
+    }
+</script>
 </body>
+
 </html>
