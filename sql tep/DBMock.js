@@ -29,69 +29,227 @@ class DBMock {
         // Inizializza strutture dati per la chat
         this.messages = []; // Memorizza tutti i messaggi
         this.onlineUsers = new Map(); // Traccia gli utenti online
-
         this.calendarEvents = [];
         this.calendarEventCounter = 1;
     }
-// Metodo per ottenere tutti gli eventi del calendario per un utente
-getCalendarEvents(userId) {
-    userId = String(userId);
-    console.log(`Recupero eventi calendario per utente ${userId}`);
-    return this.calendarEvents.filter(event => String(event.userId) === userId);
-}
 
-// Metodo per aggiungere un evento al calendario
-addCalendarEvent(eventData) {
-    const newEvent = {
-        ...eventData,
-        id: this.calendarEventCounter++,
-        createdAt: new Date().toISOString()
-    };
-    
-    console.log(`Aggiunto nuovo evento calendario: ${JSON.stringify(newEvent)}`);
-    this.calendarEvents.push(newEvent);
-    return newEvent;
-}
+    // Gets all calendar events (filtered by user ID if provided)
+    getCalendarEvents(userId = null) {
+        if (userId) {
+            userId = String(userId);
+            return this.calendarEvents.filter(event => String(event.userId) === userId);
+        }
+        return this.calendarEvents;
+    }
 
-// Metodo per ottenere un evento del calendario per ID
-getCalendarEventById(eventId) {
-    eventId = String(eventId);
-    return this.calendarEvents.find(event => String(event.id) === eventId);
-}
+    // Get all events for admin view (with user details)
+    getCalendarEventsForAdmin() {
+        return this.calendarEvents.map(event => {
+            const user = this.getUserById(event.userId);
+            return {
+                ...event,
+                userName: user ? `${user.nome} ${user.cognome || ''}` : 'Utente sconosciuto'
+            };
+        });
+    }
 
-// Metodo per aggiornare un evento del calendario
-updateCalendarEvent(eventId, eventData) {
-    eventId = String(eventId);
-    const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
-    
-    if (index !== -1) {
-        const updatedEvent = {
-            ...this.calendarEvents[index],
+
+    countUserEventsForDate(userId, date) {
+        userId = String(userId);
+
+        // Normalizza la data a solo YYYY-MM-DD senza ora
+        const dateStr = new Date(date).toISOString().split('T')[0];
+
+        // Debug log
+        console.log(`Conteggio eventi per utente ${userId} in data ${dateStr}`);
+        console.log(`Eventi totali: ${this.calendarEvents.length}`);
+
+        // Conta gli eventi di questo utente per questa data
+        const eventsCount = this.calendarEvents.filter(event => {
+            // Normalizza anche la data dell'evento
+            const eventDate = new Date(event.start).toISOString().split('T')[0];
+
+            const matchesUser = String(event.userId) === userId;
+            const matchesDate = eventDate === dateStr;
+
+            // Debug per ogni evento
+            if (matchesUser) {
+                console.log(`Evento trovato per l'utente: ${event.title} in data ${eventDate}, matches date: ${matchesDate}`);
+            }
+
+            return matchesUser && matchesDate;
+        }).length;
+
+        console.log(`Numero di eventi trovati: ${eventsCount}`);
+        return eventsCount;
+    }
+
+    // Check if user can add an event on a specific date
+    canAddEventOnDate(userId, date) {
+        const user = this.getUserById(userId);
+        if (!user) return false;
+
+        // Se è un utente normale, non ha limiti
+        if (user.ruolo !== 'admin') {
+            return true;
+        }
+
+        // Per admin, limite di 10 appuntamenti al giorno
+        const currentCount = this.countUserEventsForDate(userId, date);
+        const maxEvents = 10; // Aumentato da 5 a 10 per admin
+
+        return currentCount < maxEvents;
+    }
+    isDayFull(date) {
+        // Normalizza la data a solo YYYY-MM-DD senza ora
+        const dateStr = new Date(date).toISOString().split('T')[0];
+
+        // Conta tutti gli eventi di admin per questa data
+        const adminEvents = this.calendarEvents.filter(event => {
+            const eventDate = new Date(event.start).toISOString().split('T')[0];
+            const user = this.getUserById(event.userId);
+
+            // Conta solo eventi admin approvati
+            return user && user.ruolo === 'admin' &&
+                eventDate === dateStr &&
+                event.status === 'approved';
+        });
+
+        // Se ci sono 10 o più eventi admin in questo giorno, è pieno
+        return adminEvents.length >= 10;
+    }
+
+
+    // Modifica o aggiungi questi metodi in DBMock.js
+
+    // Assicurati che il metodo addCalendarEvent imposti sempre lo status
+    addCalendarEvent(eventData) {
+        const newEvent = {
             ...eventData,
-            updatedAt: new Date().toISOString()
+            id: this.calendarEventCounter++,
+            // Imposta sempre uno stato predefinito (pending per utenti normali)
+            status: eventData.status || 'pending',
+            createdAt: new Date().toISOString()
         };
-        
-        this.calendarEvents[index] = updatedEvent;
-        console.log(`Aggiornato evento calendario ${eventId}`);
-        return updatedEvent;
-    }
-    
-    return null;
-}
 
-// Metodo per eliminare un evento del calendario
-deleteCalendarEvent(eventId) {
-    eventId = String(eventId);
-    const initialLength = this.calendarEvents.length;
-    this.calendarEvents = this.calendarEvents.filter(event => String(event.id) !== eventId);
-    
-    const success = this.calendarEvents.length < initialLength;
-    if (success) {
-        console.log(`Eliminato evento calendario ${eventId}`);
+        console.log(`[DBMock] Nuovo evento creato: ID=${newEvent.id}, UserId=${newEvent.userId}, Status=${newEvent.status}`);
+
+        this.calendarEvents.push(newEvent);
+        return newEvent;
     }
-    return success;
-}
+
+    // Assicurati che questo metodo funzioni correttamente
+    updateEventStatus(eventId, status) {
+        eventId = Number(eventId);
+        console.log(`[DBMock] Tentativo di aggiornare evento ${eventId} a stato ${status}`);
+
+        const index = this.calendarEvents.findIndex(event => Number(event.id) === eventId);
+
+        if (index !== -1) {
+            this.calendarEvents[index].status = status;
+            console.log(`[DBMock] Evento ${eventId} aggiornato a stato ${status}`);
+            return this.calendarEvents[index];
+        }
+
+        console.log(`[DBMock] Evento ${eventId} non trovato!`);
+        return null;
+    }
+
+    // Metodo di debug per stampare tutti gli eventi
+    logAllEvents() {
+        console.log("[DBMock] --- TUTTI GLI EVENTI ---");
+        this.calendarEvents.forEach((event, index) => {
+            const user = this.getUserById(event.userId);
+            const userName = user ? `${user.nome} ${user.cognome}` : 'Sconosciuto';
+            console.log(`[${index}] ID=${event.id}, Utente=${userName} (${event.userId}), Stato=${event.status}, Data=${event.start}`);
+        });
+        console.log("[DBMock] --- FINE EVENTI ---");
+    }
     
+
+    // Get calendar events by status
+    getCalendarEventsByStatus(status) {
+        return this.calendarEvents.filter(event => event.status === status);
+    }
+
+    // Existing updateCalendarEvent method
+    updateCalendarEvent(eventId, eventData) {
+        eventId = String(eventId);
+        const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
+
+        if (index !== -1) {
+            const updatedEvent = {
+                ...this.calendarEvents[index],
+                ...eventData,
+                updatedAt: new Date().toISOString()
+            };
+
+            this.calendarEvents[index] = updatedEvent;
+            return updatedEvent;
+        }
+
+        return null;
+    }
+
+    // Metodo per ottenere tutti gli eventi del calendario per un utente
+    getCalendarEvents(userId) {
+        userId = String(userId);
+        console.log(`Recupero eventi calendario per utente ${userId}`);
+        return this.calendarEvents.filter(event => String(event.userId) === userId);
+    }
+
+    // Metodo per aggiungere un evento al calendario
+    addCalendarEvent(eventData) {
+        const newEvent = {
+            ...eventData,
+            id: this.calendarEventCounter++,
+            createdAt: new Date().toISOString()
+        };
+
+        console.log(`Aggiunto nuovo evento calendario: ${JSON.stringify(newEvent)}`);
+        this.calendarEvents.push(newEvent);
+        return newEvent;
+    }
+
+    // Metodo per ottenere un evento del calendario per ID
+    getCalendarEventById(eventId) {
+        eventId = String(eventId);
+        return this.calendarEvents.find(event => String(event.id) === eventId);
+    }
+
+    // Metodo per aggiornare un evento del calendario
+    updateCalendarEvent(eventId, eventData) {
+        eventId = String(eventId);
+        const index = this.calendarEvents.findIndex(event => String(event.id) === eventId);
+
+        if (index !== -1) {
+            const updatedEvent = {
+                ...this.calendarEvents[index],
+                ...eventData,
+                updatedAt: new Date().toISOString()
+            };
+
+            this.calendarEvents[index] = updatedEvent;
+            console.log(`Aggiornato evento calendario ${eventId}`);
+            return updatedEvent;
+        }
+
+        return null;
+    }
+
+    // Metodo per eliminare un evento del calendario
+    deleteCalendarEvent(eventId) {
+        eventId = String(eventId);
+        const initialLength = this.calendarEvents.length;
+        this.calendarEvents = this.calendarEvents.filter(event => String(event.id) !== eventId);
+
+        const success = this.calendarEvents.length < initialLength;
+        if (success) {
+            console.log(`Eliminato evento calendario ${eventId}`);
+        }
+        return success;
+    }
+
     // Ottieni tutti gli utenti
     getAllUsers() {
         return this.users.map(user => ({ ...user, password: undefined })); // Escludi la password
@@ -201,42 +359,42 @@ deleteCalendarEvent(eventId) {
     }
 
     // Aggiungi questa funzione alla classe DBMock
-getCalendarEvents(userId) {
-    console.log(`Recupero eventi calendario per utente ${userId}`);
-    
-    // Eventi base che verranno restituiti per tutti gli utenti
-    const baseEvents = [
-      {
-        id: 1,
-        title: 'Visita Medica',
-        start: '2024-12-14T10:00:00',
-        end: '2024-12-14T11:00:00',
-        description: 'Visita di controllo generale'
-      },
-      {
-        id: 2,
-        title: 'Check-up Fisico',
-        start: '2024-12-15T09:00:00',
-        end: '2024-12-15T10:00:00',
-        description: 'Visita di controllo cardiaco'
-      }
-    ];
-    
-    // Eventi personalizzati basati sull'ID utente (opzionale)
-    // Esempio: se l'ID finisce con un numero specifico, aggiungi un evento personalizzato
-    const lastDigit = String(userId).slice(-1);
-    if (lastDigit === '4') {
-      baseEvents.push({
-        id: 3,
-        title: 'Consulenza Specialistica',
-        start: '2024-12-17T14:00:00',
-        end: '2024-12-17T15:00:00',
-        description: 'Consulenza con cardiologo'
-      });
+    getCalendarEvents(userId) {
+        console.log(`Recupero eventi calendario per utente ${userId}`);
+
+        // Eventi base che verranno restituiti per tutti gli utenti
+        const baseEvents = [
+            {
+                id: 1,
+                title: 'Visita Medica',
+                start: '2024-12-14T10:00:00',
+                end: '2024-12-14T11:00:00',
+                description: 'Visita di controllo generale'
+            },
+            {
+                id: 2,
+                title: 'Check-up Fisico',
+                start: '2024-12-15T09:00:00',
+                end: '2024-12-15T10:00:00',
+                description: 'Visita di controllo cardiaco'
+            }
+        ];
+
+        // Eventi personalizzati basati sull'ID utente (opzionale)
+        // Esempio: se l'ID finisce con un numero specifico, aggiungi un evento personalizzato
+        const lastDigit = String(userId).slice(-1);
+        if (lastDigit === '4') {
+            baseEvents.push({
+                id: 3,
+                title: 'Consulenza Specialistica',
+                start: '2024-12-17T14:00:00',
+                end: '2024-12-17T15:00:00',
+                description: 'Consulenza con cardiologo'
+            });
+        }
+
+        return baseEvents;
     }
-    
-    return baseEvents;
-  }
     // Ottieni messaggi tra due utenti
     getMessagesBetweenUsers(userId1, userId2) {
         // Assicura che gli ID siano stringhe per confronti coerenti

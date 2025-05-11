@@ -13,6 +13,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+
 // Chiave segreta per JWT - dovrebbe essere in variabili d'ambiente
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
@@ -882,12 +883,12 @@ io.use((socket, next) => {
   try {
     // Ottieni il token dal cookie o dall'auth
     let token = null;
-    
+
     // Prova a ottenere il token dall'auth
     if (socket.handshake.auth && socket.handshake.auth.token) {
       token = socket.handshake.auth.token;
       console.log("Token trovato in auth");
-    } 
+    }
     // Prova a ottenere il token dai cookie
     else if (socket.handshake.headers.cookie) {
       const cookies = socket.handshake.headers.cookie.split(';');
@@ -897,7 +898,7 @@ io.use((socket, next) => {
         console.log("Token trovato nei cookie");
       }
     }
-    
+
     if (!token) {
       console.log("Socket auth fallita: Nessun token");
       // Passa comunque alla prossima fase per debugging
@@ -905,7 +906,7 @@ io.use((socket, next) => {
       console.log("Utente anonimo creato per debugging");
       return next();
     }
-    
+
     const decoded = jwt.verify(token, JWT_SECRET);
     socket.user = decoded;
     console.log(`Socket autenticato per l'utente: ${decoded.id} (${decoded.nome})`);
@@ -921,44 +922,44 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.user.id} (${socket.user.nome} - ${socket.user.ruolo})`);
-  
+
   // Store socket connection with consistent string ID
   const userId = String(socket.user.id);
   socketConnections.set(userId, socket);
-  
+
   // Set user as online
   db.setUserOnlineStatus(userId, true);
-  
+
   // Broadcast user status to all clients - CORREGGI QUI
   io.emit('users_status', db.getAllUsersStatus());
-  
+
   // Handle private messages
   socket.on('send_message', (message) => {
     // Ensure IDs are strings for consistency
     const senderId = String(socket.user.id);
     const recipientId = String(message.recipientId);
-    
+
     console.log(`Message from ${senderId} (${socket.user.nome}) to ${recipientId}: ${message.content}`);
-    
+
     // Save message to database
     const savedMessage = db.addMessage(
-      senderId, 
-      recipientId, 
+      senderId,
+      recipientId,
       message.content
     );
-    
+
     // Add sender info to message
     const messageToSend = {
       ...savedMessage,
       senderName: `${socket.user.nome} ${socket.user.cognome || ''}`
     };
-    
+
     // Send confirmation to sender
     socket.emit('private_message', savedMessage);
-    
+
     // Find recipient socket
     const recipientSocket = socketConnections.get(recipientId);
-    
+
     // Send to recipient if online
     if (recipientSocket) {
       console.log(`Delivering message to recipient ${recipientId}`);
@@ -967,18 +968,18 @@ io.on('connection', (socket) => {
       console.log(`Recipient ${recipientId} is offline, message saved in DB only`);
     }
   });
-  
+
   // Handle disconnection
   socket.on('disconnect', () => {
     const userId = String(socket.user.id);
     console.log(`User disconnected: ${userId} (${socket.user.nome})`);
-    
+
     // Remove socket connection
     socketConnections.delete(userId);
-    
+
     // Set user as offline
     db.setUserOnlineStatus(userId, false);
-    
+
     // Broadcast updated user status - CORREGGI QUI
     io.emit('users_status', db.getAllUsersStatus());
   });
@@ -999,7 +1000,7 @@ app.get('/api/test/socket', (req, res) => {
         getChatUsers: typeof db.getChatUsers === 'function'
       }
     };
-    
+
     // Prova a vedere cosa restituisce getChatUsers per admin e user
     try {
       socketStatus.chatUsersForAdmin = db.getChatUsers ? db.getChatUsers('admin', 1) : "function not implemented";
@@ -1007,16 +1008,16 @@ app.get('/api/test/socket', (req, res) => {
     } catch (e) {
       socketStatus.chatUsersFunctionError = e.message;
     }
-    
+
     res.json({
       success: true,
       status: socketStatus
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
   }
 });
@@ -1024,44 +1025,44 @@ app.get('/api/test/socket', (req, res) => {
 // Mantieni solo questo handler socket.io:
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.user.id} (${socket.user.nome} - ${socket.user.ruolo})`);
-  
+
   // Store socket connection with consistent string ID
   const userId = String(socket.user.id);
   socketConnections.set(userId, socket);
-  
+
   // Set user as online
   db.setUserOnlineStatus(userId, true);
-  
+
   // Broadcast user status to all clients
   io.emit('users_status', db.getAllUsersStatus());
-  
+
   // Handle private messages
   socket.on('send_message', (message) => {
     // Ensure IDs are strings for consistency
     const senderId = String(socket.user.id);
     const recipientId = String(message.recipientId);
-    
+
     console.log(`Message from ${senderId} (${socket.user.nome}) to ${recipientId}: ${message.content}`);
-    
+
     // Save message to database
     const savedMessage = db.addMessage(
-      senderId, 
-      recipientId, 
+      senderId,
+      recipientId,
       message.content
     );
-    
+
     // Add sender info to message
     const messageToSend = {
       ...savedMessage,
       senderName: `${socket.user.nome} ${socket.user.cognome || ''}`
     };
-    
+
     // Send confirmation to sender
     socket.emit('private_message', savedMessage);
-    
+
     // Find recipient socket
     const recipientSocket = socketConnections.get(recipientId);
-    
+
     // Send to recipient if online
     if (recipientSocket) {
       console.log(`Delivering message to recipient ${recipientId}`);
@@ -1070,18 +1071,18 @@ io.on('connection', (socket) => {
       console.log(`Recipient ${recipientId} is offline, message saved in DB only`);
     }
   });
-  
+
   // Handle disconnection
   socket.on('disconnect', () => {
     const userId = String(socket.user.id);
     console.log(`User disconnected: ${userId} (${socket.user.nome})`);
-    
+
     // Remove socket connection
     socketConnections.delete(userId);
-    
+
     // Set user as offline
     db.setUserOnlineStatus(userId, false);
-    
+
     // Broadcast updated user status
     io.emit('users_status', db.getAllUsersStatus());
   });
@@ -1324,48 +1325,48 @@ app.post('/logout', (req, res) => {
 // API per gli utenti chat - versione di debug avanzata
 app.get('/api/chat/users', verifyToken, (req, res) => {
   try {
-      console.log('------------------------------------');
-      console.log('RICHIESTA UTENTI CHAT');
-      console.log('Utente:', req.user.nome, req.user.id, req.user.ruolo);
-      
-      // Log tutti gli utenti nel database
-      const allUsers = db.getAllUsers();
-      console.log('Tutti gli utenti nel DB:', allUsers.length);
-      allUsers.forEach(u => console.log(`- ${u.id}: ${u.nome} (${u.ruolo})`));
-      
-      let chatUsers = [];
-      
-      if (req.user.ruolo === 'admin') {
-          // Admin vede tutti gli utenti normali
-          chatUsers = db.getAllUsers()
-              .filter(user => user.ruolo === 'user')
-              .map(user => ({
-                  id: String(user.id),
-                  nome: user.nome || 'Utente',
-                  cognome: user.cognome || '',
-                  connected: false
-              }));
-          console.log(`Admin: restituisco ${chatUsers.length} pazienti`);
-      } else {
-          // Utente normale vede solo gli admin
-          chatUsers = db.getAllUsers()
-              .filter(user => user.ruolo === 'admin')
-              .map(user => ({
-                  id: String(user.id),
-                  nome: user.nome || 'Admin',
-                  cognome: user.cognome || '',
-                  connected: false
-              }));
-          console.log(`Utente: restituisco ${chatUsers.length} admin`);
-      }
-      
-      console.log('Utenti chat trovati:', chatUsers);
-      console.log('------------------------------------');
-      
-      return res.json(chatUsers);
+    console.log('------------------------------------');
+    console.log('RICHIESTA UTENTI CHAT');
+    console.log('Utente:', req.user.nome, req.user.id, req.user.ruolo);
+
+    // Log tutti gli utenti nel database
+    const allUsers = db.getAllUsers();
+    console.log('Tutti gli utenti nel DB:', allUsers.length);
+    allUsers.forEach(u => console.log(`- ${u.id}: ${u.nome} (${u.ruolo})`));
+
+    let chatUsers = [];
+
+    if (req.user.ruolo === 'admin') {
+      // Admin vede tutti gli utenti normali
+      chatUsers = db.getAllUsers()
+        .filter(user => user.ruolo === 'user')
+        .map(user => ({
+          id: String(user.id),
+          nome: user.nome || 'Utente',
+          cognome: user.cognome || '',
+          connected: false
+        }));
+      console.log(`Admin: restituisco ${chatUsers.length} pazienti`);
+    } else {
+      // Utente normale vede solo gli admin
+      chatUsers = db.getAllUsers()
+        .filter(user => user.ruolo === 'admin')
+        .map(user => ({
+          id: String(user.id),
+          nome: user.nome || 'Admin',
+          cognome: user.cognome || '',
+          connected: false
+        }));
+      console.log(`Utente: restituisco ${chatUsers.length} admin`);
+    }
+
+    console.log('Utenti chat trovati:', chatUsers);
+    console.log('------------------------------------');
+
+    return res.json(chatUsers);
   } catch (error) {
-      console.error('ERRORE API CHAT USERS:', error);
-      return res.status(500).json({ error: 'Errore nel recupero degli utenti' });
+    console.error('ERRORE API CHAT USERS:', error);
+    return res.status(500).json({ error: 'Errore nel recupero degli utenti' });
   }
 });
 // Aggiorna l'API per i messaggi chat:
@@ -1545,10 +1546,10 @@ app.get('/api/calendar-events', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     console.log(`Richiesta eventi calendario per utente ID: ${userId}`);
-    
+
     // Recupera gli eventi dal database per l'utente specificato
     const events = db.getCalendarEvents(userId);
-    
+
     console.log(`Restituiti ${events.length} eventi per l'utente`);
     res.json(events);
   } catch (error) {
@@ -1557,30 +1558,68 @@ app.get('/api/calendar-events', verifyToken, (req, res) => {
   }
 });
 
-// POST: Crea un nuovo evento calendario
+// Modifica l'API POST per calendar-events
 app.post('/api/calendar-events', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     const eventData = req.body;
-    
-    console.log(`Creazione nuovo evento per utente ID: ${userId}`, eventData);
-    
-    // Assicurati che l'evento contenga i dati minimi necessari
+    const user = db.getUserById(userId);
+
+    console.log(`Creazione nuovo evento per utente ID: ${userId} (ruolo: ${user ? user.ruolo : 'sconosciuto'})`, eventData);
+
+    // Controlla i campi richiesti
     if (!eventData.title || !eventData.start) {
       return res.status(400).json({ error: 'Titolo e data di inizio sono obbligatori' });
     }
-    
+
+    const eventDate = new Date(eventData.start);
+
+    // Se è un admin, verifica il limite di 10 al giorno
+    if (user.ruolo === 'admin') {
+      if (!db.canAddEventOnDate(userId, eventDate)) {
+        return res.status(400).json({ error: 'Hai raggiunto il limite massimo di 10 appuntamenti per questa giornata' });
+      }
+    }
+    // Se è un utente normale, verifica se ci sono posti disponibili
+    else {
+      if (db.isDayFull(eventDate)) {
+        return res.status(400).json({ error: 'Non ci sono più posti disponibili per questa data. Scegli un altro giorno.' });
+      }
+    }
+
     // Aggiungi l'ID utente all'evento
     eventData.userId = userId;
-    
+
     // Salva l'evento nel database
     const savedEvent = db.addCalendarEvent(eventData);
-    
     console.log(`Evento salvato con ID: ${savedEvent.id}`);
     res.json(savedEvent);
   } catch (error) {
     console.error('Errore nel salvare l\'evento calendario:', error);
-    res.status(500).json({ error: 'Errore nel salvare l\'evento' });
+    res.status(500).json({ error: error.message || 'Errore nel salvare l\'evento' });
+  }
+});
+
+// Nuovo endpoint per verificare la disponibilità del giorno
+app.get('/api/calendar-availability/:date', verifyToken, (req, res) => {
+  try {
+    const dateStr = req.params.date;
+    const date = new Date(dateStr);
+
+    if (isNaN(date.getTime())) {
+      return res.status(400).json({ error: 'Data non valida' });
+    }
+
+    const isDayFull = db.isDayFull(date);
+
+    res.json({
+      date: dateStr,
+      available: !isDayFull,
+      message: isDayFull ? 'Non ci sono più posti disponibili per questa data' : 'Posti disponibili'
+    });
+  } catch (error) {
+    console.error('Errore nel verificare la disponibilità:', error);
+    res.status(500).json({ error: 'Errore nel verificare la disponibilità' });
   }
 });
 
@@ -1590,22 +1629,22 @@ app.put('/api/calendar-events/:id', verifyToken, (req, res) => {
     const userId = req.user.id;
     const eventId = req.params.id;
     const eventData = req.body;
-    
+
     console.log(`Aggiornamento evento ID: ${eventId} per utente ID: ${userId}`);
-    
+
     // Verifica che l'evento esista e appartenga all'utente
     const event = db.getCalendarEventById(eventId);
     if (!event) {
       return res.status(404).json({ error: 'Evento non trovato' });
     }
-    
+
     if (String(event.userId) !== String(userId)) {
       return res.status(403).json({ error: 'Non hai il permesso di modificare questo evento' });
     }
-    
+
     // Aggiorna l'evento
     const updatedEvent = db.updateCalendarEvent(eventId, eventData);
-    
+
     console.log(`Evento ${eventId} aggiornato con successo`);
     res.json(updatedEvent);
   } catch (error) {
@@ -1619,22 +1658,22 @@ app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     const eventId = req.params.id;
-    
+
     console.log(`Eliminazione evento ID: ${eventId} per utente ID: ${userId}`);
-    
+
     // Verifica che l'evento esista e appartenga all'utente
     const event = db.getCalendarEventById(eventId);
     if (!event) {
       return res.status(404).json({ error: 'Evento non trovato' });
     }
-    
+
     if (String(event.userId) !== String(userId)) {
       return res.status(403).json({ error: 'Non hai il permesso di eliminare questo evento' });
     }
-    
+
     // Elimina l'evento
     const success = db.deleteCalendarEvent(eventId);
-    
+
     if (success) {
       console.log(`Evento ${eventId} eliminato con successo`);
       res.json({ success: true });
@@ -1679,10 +1718,10 @@ app.get('/api/calendar-events', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     console.log(`Richiesta eventi calendario per utente ID: ${userId}`);
-    
+
     // Recupera gli eventi dal database per l'utente specificato
     const events = db.getCalendarEvents(userId);
-    
+
     console.log(`Restituiti ${events.length} eventi per l'utente`);
     res.json(events);
   } catch (error) {
@@ -1696,20 +1735,20 @@ app.post('/api/calendar-events', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     const eventData = req.body;
-    
+
     console.log(`Creazione nuovo evento per utente ID: ${userId}`, eventData);
-    
+
     // Assicurati che l'evento contenga i dati minimi necessari
     if (!eventData.title || !eventData.start) {
       return res.status(400).json({ error: 'Titolo e data di inizio sono obbligatori' });
     }
-    
+
     // Aggiungi l'ID utente all'evento
     eventData.userId = userId;
-    
+
     // Salva l'evento nel database
     const savedEvent = db.addCalendarEvent(eventData);
-    
+
     console.log(`Evento salvato con ID: ${savedEvent.id}`);
     res.json(savedEvent);
   } catch (error) {
@@ -1724,22 +1763,22 @@ app.put('/api/calendar-events/:id', verifyToken, (req, res) => {
     const userId = req.user.id;
     const eventId = req.params.id;
     const eventData = req.body;
-    
+
     console.log(`Aggiornamento evento ID: ${eventId} per utente ID: ${userId}`);
-    
+
     // Verifica che l'evento esista e appartenga all'utente
     const event = db.getCalendarEventById(eventId);
     if (!event) {
       return res.status(404).json({ error: 'Evento non trovato' });
     }
-    
+
     if (String(event.userId) !== String(userId)) {
       return res.status(403).json({ error: 'Non hai il permesso di modificare questo evento' });
     }
-    
+
     // Aggiorna l'evento
     const updatedEvent = db.updateCalendarEvent(eventId, eventData);
-    
+
     console.log(`Evento ${eventId} aggiornato con successo`);
     res.json(updatedEvent);
   } catch (error) {
@@ -1753,22 +1792,22 @@ app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
   try {
     const userId = req.user.id;
     const eventId = req.params.id;
-    
+
     console.log(`Eliminazione evento ID: ${eventId} per utente ID: ${userId}`);
-    
+
     // Verifica che l'evento esista e appartenga all'utente
     const event = db.getCalendarEventById(eventId);
     if (!event) {
       return res.status(404).json({ error: 'Evento non trovato' });
     }
-    
+
     if (String(event.userId) !== String(userId)) {
       return res.status(403).json({ error: 'Non hai il permesso di eliminare questo evento' });
     }
-    
+
     // Elimina l'evento
     const success = db.deleteCalendarEvent(eventId);
-    
+
     if (success) {
       console.log(`Evento ${eventId} eliminato con successo`);
       res.json({ success: true });
@@ -1780,6 +1819,99 @@ app.delete('/api/calendar-events/:id', verifyToken, (req, res) => {
     res.status(500).json({ error: 'Errore nell\'eliminare l\'evento' });
   }
 });
+
+// Sostituisci o aggiungi questa funzione nel file server.js
+
+// Endpoint per ottenere tutti gli appuntamenti per l'admin
+app.get('/api/admin/calendar-events', verifyToken, ensureAdmin, (req, res) => {
+    try {
+        // Ottieni tutti gli eventi calendario
+        const allEvents = db.calendarEvents || [];
+        
+        // Arricchisci gli eventi con informazioni utente
+        const enrichedEvents = allEvents.map(event => {
+            // Trova l'utente corrispondente
+            const user = db.getUserById(event.userId);
+            
+            return {
+                ...event,
+                // Aggiungi nome utente per visualizzazione
+                userName: user ? `${user.nome} ${user.cognome || ''}` : 'Utente sconosciuto',
+                // Assicurati che ci sia sempre uno stato
+                status: event.status || 'pending'
+            };
+        });
+        
+        console.log(`[Admin API] Inviando ${enrichedEvents.length} eventi al client admin`);
+        res.json(enrichedEvents);
+    } catch (error) {
+        console.error('Errore nel recupero degli eventi calendario:', error);
+        res.status(500).json({ error: 'Errore nel recupero degli eventi' });
+    }
+});
+
+// Assicurati che questo endpoint accetti correttamente il parametro di stato
+app.put('/api/admin/calendar-events/:id/status', verifyToken, ensureAdmin, (req, res) => {
+    try {
+        const eventId = req.params.id;
+        const { status } = req.body;
+        
+        if (!['approved', 'rejected', 'pending'].includes(status)) {
+            return res.status(400).json({ error: 'Lo stato deve essere approved, rejected o pending' });
+        }
+        
+        // Debug
+        console.log(`[Admin API] Aggiornamento evento ${eventId} a stato: ${status}`);
+        
+        const updatedEvent = db.updateEventStatus(eventId, status);
+        
+        if (updatedEvent) {
+            res.json(updatedEvent);
+        } else {
+            res.status(404).json({ error: 'Evento non trovato' });
+        }
+    } catch (error) {
+        console.error('Errore nell\'aggiornare lo stato dell\'evento:', error);
+        res.status(500).json({ error: 'Errore nell\'aggiornare lo stato' });
+    }
+});
+
+// Modifica l'API POST esistente per gli eventi calendario
+app.post('/api/calendar-events', verifyToken, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const eventData = req.body;
+
+    console.log(`Creazione nuovo evento per utente ID: ${userId}`, eventData);
+
+    // Controlla i campi richiesti
+    if (!eventData.title || !eventData.start) {
+      return res.status(400).json({ error: 'Titolo e data di inizio sono obbligatori' });
+    }
+
+    // Aggiungi l'ID utente all'evento (prendendolo dal token JWT)
+    eventData.userId = userId;
+
+    // Verifica se l'utente ha già raggiunto il limite giornaliero
+    const eventDate = new Date(eventData.start);
+    const canAddEvent = db.canAddEventOnDate(userId, eventDate);
+
+    console.log(`Può aggiungere evento: ${canAddEvent}`);
+
+    if (!canAddEvent) {
+      return res.status(400).json({ error: 'Hai raggiunto il limite massimo di promemoria per questa giornata' });
+    }
+
+    // Salva l'evento nel database
+    const savedEvent = db.addCalendarEvent(eventData);
+    console.log(`Evento salvato con ID: ${savedEvent.id}`);
+    res.json(savedEvent);
+  } catch (error) {
+    console.error('Errore nel salvare l\'evento calendario:', error);
+    res.status(500).json({ error: error.message || 'Errore nel salvare l\'evento' });
+  }
+});
+
 // Avvio del server (modificato per usare http.server con socket.io)
 server.listen(port, () => {
   console.log(`Server in esecuzione su http://localhost:${port}`);

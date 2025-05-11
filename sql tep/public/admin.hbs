@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PFarmacy - Pannello Amministratore</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet'>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
     <style>
         :root {
             --primary: #3f6ad8;
@@ -165,19 +167,23 @@
         }
 
         /* Table styles */
-        .users-table {
+        .users-table,
+        .appointments-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
         }
 
         .users-table th,
-        .users-table td {
+        .users-table td,
+        .appointments-table th,
+        .appointments-table td {
             padding: 1rem;
             text-align: left;
         }
 
-        .users-table th {
+        .users-table th,
+        .appointments-table th {
             background-color: var(--primary-light);
             color: var(--primary);
             font-weight: 600;
@@ -186,23 +192,28 @@
             border-bottom: 2px solid rgba(63, 106, 216, 0.2);
         }
 
-        .users-table th:first-child {
+        .users-table th:first-child,
+        .appointments-table th:first-child {
             border-top-left-radius: var(--border-radius);
         }
 
-        .users-table th:last-child {
+        .users-table th:last-child,
+        .appointments-table th:last-child {
             border-top-right-radius: var(--border-radius);
         }
 
-        .users-table tr:nth-child(even) {
+        .users-table tr:nth-child(even),
+        .appointments-table tr:nth-child(even) {
             background-color: rgba(245, 247, 250, 0.5);
         }
 
-        .users-table tr:hover {
+        .users-table tr:hover,
+        .appointments-table tr:hover {
             background-color: var(--primary-light);
         }
 
-        .users-table td {
+        .users-table td,
+        .appointments-table td {
             border-bottom: 1px solid #e9ecef;
         }
 
@@ -211,6 +222,7 @@
             overflow-y: auto;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
+            margin-bottom: 2rem;
         }
 
         /* Badges */
@@ -231,6 +243,21 @@
         .user-badge {
             background-color: var(--light);
             color: var(--secondary);
+        }
+
+        .pending-badge {
+            background-color: var(--warning);
+            color: #212529;
+        }
+
+        .approved-badge {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .rejected-badge {
+            background-color: var(--danger);
+            color: var(--white);
         }
 
         /* Action buttons */
@@ -270,8 +297,27 @@
             background-color: #c32148;
         }
 
+        .approve-btn {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .approve-btn:hover {
+            background-color: #2ea96a;
+        }
+
+        .reject-btn {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .reject-btn:hover {
+            background-color: #c32148;
+        }
+
         /* Modal styles */
-        .user-modal {
+        .user-modal,
+        .appointment-modal {
             display: none;
             position: fixed;
             z-index: 100;
@@ -398,28 +444,120 @@
             background-color: #e2e6ea;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .admin-header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
+        /* Tab navigation */
+        .tabs-container {
+            margin-bottom: 1.5rem;
+        }
 
-            .filter-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .tabs-nav {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-bottom: 2px solid #e9ecef;
+        }
 
-            .users-table th,
-            .users-table td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.875rem;
-            }
+        .tabs-nav li {
+            margin-right: 0.5rem;
+        }
 
-            .action-buttons {
-                flex-direction: column;
-            }
+        .tabs-nav button {
+            padding: 0.75rem 1.25rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--secondary);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tabs-nav button:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary-light);
+        }
+
+        .tabs-nav button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+
+        .pending-count {
+            background-color: var(--warning);
+            color: #212529;
+        }
+
+        .approved-count {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .rejected-count {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .tab-content {
+            padding: 1.5rem 0;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Calendar styles */
+        .calendar-container {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alert styles */
+        .alert {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
         }
 
         /* Stile contenitore per i bottoni di azione */
@@ -566,10 +704,39 @@
                 opacity: 1;
             }
         }
+
+        /* Stili per distinguere gli appuntamenti per stato */
+        .appointments-table tr.approved-row {
+            border-left: 4px solid #3ac47d;
+        }
+
+        .appointments-table tr.rejected-row {
+            border-left: 4px solid #d92550;
+        }
+
+        /* Hover states */
+        .appointments-table tr.approved-row:hover {
+            background-color: rgba(58, 196, 125, 0.2);
+        }
+
+        .appointments-table tr.rejected-row:hover {
+            background-color: rgba(217, 37, 80, 0.2);
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            font-weight: 600;
+            line-height: 1;
+            white-space: nowrap;
+            vertical-align: baseline;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Elemento per memorizzare l'ID dell'admin per JavaScript -->
+    <div data-user-id="{{ admin.id }}" id="adminData" style="display: none;"></div>
 
     <div class="container">
         <div class="admin-header">
@@ -588,6 +755,154 @@
             </div>
         </div>
 
+        <!-- Sezione Gestione Appuntamenti -->
+        <div class="panel-card">
+            <div class="filter-controls">
+                <h2><i class="fas fa-calendar-alt"></i> Gestione Appuntamenti</h2>
+            </div>
+
+            <div class="tabs-container">
+                <ul class="tabs-nav">
+                    <li>
+                        <button id="pendingTab" class="active" onclick="switchTab('pending')">
+                            <i class="fas fa-clock"></i> In attesa
+                            <span id="pendingCount" class="tab-count pending-count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button id="approvedTab" onclick="switchTab('approved')">
+                            <i class="fas fa-check-circle"></i> Approvati
+                            <span id="approvedCount" class="tab-count approved-count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button id="rejectedTab" onclick="switchTab('rejected')">
+                            <i class="fas fa-times-circle"></i> Rifiutati
+                            <span id="rejectedCount" class="tab-count rejected-count">0</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button id="myAppointmentsTab" onclick="switchTab('myAppointments')">
+                            <i class="fas fa-user-clock"></i> I miei appuntamenti
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Tab: In attesa -->
+                    <div id="pendingPane" class="tab-pane active">
+                        <div class="table-container">
+                            <table class="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Paziente</th>
+                                        <th><i class="fas fa-calendar-day"></i> Data</th>
+                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                        <th><i class="fas fa-cogs"></i> Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingAppointmentsList">
+                                    <!-- I dati verranno caricati dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Approvati -->
+                    <div id="approvedPane" class="tab-pane">
+                        <div class="table-container">
+                            <table class="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Paziente</th>
+                                        <th><i class="fas fa-calendar-day"></i> Data</th>
+                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                        <th><i class="fas fa-cogs"></i> Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvedAppointmentsList">
+                                    <!-- I dati verranno caricati dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Rifiutati -->
+                    <div id="rejectedPane" class="tab-pane">
+                        <div class="table-container">
+                            <table class="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Paziente</th>
+                                        <th><i class="fas fa-calendar-day"></i> Data</th>
+                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                        <th><i class="fas fa-cogs"></i> Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rejectedAppointmentsList">
+                                    <!-- I dati verranno caricati dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab: I miei appuntamenti -->
+                    <div id="myAppointmentsPane" class="tab-pane">
+                        <div class="panel-card">
+                            <h3><i class="fas fa-plus-circle"></i> Crea nuovo appuntamento</h3>
+                            <form id="appointmentForm">
+                                <div class="form-group">
+                                    <label for="appointmentDate"><i class="fas fa-calendar-alt"></i> Data e ora:</label>
+                                    <input type="datetime-local" id="appointmentDate" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="appointmentDescription"><i class="fas fa-align-left"></i>
+                                        Descrizione:</label>
+                                    <textarea id="appointmentDescription" class="form-control" rows="3"
+                                        required></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="submit-btn">
+                                        <i class="fas fa-save"></i> Salva Appuntamento
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="limitAlert" class="alert alert-warning">
+                                '<i class="fas fa-exclamation-triangle"></i> Hai raggiunto il limite massimo di 10
+                                appuntamenti per questa giornata.';
+
+                            </div>
+                            <div id="successAlert" class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Appuntamento salvato con successo.
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar-day"></i> Data</th>
+                                        <th><i class="fas fa-align-left"></i> Descrizione</th>
+                                        <th><i class="fas fa-cogs"></i> Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myAppointmentsList">
+                                    <!-- I dati verranno caricati dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendario principale -->
+        <div class="calendar-container">
+            <h3><i class="fas fa-calendar-alt"></i> Calendario completo</h3>
+            <div id="adminCalendar"></div>
+        </div>
+
+        <!-- Sezione Gestione Utenti -->
         <div class="panel-card">
             <div class="filter-controls">
                 <h2><i class="fas fa-users-cog"></i> Gestione Utenti</h2>
@@ -644,6 +959,7 @@
             </table>
         </div>
 
+        <!-- Modal per modifica/aggiunta utente -->
         <div id="userModal" class="user-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -697,6 +1013,9 @@
     </div>
 
     <script>
+        // Variabile per memorizzare l'ID dell'admin corrente
+        let currentAdminId;
+
         // Verificare se l'utente è un amministratore
         document.addEventListener('DOMContentLoaded', function () {
             // Controlla se l'utente è autenticato e ha il ruolo di admin
@@ -712,8 +1031,18 @@
                     } else {
                         // Mostra il nome dell'admin
                         document.getElementById('adminName').textContent = data.nome || 'Admin';
+
+                        // Ottieni l'ID dell'admin (per il calendario e gli appuntamenti)
+                        currentAdminId = document.getElementById('adminData').getAttribute('data-user-id');
+
                         // Carica gli utenti
                         fetchAllUsers();
+
+                        // Carica gli appuntamenti
+                        loadAllAppointments();
+
+                        // Inizializza il calendario
+                        initializeCalendar();
                     }
                 })
                 .catch(error => {
@@ -788,11 +1117,114 @@
             document.querySelector('.table-container').classList.add('fadeIn');
         }
 
-        // Mostra notifiche
+        // Sostituisci la funzione showNotification con questa versione migliorata
         function showNotification(message, type = 'success') {
-            alert(message); // Per ora utilizziamo alert, ma potrebbe essere sostituito con un sistema di notifiche più elegante
+            console.log(`Notifica (${type}): ${message}`);
+
+            // Crea un elemento di notifica
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = type === 'success' ? '#10b981' :
+                type === 'error' ? '#ef4444' :
+                    type === 'info' ? '#3b82f6' : '#f59e0b';
+            notification.style.color = 'white';
+            notification.style.padding = '15px 25px';
+            notification.style.borderRadius = '8px';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notification.style.zIndex = '9999';
+            notification.style.maxWidth = '350px';
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(20px)';
+            notification.style.transition = 'all 0.3s ease-in-out';
+
+            // Aggiungi icona in base al tipo
+            const icon = document.createElement('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' :
+                type === 'error' ? 'fas fa-exclamation-circle' :
+                    type === 'info' ? 'fas fa-info-circle' : 'fas fa-bell';
+            icon.style.marginRight = '10px';
+
+            notification.appendChild(icon);
+            notification.appendChild(document.createTextNode(message));
+
+            // Aggiungi al DOM
+            document.body.appendChild(notification);
+
+            // Avvia l'animazione
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Rimuovi dopo 4 secondi
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(20px)';
+
+                // Rimuovi dal DOM dopo la fine dell'animazione
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+        // Aggiungi questo all'interno del tuo evento DOMContentLoaded
+
+        // Funzione di debug per diagnosticare problemi
+        function runDiagnostics() {
+            console.log("------- DIAGNOSTICA SISTEMA APPUNTAMENTI -------");
+
+            // Verifica ID admin corrente
+            console.log(`ID Admin corrente: ${currentAdminId}`);
+
+            // Verifica funzionamento delle tab
+            const tabs = document.querySelectorAll('.tabs-nav button');
+            console.log(`Tab trovate: ${tabs.length}`);
+
+            // Verifica che le tabelle esistano
+            const tablesIds = ['pendingAppointmentsList', 'approvedAppointmentsList', 'rejectedAppointmentsList', 'myAppointmentsList'];
+            tablesIds.forEach(id => {
+                const table = document.getElementById(id);
+                console.log(`Tabella '${id}' trovata: ${!!table}`);
+            });
+
+            console.log("-----------------------------------------------");
+
+            // Forza una richiesta immediata degli appuntamenti
+            loadAllAppointments();
         }
 
+        // Esegui la diagnostica dopo il caricamento
+        setTimeout(runDiagnostics, 1000);
+
+        // Aggiungi pulsante di refresh manuale
+        const adminHeader = document.querySelector('.admin-header h1');
+        if (adminHeader) {
+            const refreshButton = document.createElement('button');
+            refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Aggiorna Appuntamenti';
+            refreshButton.style.marginLeft = '20px';
+            refreshButton.style.padding = '5px 10px';
+            refreshButton.style.fontSize = '0.8rem';
+            refreshButton.style.backgroundColor = 'rgba(255,255,255,0.2)';
+            refreshButton.style.border = 'none';
+            refreshButton.style.borderRadius = '4px';
+            refreshButton.style.color = 'white';
+            refreshButton.style.cursor = 'pointer';
+
+            refreshButton.addEventListener('click', () => {
+                console.log("Aggiornamento manuale richiesto!");
+                loadAllAppointments();
+                // Aggiorna anche il calendario
+                const calendarEl = document.getElementById('adminCalendar');
+                if (calendarEl && calendarEl._calendar) {
+                    calendarEl._calendar.refetchEvents();
+                }
+            });
+
+            adminHeader.appendChild(refreshButton);
+        }
         // Apre il modale per aggiungere un nuovo utente
         function addNewUser() {
             document.getElementById('modalTitle').textContent = 'Aggiungi Nuovo Utente';
@@ -899,6 +1331,488 @@
                 });
         });
 
+        // Gestione tab per appuntamenti
+        function switchTab(tabId) {
+            // Nasconde tutti i pannelli
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+
+            // Rimuove 'active' da tutti i tab
+            document.querySelectorAll('.tabs-nav button').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Attiva il tab e il pannello selezionati
+            document.getElementById(tabId + 'Pane').classList.add('active');
+            document.getElementById(tabId + 'Tab').classList.add('active');
+        }
+
+        // Sostituisci la funzione initializeCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('adminCalendar');
+            if (!calendarEl) {
+                console.error('Elemento calendario non trovato');
+                return;
+            }
+
+            // Rimuovi eventuale istanza precedente
+            if (calendarEl._calendar) {
+                calendarEl._calendar.destroy();
+            }
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'it',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Oggi',
+                    month: 'Mese',
+                    week: 'Settimana',
+                    day: 'Giorno'
+                },
+                events: function (info, successCallback, failureCallback) {
+                    // Carica gli eventi dal server
+                    fetch('/api/admin/calendar-events', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Errore nel recupero degli eventi');
+                            }
+                            return response.json();
+                        })
+                        .then(events => {
+                            console.log('Eventi calendario ricevuti:', events.length);
+
+                            // Formatta gli eventi per il calendario
+                            const formattedEvents = events.map(event => ({
+                                id: event.id,
+                                title: `${event.userName || 'Utente'}: ${event.title || 'Promemoria'}`,
+                                start: new Date(event.start),
+                                color: getEventColor(event.status),
+                                extendedProps: {
+                                    userId: event.userId,
+                                    status: event.status,
+                                    description: event.title
+                                }
+                            }));
+
+                            successCallback(formattedEvents);
+                        })
+                        .catch(error => {
+                            console.error('Errore nel caricamento degli eventi:', error);
+                            failureCallback(error);
+                        });
+                },
+                eventClick: function (info) {
+                    // Visualizza dettagli evento
+                    const event = info.event;
+                    const status = event.extendedProps?.status || 'pending';
+
+                    alert(`
+                Dettagli Appuntamento:
+                Paziente: ${event.title.split(':')[0]}
+                Descrizione: ${event.extendedProps?.description || event.title.split(':')[1] || ''}
+                Data: ${event.start.toLocaleString()}
+                Stato: ${status}
+            `);
+                }
+            });
+
+            // Salva riferimento per futura distruzione
+            calendarEl._calendar = calendar;
+
+            calendar.render();
+        }
+        // Funzione per ottenere il colore in base allo stato dell'appuntamento
+        function getEventColor(status) {
+            switch (status) {
+                case 'approved': return '#3ac47d'; // Verde
+                case 'rejected': return '#d92550'; // Rosso
+                case 'pending': return '#f7b924'; // Giallo
+                default: return '#3f6ad8'; // Blu
+            }
+        }
+
+        // Sostituisci la funzione loadAllAppointments con questa versione aggiornata
+        function loadAllAppointments() {
+            console.log("Richiesta di caricamento appuntamenti avviata...");
+
+            // Evita caching
+            const timestamp = new Date().getTime();
+
+            fetch(`/api/admin/calendar-events?_=${timestamp}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Errore nel recupero degli appuntamenti: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(appointments => {
+                    console.log(`Ricevuti ${appointments.length} appuntamenti dal server`);
+
+                    // Filtra gli appuntamenti per stato
+                    const pendingAppointments = appointments.filter(a => a.status === 'pending');
+                    const approvedAppointments = appointments.filter(a => a.status === 'approved');
+                    const rejectedAppointments = appointments.filter(a => a.status === 'rejected');
+                    const myAppointments = appointments.filter(a => String(a.userId) === String(currentAdminId));
+
+                    // Crea un array combinato di appuntamenti pendenti e approvati per la prima tab
+                    // Gli appuntamenti saranno comunque visualmente distinguibili dal loro stato
+                    const combinedAppointments = [...pendingAppointments, ...approvedAppointments];
+
+                    // Ordina gli appuntamenti per data (i più recenti prima)
+                    combinedAppointments.sort((a, b) => new Date(b.start) - new Date(a.start));
+
+                    // Aggiorna i contatori (mostra il numero totale nella tab "In attesa")
+                    document.getElementById('pendingCount').textContent = combinedAppointments.length;
+                    document.getElementById('approvedCount').textContent = approvedAppointments.length;
+                    document.getElementById('rejectedCount').textContent = rejectedAppointments.length;
+
+                    // Popola le tabelle
+                    populateAppointmentsTable('pendingAppointmentsList', combinedAppointments, true);
+                    populateAppointmentsTable('approvedAppointmentsList', approvedAppointments, true);
+                    populateAppointmentsTable('rejectedAppointmentsList', rejectedAppointments, true);
+                    populateMyAppointmentsTable('myAppointmentsList', myAppointments);
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento degli appuntamenti:', error);
+
+                    // Mostra l'errore all'utente
+                    const pendingTable = document.getElementById('pendingAppointmentsList');
+                    if (pendingTable) {
+                        pendingTable.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center" style="color: red;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Errore nel caricamento degli appuntamenti: ${error.message}
+                    </td>
+                </tr>
+            `;
+                    }
+                });
+        }
+        // Sostituisci la funzione populateAppointmentsTable per distinguere gli stati visivamente
+        function populateAppointmentsTable(tableId, appointments, showActions = true) {
+            console.log(`Popolamento tabella ${tableId} con ${appointments.length} appuntamenti`);
+
+            const table = document.getElementById(tableId);
+            if (!table) {
+                console.error(`Tabella ${tableId} non trovata`);
+                return;
+            }
+
+            table.innerHTML = '';
+
+            if (!appointments || appointments.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="4" class="text-center">Nessun appuntamento trovato</td>`;
+                table.appendChild(row);
+                return;
+            }
+
+            // Aggiungi ogni appuntamento alla tabella
+            appointments.forEach((appointment) => {
+                const row = document.createElement('tr');
+
+                // Aggiungi classe CSS in base allo stato per styling visivo
+                if (appointment.status === 'approved') {
+                    row.classList.add('approved-row');
+                    row.style.backgroundColor = 'rgba(58, 196, 125, 0.1)'; // Verde chiaro per approvati
+                } else if (appointment.status === 'rejected') {
+                    row.classList.add('rejected-row');
+                    row.style.backgroundColor = 'rgba(217, 37, 80, 0.1)'; // Rosso chiaro per rifiutati
+                }
+
+                // Formatta la data
+                const date = new Date(appointment.start);
+                const formattedDate = date.toLocaleDateString('it-IT', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Aggiungi badge di stato se l'appuntamento è approvato o rifiutato
+                let statusBadge = '';
+                if (tableId === 'pendingAppointmentsList') {
+                    if (appointment.status === 'approved') {
+                        statusBadge = `<span class="badge approved-badge" style="margin-left: 8px; background-color: #3ac47d; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Approvato</span>`;
+                    } else if (appointment.status === 'rejected') {
+                        statusBadge = `<span class="badge rejected-badge" style="margin-left: 8px; background-color: #d92550; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px;">Rifiutato</span>`;
+                    }
+                }
+
+                // Costruisci la riga della tabella
+                row.innerHTML = `
+            <td>${appointment.userName || 'Utente'}</td>
+            <td>${formattedDate}</td>
+            <td>${appointment.title || 'Nessuna descrizione'}${statusBadge}</td>
+            <td>${getAppointmentActionButtons(appointment, showActions)}</td>
+        `;
+
+                table.appendChild(row);
+            });
+        }
+        function populateMyAppointmentsTable(tableId, appointments) {
+            const table = document.getElementById(tableId);
+            table.innerHTML = '';
+
+            if (appointments.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="3" class="text-center">Nessun appuntamento trovato</td>`;
+                table.appendChild(row);
+                return;
+            }
+
+            appointments.forEach(appointment => {
+                const row = document.createElement('tr');
+
+                // Formatta la data
+                const date = new Date(appointment.start);
+                const formattedDate = date.toLocaleDateString('it-IT', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${appointment.title}</td>
+                    <td>
+                        <button class="btn delete-btn" onclick="deleteAppointment(${appointment.id})">
+                            <i class="fas fa-trash"></i> Elimina
+                        </button>
+                    </td>
+                `;
+
+                table.appendChild(row);
+            });
+        }
+
+        // Sostituisci la funzione getAppointmentActionButtons per mostrare bottoni appropriati in base allo stato
+        function getAppointmentActionButtons(appointment, showActions) {
+            if (!showActions) return '';
+
+            // Se siamo nella tab combinata (pendingAppointmentsList)
+            // vogliamo mostrare bottoni diversi in base allo stato
+
+            switch (appointment.status) {
+                case 'pending':
+                    return `
+                <div class="action-buttons">
+                    <button class="btn approve-btn" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
+                        <i class="fas fa-check"></i> Approva
+                    </button>
+                    <button class="btn reject-btn" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
+                        <i class="fas fa-times"></i> Rifiuta
+                    </button>
+                </div>
+            `;
+                case 'approved':
+                    return `
+                <div class="action-buttons">
+                    <button class="btn reject-btn" onclick="updateAppointmentStatus(${appointment.id}, 'rejected')">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                </div>
+            `;
+                case 'rejected':
+                    return `
+                <div class="action-buttons">
+                    <button class="btn approve-btn" onclick="updateAppointmentStatus(${appointment.id}, 'approved')">
+                        <i class="fas fa-check"></i> Approva
+                    </button>
+                </div>
+            `;
+                default:
+                    return '';
+            }
+        }
+        const pendingTabButton = document.getElementById('pendingTab');
+        if (pendingTabButton) {
+            pendingTabButton.innerHTML = `
+        <i class="fas fa-list"></i> Tutti gli appuntamenti
+        <span id="pendingCount" class="tab-count pending-count">0</span>
+    `;
+        }
+        function setupAutoRefresh() {
+            // Aggiorna ogni 30 secondi
+            setInterval(() => {
+                console.log('Aggiornamento automatico appuntamenti...');
+                loadAllAppointments();
+            }, 30000);
+        }
+        // Sostituisci la funzione updateAppointmentStatus con questa versione migliorata
+        function updateAppointmentStatus(appointmentId, status) {
+            console.log(`Aggiornamento stato: appuntamento=${appointmentId}, nuovo stato=${status}`);
+
+            // Mostra indicatore di caricamento
+            const statusText = status === 'approved' ? 'Approvazione' : 'Rifiuto';
+            showNotification(`${statusText} in corso...`, 'info');
+
+            fetch(`/api/admin/calendar-events/${appointmentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ status })
+            })
+                .then(response => {
+                    console.log(`Risposta ricevuta: ${response.status}`);
+
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || `Errore ${response.status}`);
+                        });
+                    }
+
+                    return response.json();
+                })
+                .then(result => {
+                    console.log(`Aggiornamento completato:`, result);
+
+                    // Notifica l'utente
+                    const actionText = status === 'approved' ? 'approvato' : 'rifiutato';
+                    showNotification(`Appuntamento ${actionText} con successo!`);
+
+                    // Ricarica i dati
+                    setTimeout(() => {
+                        loadAllAppointments();
+
+                        // Aggiorna anche il calendario
+                        const calendarEl = document.getElementById('adminCalendar');
+                        if (calendarEl && calendarEl._calendar) {
+                            calendarEl._calendar.refetchEvents();
+                        }
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('Errore durante aggiornamento stato:', error);
+                    showNotification(`Errore: ${error.message}`, 'error');
+                });
+        }// Funzione per eliminare un appuntamento
+        function deleteAppointment(appointmentId) {
+            if (confirm('Sei sicuro di voler eliminare questo appuntamento?')) {
+                fetch(`/api/calendar-events/${appointmentId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Errore nell\'eliminazione dell\'appuntamento');
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        // Ricarica gli appuntamenti
+                        loadAllAppointments();
+                        // Aggiorna anche il calendario
+                        const calendarApi = document.querySelector('.fc').FullCalendar;
+                        if (calendarApi) {
+                            calendarApi.refetchEvents();
+                        }
+                        showNotification('Appuntamento eliminato con successo.');
+                    })
+                    .catch(error => {
+                        console.error('Errore:', error);
+                        showNotification('Si è verificato un errore nell\'eliminare l\'appuntamento.', 'error');
+                    });
+            }
+        }
+
+        // Event listener per il form di creazione appuntamento
+        document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const date = document.getElementById('appointmentDate').value;
+            const description = document.getElementById('appointmentDescription').value;
+
+            if (!date || !description) {
+                showNotification('Tutti i campi sono obbligatori.', 'error');
+                return;
+            }
+
+            // Invia la richiesta al server
+            fetch('/api/calendar-events', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    title: description,
+                    start: date,
+                    status: 'approved' // Gli appuntamenti admin sono auto-approvati
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 400) {
+                            return response.json().then(data => {
+                                throw new Error(data.error || 'Limite massimo di appuntamenti raggiunto');
+                            });
+                        }
+                        throw new Error(`Errore ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(savedAppointment => {
+                    // Reset del form
+                    document.getElementById('appointmentForm').reset();
+
+                    // Mostra messaggio di successo
+                    const successAlert = document.getElementById('successAlert');
+                    successAlert.style.display = 'block';
+                    setTimeout(() => {
+                        successAlert.style.display = 'none';
+                    }, 3000);
+
+                    // Ricarica gli appuntamenti e il calendario
+                    loadAllAppointments();
+                    const calendarApi = document.querySelector('.fc').FullCalendar;
+                    if (calendarApi) {
+                        calendarApi.refetchEvents();
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore:', error);
+
+                    if (error.message.includes('limite massimo')) {
+                        const limitAlert = document.getElementById('limitAlert');
+                        limitAlert.style.display = 'block';
+                        setTimeout(() => {
+                            limitAlert.style.display = 'none';
+                        }, 5000);
+                    } else {
+                        showNotification('Si è verificato un errore: ' + error.message, 'error');
+                    }
+                });
+        });
+
         // Gestisce il logout
         document.getElementById('logoutBtn').addEventListener('click', function () {
             fetch('/logout', {
@@ -921,6 +1835,7 @@
                 closeModal();
             }
         };
+        setupAutoRefresh();
     </script>
 </body>
 
